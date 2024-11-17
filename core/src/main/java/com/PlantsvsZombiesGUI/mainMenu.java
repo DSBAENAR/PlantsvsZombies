@@ -52,9 +52,7 @@ public class mainMenu implements Screen {
         game.getBatch().draw(btnplay, btnplayX, btnplayY, btnplayWidth, btnplayHeight);
         game.getBatch().draw(btnSaveAndExit, btnSaveAndExitX, btnSaveAndExitY, btnSaveAndExitWidth, btnSaveAndExitHeight);
         game.getBatch().end();
-        
-        
-        
+       
         
      // Detectar clic en el botón de "Play"
         if (Gdx.input.isTouched()) {
