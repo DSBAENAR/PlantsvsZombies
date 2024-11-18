@@ -87,10 +87,9 @@ public class mainMenu implements Screen {
 
     @Override
     public void show() {
-    	backgroundMusic= Gdx.audio.newMusic(Gdx.files.internal("backgroundsound.mp3"));
-        backgroundMusic.setLooping(true); // Hacer que la música se repita en bucle
-        backgroundMusic.setVolume(0.5f); // Ajustar el volumen (0.0 a 1.0)
-        backgroundMusic.play(); // Iniciar la reproducción de la música
+    	if (!game.backgroundMusic.isPlaying()) {
+            game.backgroundMusic.play();
+        }
     }
 
     @Override

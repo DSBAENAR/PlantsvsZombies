@@ -5,10 +5,15 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class LevelScreen implements Screen {
     public SpriteBatch batch;
@@ -16,6 +21,7 @@ public class LevelScreen implements Screen {
     public FitViewport viewport;
     private Stage stage;
     private Texture img;
+    private Texture backButton;
     PlantsvsZombies game;
 
     public LevelScreen(PlantsvsZombies game) {
@@ -27,35 +33,41 @@ public class LevelScreen implements Screen {
         // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Gdx.input.setInputProcessor(stage);
-
-        // Cargar una Skin (puedes usar un skin estándar o crear el tuyo)
-        //skin = new Skin(Gdx.files.internal("uiskin.json"));
+        backButton = new Texture("ButtonBackArrowpng.png");
 
         // Crear la interfaz de usuario
         createUI();
     }
 
     private void createUI() {
-        // Crear botones de nivel
-        //TextButton level1Button = new TextButton("Level 1", skin);
-        //TextButton level2Button = new TextButton("Level 2", skin);
-        //TextButton level3Button = new TextButton("Level 3", skin);
-        //TextButton level4Button = new TextButton("Level 4", skin);
+        // Crear un drawable para el botón de retroceso usando la textura
+       
+        TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(backButton));
 
-        // Crear una tabla para organizar los botones
+        // Crear un ImageButton con el drawable
+        ImageButton backButtonActor = new ImageButton(backDrawable);
+
+        // Agregar un listener para manejar el clic en el botón
+        backButtonActor.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new mainMenu(game)); // Ejemplo de transición a la pantalla del menú principal
+            }
+        });
+
+        // Crear una tabla para organizar los elementos de la interfaz de usuario
         Table table = new Table();
         table.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
-        table.bottom().center(); // Centrar en la parte inferior de la pantalla
+        table.top().left(); // Posiciona la tabla en la esquina superior izquierda
 
-        // Agregar los botones en una fila
-        //table.add(level1Button).pad(10); // Agrega el botón con un margen
-        //table.add(level2Button).pad(10);
-        //table.add(level3Button).pad(10);
-        //table.add(level4Button).pad(10);
+        // Agregar el botón de retroceso a la tabla con tamaño y margen
+        table.add(backButtonActor).size(50, 50).pad(10);
 
-        // Agregar la tabla al Stage
+        // Agregar la tabla al stage
         stage.addActor(table);
     }
+
+
 
     @Override
     public void show() {
