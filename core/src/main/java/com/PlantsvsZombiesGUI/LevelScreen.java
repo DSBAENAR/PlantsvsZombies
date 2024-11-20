@@ -21,53 +21,71 @@ public class LevelScreen implements Screen {
     public FitViewport viewport;
     private Stage stage;
     private Texture img;
-    private Texture backButton;
+    //private Texture backButton;
+    private Texture Level_1;
+    private Texture Level_2;
+    private Texture Level_3;
     PlantsvsZombies game;
 
     public LevelScreen(PlantsvsZombies game) {
         this.game = game;
 
         // Inicializar fondo
-        img = new Texture("levelmenu_resized.png");
-
+        //img = new Texture("levelmenu.png");
         // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Gdx.input.setInputProcessor(stage);
-        backButton = new Texture("ButtonBackArrowpng.png");
-
+        //backButton = new Texture("ButtonBackArrowpng.png");
+        Level_1 = new Texture("L1.png");
+        Level_2 = new Texture("L2.png");
+        Level_3 = new Texture("L3.png");
         // Crear la interfaz de usuario
         createUI();
     }
 
     private void createUI() {
         // Crear un drawable para el botón de retroceso usando la textura
-       
-        TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(backButton));
-
+//    	TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(backButton));
+    	TextureRegionDrawable L1Drawabable = new TextureRegionDrawable(new TextureRegion(Level_1));
+    	TextureRegionDrawable L2Drawabable = new TextureRegionDrawable(new TextureRegion(Level_2));
+    	TextureRegionDrawable L3Drawabable = new TextureRegionDrawable(new TextureRegion(Level_3));
         // Crear un ImageButton con el drawable
-        ImageButton backButtonActor = new ImageButton(backDrawable);
-
+//        ImageButton backButtonActor = new ImageButton(backDrawable);
+        ImageButton level_1_ButtonActor = new ImageButton(L1Drawabable);
+        ImageButton level_2_ButtonActor = new ImageButton(L2Drawabable);
+        ImageButton level_3_ButtonActor = new ImageButton(L3Drawabable);
         // Agregar un listener para manejar el clic en el botón
-        backButtonActor.addListener(new ClickListener() {
+//        backButtonActor.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                game.setScreen(new mainMenu(game)); // Ejemplo de transición a la pantalla del menú principal
+//            }
+//        });
+        
+        level_1_ButtonActor.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new mainMenu(game)); // Ejemplo de transición a la pantalla del menú principal
+                game.setScreen(new GameScreen(game)); // Ejemplo de transición a la pantalla del menú principal
             }
         });
-
         // Crear una tabla para organizar los elementos de la interfaz de usuario
         Table table = new Table();
         table.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
-        table.top().left(); // Posiciona la tabla en la esquina superior izquierda
+        table.top().center(); // Posiciona la tabla en la esquina superior izquierda
+        table.add(level_1_ButtonActor);
+        table.add(level_2_ButtonActor);
+        table.add(level_3_ButtonActor);
 
         // Agregar el botón de retroceso a la tabla con tamaño y margen
-        table.add(backButtonActor).size(50, 50).pad(10);
+        //table.add(backButtonActor).size(50, 50).pad(10);
 
         // Agregar la tabla al stage
         stage.addActor(table);
+        
     }
 
-
+    
+    
 
     @Override
     public void show() {
@@ -81,7 +99,7 @@ public class LevelScreen implements Screen {
 
         // Dibujar la imagen de fondo
         game.getBatch().begin();
-        game.getBatch().draw(img, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        //game.getBatch().draw(img, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.getBatch().end();
 
         // Dibujar el Stage (y por lo tanto los botones)
