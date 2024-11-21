@@ -3,8 +3,10 @@ package com.PlantsvsZombiesGUI;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -19,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 
+
 public class GameScreen implements Screen {
 	    public SpriteBatch batch;
 	    public BitmapFont font;
@@ -31,6 +34,12 @@ public class GameScreen implements Screen {
 	    PlantsvsZombies game;
 	    private Table innerTable; // Tabla interna para organizar elementos dinámicamente
 	    private DragAndDrop dragAndDrop;
+	    private final int GRID_ROWS = 5; // Número de filas
+	    private final int GRID_COLS = 9; // Número de columnas
+	    private final float CELL_WIDTH = 100; // Ancho de cada celda
+	    private final float CELL_HEIGHT = 100; // Altura de cada celda
+	    private final float GRID_X_OFFSET = 200; // Posición inicial del grid en X
+	    private final float GRID_Y_OFFSET = 50; // Posición inicial del grid en Y
 
 	    
 	    public GameScreen(PlantsvsZombies game) {
@@ -155,13 +164,14 @@ public class GameScreen implements Screen {
 	        dragAndDrop.addTarget(new DragAndDrop.Target(innerTable) {
 	            @Override
 	            public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-	                // Muestra visualmente si es posible soltar aquí
-	                return true; // Permitir siempre soltar
+	            	// Solo permitir soltar si está dentro del área del campo verde
+	                return x >= GRID_X_OFFSET && x <= GRID_X_OFFSET + GRID_COLS * CELL_WIDTH &&
+	                       y >= GRID_Y_OFFSET && y <= GRID_Y_OFFSET + GRID_ROWS * CELL_HEIGHT;
 	            }
 
 	            @Override
 	            public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-	                // Crear una nueva planta en la posición donde se suelta la carta
+	            	// Crear una planta en la posición correspondiente
 	                String plantType = (String) payload.getObject();
 	                createPlant(plantType, x, y);
 	            }
@@ -170,15 +180,31 @@ public class GameScreen implements Screen {
 	    
 	 // Método para crear una nueva planta
 	    private void createPlant(String plantType, float x, float y) {
-	        // Aquí puedes agregar lógica para diferentes tipos de plantas
-	        System.out.println("Nueva planta creada: " + plantType + " en posición (" + x + ", " + y + ")");
+	    	 // Determinar la celda del grid donde se soltó
+	        int col = (int) ((x - GRID_X_OFFSET) / CELL_WIDTH);
+	        int row = (int) ((y - GRID_Y_OFFSET) / CELL_HEIGHT);
 
-	        // Crear la planta como una imagen en la posición especificada
-	        Image plant = new Image(new Texture(plantType + ".png")); // Asegúrate de que las texturas de las plantas existan
-	        plant.setPosition(x - plant.getWidth() / 2, y - plant.getHeight() / 2); // Centrar la planta en el punto de soltar
-	        stage.addActor(plant);
+	        // Verificar si la celda está dentro del grid
+	        if (col >= 0 && col < GRID_COLS && row >= 0 && row < GRID_ROWS) {
+	            float plantX = GRID_X_OFFSET + col * CELL_WIDTH;
+	            float plantY = GRID_Y_OFFSET + row * CELL_HEIGHT;
+
+	            System.out.println("Planta " + plantType + " creada en celda (" + row + ", " + col + ")");
+
+	            // Crear una animación para la planta
+	            Animation<TextureRegion> animation = createPlantAnimation(plantType);
+	            AnimatedActor plant = new AnimatedActor(animation, plantX, plantY, CELL_WIDTH, CELL_HEIGHT);
+
+	            // Agregar la planta al stage
+	            stage.addActor(plant);
+	        }
 	    }
 	    
+	    
+	    private Animation<TextureRegion> createPlantAnimation(String plantName) {
+	        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(plantName + ".atlas")); // Reemplaza con el archivo correcto
+	        return new Animation<>(0.1f, atlas.findRegions("frame"), Animation.PlayMode.LOOP);
+	    }
 
 
 
