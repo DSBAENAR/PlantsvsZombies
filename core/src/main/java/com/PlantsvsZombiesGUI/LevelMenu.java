@@ -1,6 +1,9 @@
 package com.PlantsvsZombiesGUI;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -15,7 +18,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class LevelScreen implements Screen {
+public class LevelMenu implements Screen {
     public SpriteBatch batch;
     public BitmapFont font;
     public FitViewport viewport;
@@ -24,16 +27,17 @@ public class LevelScreen implements Screen {
     private Texture backButton;
     PlantsvsZombies game;
 
-    public LevelScreen(PlantsvsZombies game) {
+    public LevelMenu(PlantsvsZombies game) {
         this.game = game;
 
         // Inicializar fondo
-        img = new Texture("levelmenu_resized.png");
+        img = new Texture("levelmenu.png");
 
         // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Gdx.input.setInputProcessor(stage);
         backButton = new Texture("ButtonBackArrowpng.png");
+
 
         // Crear la interfaz de usuario
         createUI();
@@ -54,6 +58,7 @@ public class LevelScreen implements Screen {
                 game.setScreen(new mainMenu(game)); // Ejemplo de transición a la pantalla del menú principal
             }
         });
+        
 
         // Crear una tabla para organizar los elementos de la interfaz de usuario
         Table table = new Table();
@@ -71,7 +76,25 @@ public class LevelScreen implements Screen {
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(stage);
+    	 InputMultiplexer multiplexer = new InputMultiplexer();
+
+    	    // Añadir el InputAdapter primero para manejar ESC
+    	    multiplexer.addProcessor(new InputAdapter() {
+    	        @Override
+    	        public boolean keyDown(int keycode) {
+    	            if (keycode == Input.Keys.ESCAPE) {
+    	                game.setScreen(new mainMenu(game)); // Cambiar al menú principal
+    	                return true; // Evento manejado
+    	            }
+    	            return false; // Evento no manejado
+    	        }
+    	    });
+
+    	    // Añadir el Stage como el segundo procesador
+    	    multiplexer.addProcessor(stage);
+
+    	    // Configurar el InputMultiplexer como el procesador de entrada
+    	    Gdx.input.setInputProcessor(multiplexer);
     }
 
     @Override

@@ -63,7 +63,7 @@ public class mainMenu implements Screen {
             if (mouseX >= btnplayX && mouseX <= btnplayX + btnplayWidth &&
                 mouseY >= btnplayY && mouseY <= btnplayY + btnplayHeight) {
                 this.dispose(); // Cerrar el juego
-                game.setScreen(new LevelScreen(game));
+                game.setScreen(new LevelMenu(game));
             }
         } 
    
