@@ -28,22 +28,19 @@ public class LevelMenu implements Screen {
     private Texture Level_1;
     private Texture Level_2;
     private Texture Level_3;
+    private Texture backButton;
     PlantsvsZombies game;
 
     public LevelMenu(PlantsvsZombies game) {
         this.game = game;
 
         // Inicializar fondo
-<<<<<<< HEAD:core/src/main/java/com/PlantsvsZombiesGUI/LevelMenu.java
         img = new Texture("levelmenu.png");
 
         // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Gdx.input.setInputProcessor(stage);
         backButton = new Texture("ButtonBackArrowpng.png");
-
-
-=======
         //img = new Texture("levelmenu.png");
         // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -52,29 +49,28 @@ public class LevelMenu implements Screen {
         Level_1 = new Texture("L1.png");
         Level_2 = new Texture("L2.png");
         Level_3 = new Texture("L3.png");
->>>>>>> origin/main:core/src/main/java/com/PlantsvsZombiesGUI/LevelScreen.java
         // Crear la interfaz de usuario
         createUI();
     }
 
     private void createUI() {
         // Crear un drawable para el botón de retroceso usando la textura
-//    	TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(backButton));
+    	TextureRegionDrawable backDrawable = new TextureRegionDrawable(new TextureRegion(backButton));
     	TextureRegionDrawable L1Drawabable = new TextureRegionDrawable(new TextureRegion(Level_1));
     	TextureRegionDrawable L2Drawabable = new TextureRegionDrawable(new TextureRegion(Level_2));
     	TextureRegionDrawable L3Drawabable = new TextureRegionDrawable(new TextureRegion(Level_3));
         // Crear un ImageButton con el drawable
-//        ImageButton backButtonActor = new ImageButton(backDrawable);
+        ImageButton backButtonActor = new ImageButton(backDrawable);
         ImageButton level_1_ButtonActor = new ImageButton(L1Drawabable);
         ImageButton level_2_ButtonActor = new ImageButton(L2Drawabable);
         ImageButton level_3_ButtonActor = new ImageButton(L3Drawabable);
-        // Agregar un listener para manejar el clic en el botón
-//        backButtonActor.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                game.setScreen(new mainMenu(game)); // Ejemplo de transición a la pantalla del menú principal
-//            }
-//        });
+         //Agregar un listener para manejar el clic en el botón
+        backButtonActor.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new mainMenu(game)); // Ejemplo de transición a la pantalla del menú principal
+            }
+        });
         
         level_1_ButtonActor.addListener(new ClickListener() {
             @Override
@@ -82,11 +78,6 @@ public class LevelMenu implements Screen {
                 game.setScreen(new GameScreen(game)); // Ejemplo de transición a la pantalla del menú principal
             }
         });
-<<<<<<< HEAD:core/src/main/java/com/PlantsvsZombiesGUI/LevelMenu.java
-        
-
-=======
->>>>>>> origin/main:core/src/main/java/com/PlantsvsZombiesGUI/LevelScreen.java
         // Crear una tabla para organizar los elementos de la interfaz de usuario
         Table table = new Table();
         table.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
@@ -94,12 +85,19 @@ public class LevelMenu implements Screen {
         table.add(level_1_ButtonActor);
         table.add(level_2_ButtonActor);
         table.add(level_3_ButtonActor);
-
-        // Agregar el botón de retroceso a la tabla con tamaño y margen
-        //table.add(backButtonActor).size(50, 50).pad(10);
-
         // Agregar la tabla al stage
         stage.addActor(table);
+        
+        
+        
+        // Crear una tabla separada para el botón de retroceso
+        Table backTable = new Table();
+        backTable.setFillParent(true); // La tabla también ocupa toda la pantalla
+        backTable.top().left(); // Posicionar la tabla en la esquina superior izquierda
+        backTable.add(backButtonActor).size(50, 50).pad(10); // Ajustar tamaño y márgenes
+
+        // Agregar la tabla de retroceso al stage
+        stage.addActor(backTable);
         
     }
 

@@ -19,6 +19,7 @@ public class PlantsvsZombies extends Game {
         backgroundMusic.setVolume(0.5f);
         backgroundMusic.play(); // Inicia la música al comenzar el juego
         this.setScreen(new mainMenu(this));
+        CustomCursor.setCustomCursor();
     }
 
     @Override
