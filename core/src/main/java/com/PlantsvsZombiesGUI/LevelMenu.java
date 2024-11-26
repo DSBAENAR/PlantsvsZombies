@@ -35,13 +35,12 @@ public class LevelMenu implements Screen {
         this.game = game;
 
         // Inicializar fondo
-        img = new Texture("levelmenu.png");
+        img = new Texture("menu3-01.png");
 
         // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Gdx.input.setInputProcessor(stage);
         backButton = new Texture("ButtonBackArrowpng.png");
-        //img = new Texture("levelmenu.png");
         // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Gdx.input.setInputProcessor(stage);
@@ -134,7 +133,7 @@ public class LevelMenu implements Screen {
 
         // Dibujar la imagen de fondo
         game.getBatch().begin();
-        //game.getBatch().draw(img, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        game.getBatch().draw(img, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.getBatch().end();
 
         // Dibujar el Stage (y por lo tanto los botones)

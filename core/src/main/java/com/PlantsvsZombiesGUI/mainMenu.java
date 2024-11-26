@@ -5,8 +5,20 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+
+
 
 public class mainMenu implements Screen {
+
 	Music backgroundMusic;
     final PlantsvsZombies game;
     private Texture background;
@@ -16,6 +28,7 @@ public class mainMenu implements Screen {
     private float btnplayWidth, btnplayHeight; // Tamaño del botón "Salir"
     private float btnSaveAndExitX, btnSaveAndExitY; // Posición del botón "Salir"
     private float btnSaveAndExitWidth, btnSaveAndExitHeight; // Tamaño del botón "Salir"
+    private Stage stage;
 
 
     public mainMenu(final PlantsvsZombies game) {
@@ -25,21 +38,54 @@ public class mainMenu implements Screen {
         background = new Texture("start_resized.png");
         btnSaveAndExit = new Texture("exit.png");
         btnplay = new Texture("startgame.png");
-
         
-        btnplayWidth = btnplay.getWidth();
-        btnplayHeight = btnplay.getHeight();
-        btnplayX = Gdx.graphics.getWidth() / 2f - btnplayWidth / 2f; // Centrar el botón horizontalmente
-        btnplayY = 700; // Ajusta la posición Y según lo necesario
         
-        // Configurar la posición y tamaño del botón "Salir"
-        btnSaveAndExitWidth = btnSaveAndExit.getWidth();
-        btnSaveAndExitHeight = btnSaveAndExit.getHeight();
-        btnSaveAndExitX = Gdx.graphics.getWidth() / 2f - btnSaveAndExitWidth / 2f; // Centrar el botón horizontalmente
-        btnSaveAndExitY = 200; // Ajusta la posición Y según lo necesario
-      
+     // Crear un Stage para gestionar los elementos de UI
+        stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        Gdx.input.setInputProcessor(stage);
+        createUI();
         
     }
+    
+    
+    private void createUI() {
+        // Crear un drawable para el botón de retroceso usando la textura
+    	TextureRegionDrawable btnSaveAndExitDrawabable = new TextureRegionDrawable(new TextureRegion(btnSaveAndExit));
+    	TextureRegionDrawable btnplayDrawabable = new TextureRegionDrawable(new TextureRegion(btnplay));
+    	
+    	
+        // Crear un ImageButton con el drawable
+        ImageButton btnSaveAndExitActor = new ImageButton(btnSaveAndExitDrawabable);
+        ImageButton btnplayActor = new ImageButton(btnplayDrawabable);
+        
+         //Agregar un listener para manejar el clic en el botón
+        btnSaveAndExitActor.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+            	Gdx.app.exit(); // Ejemplo de transición a la pantalla del menú principal
+            }
+        });
+        
+        //Agregar un listener para manejar el clic en el botón
+        btnplayActor.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+            	game.dispose();
+                game.setScreen(new LevelMenu(game)); // Ejemplo de transición a la pantalla del menú principal
+            }
+        });
+        
+        Table table = new Table();
+        table.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
+        table.top().center(); // Posiciona la tabla en la esquina superior izquierda
+        table.add(btnSaveAndExitActor);
+        table.add(btnplayActor);
+        // Agregar la tabla al stage
+        stage.addActor(table);
+    }
+    
+    
+    
     
     @Override
     public void render(float delta) {
@@ -48,39 +94,14 @@ public class mainMenu implements Screen {
 
         // Dibujar el fondo y el botón de "Salir"
         game.getBatch().begin();
-        game.getBatch().draw(background, 0, 0);
-        game.getBatch().draw(btnplay, btnplayX, btnplayY, btnplayWidth, btnplayHeight);
-        game.getBatch().draw(btnSaveAndExit, btnSaveAndExitX, btnSaveAndExitY, btnSaveAndExitWidth, btnSaveAndExitHeight);
+        game.getBatch().draw(background, 0, 0,Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.getBatch().end();
-       
         
-     // Detectar clic en el botón de "Play"
-        if (Gdx.input.isTouched()) {
-            float mouseX = Gdx.input.getX();
-            float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY(); // Convertir coordenadas Y
-
-            // Verificar si el clic está dentro de los límites del botón de "Salir"
-            if (mouseX >= btnplayX && mouseX <= btnplayX + btnplayWidth &&
-                mouseY >= btnplayY && mouseY <= btnplayY + btnplayHeight) {
-                this.dispose(); // Cerrar el juego
-                game.setScreen(new LevelMenu(game));
-            }
-        } 
-   
-        
-        // Detectar clic en el botón de "Salir"
-        if (Gdx.input.isTouched()) {
-            float mouseX = Gdx.input.getX();
-            float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY(); // Convertir coordenadas Y
-
-            // Verificar si el clic está dentro de los límites del botón de "Salir"
-            if (mouseX >= btnSaveAndExitX && mouseX <= btnSaveAndExitX + btnSaveAndExitWidth &&
-                mouseY >= btnSaveAndExitY && mouseY <= btnSaveAndExitY + btnSaveAndExitHeight) {
-                Gdx.app.exit(); // Cerrar el juego
-            }
-        }
+     // Dibujar el Stage (y por lo tanto los botones)
+        stage.act(delta);
+        stage.draw();
     }
-    
+        
 
     @Override
     public void resize(int width, int height) {}
@@ -105,5 +126,6 @@ public class mainMenu implements Screen {
     public void dispose() {
         background.dispose();
         btnSaveAndExit.dispose();
+        btnplay.dispose();
     }
 }
