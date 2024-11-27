@@ -23,11 +23,8 @@ public class mainMenu implements Screen {
     final PlantsvsZombies game;
     private Texture background;
     private Texture btnSaveAndExit;
-    private Texture btnplay;
-    private float btnplayX, btnplayY; // Posición del botón "Salir"
-    private float btnplayWidth, btnplayHeight; // Tamaño del botón "Salir"
-    private float btnSaveAndExitX, btnSaveAndExitY; // Posición del botón "Salir"
-    private float btnSaveAndExitWidth, btnSaveAndExitHeight; // Tamaño del botón "Salir"
+    private Texture btnPlay;
+    private Texture btnLoadGame;
     private Stage stage;
 
 
@@ -37,7 +34,8 @@ public class mainMenu implements Screen {
         // Cargar texturas
         background = new Texture("start_resized.png");
         btnSaveAndExit = new Texture("exit.png");
-        btnplay = new Texture("startgame.png");
+        btnPlay = new Texture("startgame.png");
+        btnLoadGame = new Texture("loadgame.png");
         
         
      // Crear un Stage para gestionar los elementos de UI
@@ -51,13 +49,14 @@ public class mainMenu implements Screen {
     private void createUI() {
         // Crear un drawable para el botón de retroceso usando la textura
     	TextureRegionDrawable btnSaveAndExitDrawabable = new TextureRegionDrawable(new TextureRegion(btnSaveAndExit));
-    	TextureRegionDrawable btnplayDrawabable = new TextureRegionDrawable(new TextureRegion(btnplay));
+    	TextureRegionDrawable btnplayDrawabable = new TextureRegionDrawable(new TextureRegion(btnPlay));
+    	TextureRegionDrawable btnLoadGameDrawabable = new TextureRegionDrawable(new TextureRegion(btnLoadGame));
     	
     	
         // Crear un ImageButton con el drawable
         ImageButton btnSaveAndExitActor = new ImageButton(btnSaveAndExitDrawabable);
         ImageButton btnplayActor = new ImageButton(btnplayDrawabable);
-        
+        ImageButton btnLoadGameActor = new ImageButton(btnLoadGameDrawabable);
          //Agregar un listener para manejar el clic en el botón
         btnSaveAndExitActor.addListener(new ClickListener() {
             @Override
@@ -77,9 +76,12 @@ public class mainMenu implements Screen {
         
         Table table = new Table();
         table.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
-        table.top().center(); // Posiciona la tabla en la esquina superior izquierda
-        table.add(btnSaveAndExitActor);
+        table.top().center();
         table.add(btnplayActor);
+        table.add(btnLoadGameActor);
+        table.add(btnSaveAndExitActor);
+        
+       
         // Agregar la tabla al stage
         stage.addActor(table);
     }
@@ -126,6 +128,6 @@ public class mainMenu implements Screen {
     public void dispose() {
         background.dispose();
         btnSaveAndExit.dispose();
-        btnplay.dispose();
+        btnPlay.dispose();
     }
 }

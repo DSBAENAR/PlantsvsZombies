@@ -2,12 +2,14 @@ package com.PlantsvsZombiesGUI;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -27,37 +29,51 @@ public class GameScreen implements Screen {
     private FitViewport viewport;
     private Stage stage;
     private Texture backgroundTexture;
+    private Texture grassTileTexture;
+    private Texture houseTexture;
     private PlantsvsZombies game;
     private Table innerTable;
     private DragAndDrop dragAndDrop;
-
-    private final int GRID_ROWS = 5;
-    private final int GRID_COLS = 9;
-    private final float CELL_WIDTH = 100;
-    private final float CELL_HEIGHT = 100;
-    private final float GRID_X_OFFSET = 200;
-    private final float GRID_Y_OFFSET = 500;
-    private Animation<TextureRegion> run;
-
-    private float stateTime = 1/25f;
-
+    private final int GRID_ROWS = 5; // Número de filas
+    private final int GRID_COLS = 9; // Número de columnas
+    private final float TILE_SIZE = 100; // Tamaño de cada tile
+    private float GRID_X_OFFSET; // Offset dinámico en X
+    private float GRID_Y_OFFSET; // Offset dinámico en Y
+    private OrthographicCamera camera;
+    private ShapeRenderer shapeRenderer;
+    private TextureRegion[] gridCells;
+    
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
+        // Inicializar el viewport
+        viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        // Inicializar otros recursos
+        batch = new SpriteBatch();
+        stage  = new Stage(viewport);
+        Gdx.input.setInputProcessor(stage);
+    	// Configurar la cámara
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.update();
 
         // Inicializar recursos
-        backgroundTexture = new Texture("BackgroundEmpty.png");
-        batch = new SpriteBatch();
-
-        // Configurar el stage
-        stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-        Gdx.input.setInputProcessor(stage);
-
-        // Crear interfaz de usuario
-        createUI();
-        stateTime = 0f;
+        backgroundTexture = new Texture("lawn.png");
+        
+        createUI();;
     }
+    
+ // Calcular los offsets para centrar el campo de juego
+    private void updateGridOffsets() {
+        float fieldWidth = GRID_COLS * TILE_SIZE;
+        float fieldHeight = GRID_ROWS * TILE_SIZE;
+
+        GRID_X_OFFSET = (Gdx.graphics.getWidth() - fieldWidth) / 2;
+        GRID_Y_OFFSET = (Gdx.graphics.getHeight() - fieldHeight) / 2;
+    }
+    
 
     private void createUI() {
+        
         // Crear la barra SeedBank como una imagen
         Image seedBankImage = new Image(new Texture("SeedBank.png"));
 
@@ -141,7 +157,34 @@ public class GameScreen implements Screen {
             System.out.println("Excepción al crear la planta: " + e.getMessage());
         }
     }
-
+    
+//    public void drawGrid() {
+//        shapeRenderer.setColor(1, 1, 1, 1); // Color blanco para las líneas
+//
+//        // Dibujar líneas horizontales
+//        for (int row = 0; row <= GRID_ROWS; row++) {
+//            float y = GRID_Y_OFFSET + row * CELL_HEIGHT;
+//            shapeRenderer.line(GRID_X_OFFSET, y, GRID_X_OFFSET + GRID_COLS * CELL_WIDTH, y);
+//        }
+//
+//        // Dibujar líneas verticales
+//        for (int col = 0; col <= GRID_COLS; col++) {
+//            float x = GRID_X_OFFSET + col * CELL_WIDTH;
+//            shapeRenderer.line(x, GRID_Y_OFFSET, x, GRID_Y_OFFSET + GRID_ROWS * CELL_HEIGHT);
+//        }
+//    }
+    
+    
+    private void drawTileGrid(SpriteBatch batch) {
+		// TODO Auto-generated method stub
+    	for (int row = 0; row < GRID_ROWS; row++) {
+            for (int col = 0; col < GRID_COLS; col++) {
+                float x = GRID_X_OFFSET + col * TILE_SIZE;
+                float y = GRID_Y_OFFSET + row * TILE_SIZE;
+                batch.draw(grassTileTexture, x, y, TILE_SIZE, TILE_SIZE);
+            }
+        }
+	}
 
 
     @Override
@@ -152,22 +195,27 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        stateTime += delta;
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+    	ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
+        // Dibujar el fondo
         batch.begin();
-        
-        batch.draw(backgroundTexture, 0, 0);
-        //new Peashooter(500,500).render(batch);
+        batch.draw(backgroundTexture,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
 
+        // Dibujar el escenario
         stage.act(delta);
         stage.draw();
+        
+        
     }
 
-    @Override
+
+
+
+	@Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
+        updateGridOffsets(); // Recalcular los offsets al cambiar el tamaño de la ventana
     }
 
     @Override
