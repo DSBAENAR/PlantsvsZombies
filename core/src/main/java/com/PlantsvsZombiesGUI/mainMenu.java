@@ -25,6 +25,9 @@ public class mainMenu implements Screen {
     private Texture btnSaveAndExit;
     private Texture btnPlay;
     private Texture btnLoadGame;
+    private Texture btnpvp; //Player vs Player
+    private Texture btnmvm; //Machine vs Machine
+    
     private Stage stage;
 
 
@@ -33,9 +36,11 @@ public class mainMenu implements Screen {
 
         // Cargar texturas
         background = new Texture("start_resized.png");
-        btnSaveAndExit = new Texture("exit.png");
-        btnPlay = new Texture("startgame.png");
-        btnLoadGame = new Texture("loadgame.png");
+        btnSaveAndExit = new Texture("button_exit.png");
+        btnPlay = new Texture("button_play.png");
+        btnLoadGame = new Texture("button_load.png");
+        btnpvp = new Texture("button_pvp.png");
+        btnmvm = new Texture("button_mvm.png");
         
         
      // Crear un Stage para gestionar los elementos de UI
@@ -51,12 +56,17 @@ public class mainMenu implements Screen {
     	TextureRegionDrawable btnSaveAndExitDrawabable = new TextureRegionDrawable(new TextureRegion(btnSaveAndExit));
     	TextureRegionDrawable btnplayDrawabable = new TextureRegionDrawable(new TextureRegion(btnPlay));
     	TextureRegionDrawable btnLoadGameDrawabable = new TextureRegionDrawable(new TextureRegion(btnLoadGame));
+    	TextureRegionDrawable btnpvpDrawabable = new TextureRegionDrawable(new TextureRegion(btnpvp));
+    	TextureRegionDrawable btnmvmDrawabable = new TextureRegionDrawable(new TextureRegion(btnmvm));
     	
     	
         // Crear un ImageButton con el drawable
         ImageButton btnSaveAndExitActor = new ImageButton(btnSaveAndExitDrawabable);
         ImageButton btnplayActor = new ImageButton(btnplayDrawabable);
         ImageButton btnLoadGameActor = new ImageButton(btnLoadGameDrawabable);
+        ImageButton btnpvpGameActor = new ImageButton(btnpvpDrawabable);
+        ImageButton btnmvmGameActor = new ImageButton(btnmvmDrawabable);
+        
          //Agregar un listener para manejar el clic en el botón
         btnSaveAndExitActor.addListener(new ClickListener() {
             @Override
@@ -76,10 +86,17 @@ public class mainMenu implements Screen {
         
         Table table = new Table();
         table.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
-        table.top().center();
-        table.add(btnplayActor);
-        table.add(btnLoadGameActor);
-        table.add(btnSaveAndExitActor);
+        table.center();
+        table.row().pad(10, 0, 10, 0);
+        table.add(btnplayActor).fillX().uniformX();
+        table.row().pad(10, 0, 10, 0);
+        table.add(btnLoadGameActor).fillX().uniformX();
+        table.row().pad(10, 0, 10, 0);
+        table.add(btnpvpGameActor).fillX().uniformX();
+        table.row().pad(10, 0, 10, 0);
+        table.add(btnmvmGameActor).fillX().uniformX();
+        table.row().pad(10, 0, 10, 0);
+        table.add(btnSaveAndExitActor).fillX().uniformX();
         
        
         // Agregar la tabla al stage
