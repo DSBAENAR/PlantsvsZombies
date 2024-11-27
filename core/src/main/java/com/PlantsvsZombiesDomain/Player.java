@@ -16,6 +16,34 @@ public abstract class Player implements GameMoves{
         this.inventory = new ArrayList<>();
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getMoney() {
+        return money;
+    }
+
+    public void setMoney(int money) {
+        this.money = money;
+    }
+
+    public boolean isPlant() {
+        return isPlant;
+    }
+
+    public void setPlant(boolean plant) {
+        isPlant = plant;
+    }
+
+    public void setInventory(ArrayList<Something> inventory) {
+        this.inventory = inventory;
+    }
+
     public ArrayList<Something> getInventory() {
         return inventory;
     }
@@ -26,6 +54,7 @@ public abstract class Player implements GameMoves{
             if(something instanceof Plant){
                 if(money >= ((Plant) something).getPrice()){
                     money -= ((Plant) something).getPrice();
+                    ((Plant) something).setOwner(this);
                     inventory.add(something);
                 }else{
                     System.out.println("No tienes suficiente dinero... Falta clase de excepciones");

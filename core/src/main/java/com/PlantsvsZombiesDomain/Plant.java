@@ -5,10 +5,14 @@ public abstract class Plant extends Something{
     private int health;
     private int price;
     private boolean itsAlive;
+    protected Player owner;
 
-    public Plant(int[] position) {
+    public Plant(int[] position, int health, int price, Player owner) {
         super(position);
+        this.health = health;
+        this.price = price;
         this.itsAlive = true;
+        this.owner = owner;
     }
 
     public int getHealth() {
@@ -17,6 +21,14 @@ public abstract class Plant extends Something{
 
     public int getPrice() {
         return price;
+    }
+
+    public void setOwner(Player owner) {
+        this.owner = owner;
+    }
+
+    public Player getOwner() {
+        return owner;
     }
 
 

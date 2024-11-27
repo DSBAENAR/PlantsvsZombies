@@ -17,6 +17,7 @@ public class PlantsVsZombiesTest {
     private Player player2;
     private PlantsVsZombies pvsz;
 
+
     @BeforeEach
     void setUp() {
         board = new Board(5, 10);
@@ -30,10 +31,53 @@ public class PlantsVsZombiesTest {
     @Test
     void testPutSomething() {
         int[] position = new int[]{0, 1};
-        SunFlower sunFlower1 = new SunFlower(position);
+        SunFlower sunFlower1 = new SunFlower(position, player1);
         pvsz.putSomething(position, sunFlower1);
         assertEquals(sunFlower1, pvsz.getBoard().getMatrixBoard()[0][1]);
         assertEquals(sunFlower1, pvsz.getPlayers().get(0).getInventory().get(0));
+
+        assertFalse(pvsz.getTurn());
+
+        int[] position2 = new int[]{0, 8};
+        NormalZombie normalZombie1 = new NormalZombie(position2, player2);
+        pvsz.putSomething(position2, normalZombie1);
+        assertEquals(normalZombie1, pvsz.getBoard().getMatrixBoard()[0][8]);
+        assertEquals(normalZombie1, pvsz.getPlayers().get(1).getInventory().get(0));
+        assertTrue(pvsz.getTurn());
     }
+
+
+    @Test
+    void testGenerateMoneyPlant() {
+        int[] position = new int[]{0, 1};
+        pvsz.putSomething(position, new SunFlower(position, player1));
+        int moneyAfterPurchase = player1.getMoney();
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  // Captura la excepción y la maneja (puedes loguear o hacer lo que necesites)
+        }
+
+        int moneyAfterGeneration = player1.getMoney();
+        assertEquals(moneyAfterPurchase + 50, moneyAfterGeneration);
+    }
+
+    @Test
+    void testGenerateMoneyZombie() {
+        int[] position = new int[]{0, 1};
+        pvsz.putSomething(position, new SunFlower(position, player1));
+        int[] position2 = new int[]{0, 8};
+        pvsz.putSomething(position, new BrainsteinZombie(position2, player2));
+        int moneyAfterPurchase = player2.getMoney();
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  // Captura la excepción y la maneja (puedes loguear o hacer lo que necesites)
+        }
+
+        int moneyAfterGeneration = player2.getMoney();
+        assertEquals(moneyAfterPurchase + 50, moneyAfterGeneration);
+    }
+
 
 }

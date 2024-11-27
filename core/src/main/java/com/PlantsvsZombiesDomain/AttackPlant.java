@@ -6,8 +6,8 @@ public abstract class AttackPlant extends Plant{
     private double attackSpeed;
 
 
-    public AttackPlant(int[] position) {
-        super(position);
+    public AttackPlant(int[] position, int health, int price, Player owner) {
+        super(position,health,price,owner);
     }
 
     public double getAttackSpeed() {
