@@ -4,6 +4,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.ArrayList;
 
+/**
+ * Principal class of the game
+ */
 public class PlantsVsZombies {
 
     private Board board;
@@ -16,6 +19,14 @@ public class PlantsVsZombies {
     private ArrayList<Something> player2Inventory;
 
 
+    /**
+     * Constructor
+     * @param board board of the game
+     * @param time time of the game
+     * @param gameMode mode of the game
+     * @param player1 one of the players
+     * @param player2 the other player
+     */
     public PlantsVsZombies(Board board, int time, String gameMode, Player player1, Player player2){
         this.board = board;
         this.players = new ArrayList<>();
@@ -29,24 +40,44 @@ public class PlantsVsZombies {
         startTimer();
     }
 
+    /**
+     * get the board
+     * @return the board
+     */
     public Board getBoard() {
         return board;
     }
 
+    /**
+     * get the players
+     * @return the players
+     */
     public ArrayList<Player> getPlayers() {
         return players;
     }
 
+    /**
+     * get the turn of the player
+     * @return the turn
+     */
     public boolean getTurn() {
         return turn;
     }
 
-
+    /**
+     * get the time
+     * @return the time
+     */
     public int getTime() {
         return time;
     }
 
 
+    /**
+     * To put something in the board (Plants, Zombies, Pruners)
+     * @param position position of the something
+     * @param something the something
+     */
     public void putSomething(int[] position, Something something){
         if(turn){
             players.get(0).putSomething(position, something);
@@ -58,7 +89,11 @@ public class PlantsVsZombies {
         turn = !turn;
     }
 
-
+    /**
+     * To delete something in the board (Plants, Zombies, Pruners)
+     * @param position position of the something
+     * @param something the something
+     */
     public void deleteSomething(int[] position, Something something){
         if(turn){
             players.get(0).deleteSomething(position, something);
@@ -68,10 +103,9 @@ public class PlantsVsZombies {
     }
 
 
-
-
-
-
+    /**
+     * Start the timer
+     */
     private void startTimer() {
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -82,13 +116,18 @@ public class PlantsVsZombies {
         }, 1000, 1000);
     }
 
-
+    /**
+     * Stop the timer
+     */
     public void stopTimer() {
         if (timer != null) {
             timer.cancel();
         }
     }
 
+    /**
+     * Reset the time
+     */
     public void resetTime() {
         time = 0;
     }

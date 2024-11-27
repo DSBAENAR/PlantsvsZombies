@@ -7,7 +7,9 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
+/**
+ * Class PlantsVsZombiesTest, this class is for testing the PlantsVsZombies class and the other classes of the domain
+ */
 public class PlantsVsZombiesTest {
 
     private Board board;
