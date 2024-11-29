@@ -75,6 +75,8 @@ public class LevelMenu implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new GameScreen(game)); // Ejemplo de transición a la pantalla del menú principal
+            	game.backgroundMusic.dispose();
+
             }
         });
         // Crear una tabla para organizar los elementos de la interfaz de usuario

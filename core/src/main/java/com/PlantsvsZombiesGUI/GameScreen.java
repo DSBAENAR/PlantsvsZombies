@@ -2,6 +2,7 @@ package com.PlantsvsZombiesGUI;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -10,17 +11,23 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 public class GameScreen implements Screen {
 	private Peashooter peashooter;
@@ -31,8 +38,10 @@ public class GameScreen implements Screen {
     private Texture backgroundTexture;
     private Texture grassTileTexture;
     private Texture houseTexture;
+    private Texture buttonMenuTexture;
     private PlantsvsZombies game;
     private Table innerTable;
+    private Table menuTable;
     private DragAndDrop dragAndDrop;
     private final int GRID_ROWS = 5; // Número de filas
     private final int GRID_COLS = 9; // Número de columnas
@@ -58,8 +67,16 @@ public class GameScreen implements Screen {
 
         // Inicializar recursos
         backgroundTexture = new Texture("lawn.png");
+     // Generar la fuente desde un archivo TTF
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ZOMBIE.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 32; // Tamaño de la fuente
+        parameter.color = Color.WHITE; // Color del texto
+        parameter.borderWidth = 1; // Borde opcional
+        parameter.borderColor = Color.BLACK;
+        font = generator.generateFont(parameter);
         
-        createUI();;
+        createUI();
     }
     
  // Calcular los offsets para centrar el campo de juego
@@ -76,10 +93,32 @@ public class GameScreen implements Screen {
         
         // Crear la barra SeedBank como una imagen
         Image seedBankImage = new Image(new Texture("SeedBank.png"));
+        
+        buttonMenuTexture = new Texture("ButtonMenu.png");
+        
+        // Crear el ImageButton con imagen de fondo
+        Image buttonImage = new Image(buttonMenuTexture);
+        
+        Label.LabelStyle labelStyle = new Label.LabelStyle();//Estilo Base del texto (No hoover)
+        labelStyle.font = font; // Usa la fuente predeterminada
+        Label textLabel = new Label("Menu", labelStyle);
+        textLabel.setAlignment(Align.center);
+        
+    
+        
+        
+        // Combinar ambos en un Stack
+        Stack buttonStack = new Stack();
+        buttonStack.add(buttonImage);
+        buttonStack.add(textLabel);
+        
+        
+        
 
         // Crear la tabla interna para organizar elementos
         innerTable = new Table();
         innerTable.top().left();
+        
 
         // Crear una tabla principal que contiene la barra y la tabla interna
         Table mainTable = new Table();
@@ -89,7 +128,15 @@ public class GameScreen implements Screen {
         mainTable.add(innerTable).padTop(-100).padLeft(10);
 
         // Agregar la tabla principal al stage
+        
+        
+        menuTable = new Table();
+        menuTable.top().right();
+        menuTable.setFillParent(true);
+        menuTable.add(buttonStack).size(200, 60); // Tamaño del botón
+        
         stage.addActor(mainTable);
+        stage.addActor(menuTable);
 
         dragAndDrop = new DragAndDrop();
 
@@ -100,6 +147,24 @@ public class GameScreen implements Screen {
 
         // Configurar drop target
         addPlantDropTarget();
+        
+        
+     // Añadir un InputListener para manejar el hover
+        buttonStack.addListener(new InputListener() {
+        	Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
+        	@Override
+        	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+        	    // Implementación al entrar
+                textLabel.setColor(color); // Cambiar color del texto al pasar el cursor
+        	}
+
+        	@Override
+        	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+        	    // Implementación al salir
+                textLabel.setColor(Color.WHITE); // Restaurar el color original al salir
+        	}
+            
+        });
     }
 
     
@@ -205,6 +270,8 @@ public class GameScreen implements Screen {
         // Dibujar el escenario
         stage.act(delta);
         stage.draw();
+        
+        
         
         
     }
