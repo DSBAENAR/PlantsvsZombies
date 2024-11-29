@@ -18,11 +18,27 @@ public abstract class Zombie extends Something {
      * @param price price of the zombie
      * @param owner owner
      */
-    public Zombie(int[] initalPosition, int health, int price, Player owner) {
+    public Zombie(int[] initalPosition, int health, int price, Player owner) throws PlantsVsZombiesException {
         super(initalPosition);
         this.health = health;
         this.price = price;
         this.itsAlive = true;
+        this.owner = owner;
+    }
+
+    /**
+     * get the owner
+     * @return owner of the zombie
+     */
+    public Player getOwner() {
+        return owner;
+    }
+
+    /**
+     * set the owner
+     * @param owner owner
+     */
+    public void setOwner(Player owner) {
         this.owner = owner;
     }
 
@@ -58,4 +74,15 @@ public abstract class Zombie extends Something {
         this.itsAlive = itsAlive;
     }
 
+    /**
+     * validate the position, if the column is not 9 throw an exception
+     * @param position initial position of the zombie
+     * @throws PlantsVsZombiesException if the column is not 9
+     */
+    protected static int[] validatePosition(int[] position) throws PlantsVsZombiesException {
+        if (position[1] != 9) {
+            throw new PlantsVsZombiesException(PlantsVsZombiesException.ARGUMENTS_NOT_VALID);
+        }
+        return position;
+    }
 }

@@ -17,7 +17,7 @@ public abstract class AttackPlant extends Plant{
      * @param price price of the plant
      * @param owner owner of the plant
      */
-    public AttackPlant(int[] position, int health, int price, Player owner) {
+    public AttackPlant(int[] position, int health, int price, Player owner) throws PlantsVsZombiesException {
         super(position,health,price,owner);
     }
 

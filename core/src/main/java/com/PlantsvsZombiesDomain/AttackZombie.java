@@ -16,7 +16,7 @@ public abstract class AttackZombie extends Zombie {
      * @param attackSpeed attack speed of the zombie
      * @param owner owner of the zombie
      */
-    public AttackZombie(int[] initalPosition, int health, int price, int damage, double attackSpeed, Player owner) {
+    public AttackZombie(int[] initalPosition, int health, int price, int damage, double attackSpeed, Player owner) throws PlantsVsZombiesException{
         super(initalPosition, health, price, owner);
         this.damage = damage;
         this.attackSpeed = attackSpeed;

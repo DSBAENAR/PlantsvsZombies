@@ -95,7 +95,7 @@ public abstract class Player implements GameMoves{
      * @param something the something
      */
     @Override
-    public void putSomething(int[] position, Something something){
+    public void putSomething(int[] position, Something something) throws PlantsVsZombiesException{
         if (isPlant){
             if(something instanceof Plant){
                 if(money >= ((Plant) something).getPrice()){
@@ -103,16 +103,17 @@ public abstract class Player implements GameMoves{
                     ((Plant) something).setOwner(this);
                     inventory.add(something);
                 }else{
-                    System.out.println("No tienes suficiente dinero... Falta clase de excepciones");
+                    throw new PlantsVsZombiesException(PlantsVsZombiesException.NOT_ENOUGH_MONEY);
                 }
             }
         } else {
             if(something instanceof Zombie){
                 if(money >= ((Zombie) something).getPrice()){
                     money -= ((Zombie) something).getPrice();
+                    ((Zombie) something).setOwner(this);
                     inventory.add(something);
                 }else{
-                    System.out.println("No tienes suficiente dinero... Falta clase de excepciones");
+                    throw new PlantsVsZombiesException(PlantsVsZombiesException.NOT_ENOUGH_MONEY);
                 }
             }
         }
