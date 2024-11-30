@@ -31,7 +31,7 @@ public class PlantsVsZombiesTest {
     }
 
     @Test
-    void testPutSomething() {
+    void testPutSomething() throws PlantsVsZombiesException {
         int[] position = new int[]{0, 1};
         SunFlower sunFlower1 = new SunFlower(position, player1);
         pvsz.putSomething(position, sunFlower1);
@@ -40,45 +40,60 @@ public class PlantsVsZombiesTest {
 
         assertFalse(pvsz.getTurn());
 
-        int[] position2 = new int[]{0, 8};
+        int[] position2 = new int[]{0, 9};
         NormalZombie normalZombie1 = new NormalZombie(position2, player2);
         pvsz.putSomething(position2, normalZombie1);
-        assertEquals(normalZombie1, pvsz.getBoard().getMatrixBoard()[0][8]);
+        assertEquals(normalZombie1, pvsz.getBoard().getMatrixBoard()[0][9]);
         assertEquals(normalZombie1, pvsz.getPlayers().get(1).getInventory().get(0));
         assertTrue(pvsz.getTurn());
     }
 
 
     @Test
-    void testGenerateMoneyPlant() {
+    void testGenerateMoneyPlant() throws PlantsVsZombiesException {
         int[] position = new int[]{0, 1};
         pvsz.putSomething(position, new SunFlower(position, player1));
         int moneyAfterPurchase = player1.getMoney();
         try {
-            Thread.sleep(200);
+            Thread.sleep(20100);
         } catch (InterruptedException e) {
             e.printStackTrace();  // Captura la excepción y la maneja (puedes loguear o hacer lo que necesites)
         }
 
         int moneyAfterGeneration = player1.getMoney();
-        assertEquals(moneyAfterPurchase + 50, moneyAfterGeneration);
+        assertEquals(moneyAfterPurchase + 50 + 50, moneyAfterGeneration);
     }
 
     @Test
-    void testGenerateMoneyZombie() {
+    void testGenerateMoneyZombie() throws PlantsVsZombiesException {
         int[] position = new int[]{0, 1};
         pvsz.putSomething(position, new SunFlower(position, player1));
-        int[] position2 = new int[]{0, 8};
-        pvsz.putSomething(position, new BrainsteinZombie(position2, player2));
+        int[] position2 = new int[]{0, 9};
+        pvsz.putSomething(position2, new BrainsteinZombie(position2, player2));
         int moneyAfterPurchase = player2.getMoney();
         try {
-            Thread.sleep(200);
+            Thread.sleep(20100);
         } catch (InterruptedException e) {
-            e.printStackTrace();  // Captura la excepción y la maneja (puedes loguear o hacer lo que necesites)
+            e.printStackTrace();
         }
 
         int moneyAfterGeneration = player2.getMoney();
-        assertEquals(moneyAfterPurchase + 50, moneyAfterGeneration);
+        assertEquals(moneyAfterPurchase + 50 + 100, moneyAfterGeneration);
+    }
+
+    @Test
+    void testGenerateMoney10Secs(){
+        int initialMoneyP1 = player1.getMoney();
+        int initialMoneyP2 = player2.getMoney();
+        try {
+            Thread.sleep(10100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        int finalMoneyP1 = player1.getMoney();
+        int finalMoneyP2 = player2.getMoney();
+        assertEquals(initialMoneyP1 + 25, finalMoneyP1);
+        assertEquals(initialMoneyP2 + 50, finalMoneyP2);
     }
 
 

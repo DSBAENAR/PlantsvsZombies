@@ -19,7 +19,7 @@ public abstract class UtilityPlant extends Plant{
      * @param MoneySupply money supply of the plant
      * @param owner owner of the plant
      */
-    public UtilityPlant(int[] position, int health, int price, int MoneySupply, Player owner) {
+    public UtilityPlant(int[] position, int health, int price, int MoneySupply, Player owner) throws PlantsVsZombiesException {
         super(position, health, price, owner);
         this.moneySupply = MoneySupply;
         startGeneratingMoney();
@@ -60,7 +60,7 @@ public abstract class UtilityPlant extends Plant{
                     stopGeneratingMoney();
                 }
             }
-        }, 0, 100);
+        }, 0, 20000);
     }
 
     /**

@@ -14,7 +14,7 @@ public class SunFlower extends UtilityPlant{
      * @param position position of the sunflower
      * @param owner owner of the sunflower
      */
-    public SunFlower(int[] position, Player owner) {
+    public SunFlower(int[] position, Player owner) throws PlantsVsZombiesException {
         super(position, 300, 50, 25, owner);
     }
 

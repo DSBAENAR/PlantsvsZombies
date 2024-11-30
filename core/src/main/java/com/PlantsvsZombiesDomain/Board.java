@@ -39,8 +39,10 @@ public class Board implements GameMoves {
      * @param something
      */
     @Override
-    public  void putSomething(int[] position, Something something){
-        if(matrixBoard[position[0]][position[1]] == null){
+    public  void putSomething(int[] position, Something something) throws PlantsVsZombiesException{
+        if(matrixBoard[position[0]][position[1]] != null){
+            throw new PlantsVsZombiesException(PlantsVsZombiesException.SOMETHING_ALREADY_IN_POSITION);
+        } else {
             matrixBoard[position[0]][position[1]] = something;
         }
     }
@@ -51,7 +53,7 @@ public class Board implements GameMoves {
      * @param something
      */
     @Override
-    public  void deleteSomething(int[] position, Something something){
+    public  void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException{
         //In construction...
     }
 }

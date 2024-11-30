@@ -12,7 +12,7 @@ public abstract class DefensePlant extends Plant {
      * @param price price of the defense plant
      * @param owner owner of the defense plant
      */
-    public DefensePlant(int[] position, int health, int price, Player owner) {
+    public DefensePlant(int[] position, int health, int price, Player owner) throws PlantsVsZombiesException{
         super(position, health, price, owner);
     }
 

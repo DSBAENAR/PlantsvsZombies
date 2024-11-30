@@ -1,5 +1,6 @@
 package com.PlantsvsZombiesDomain;
 
+import javax.swing.*;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.ArrayList;
@@ -79,14 +80,18 @@ public class PlantsVsZombies {
      * @param something the something
      */
     public void putSomething(int[] position, Something something){
-        if(turn){
-            players.get(0).putSomething(position, something);
-            board.putSomething(position, something);
-        }else{
-            players.get(1).putSomething(position, something);
-            board.putSomething(position, something);
+        try {
+            if (turn) {
+                players.get(0).putSomething(position, something);
+                board.putSomething(position, something);
+            } else {
+                players.get(1).putSomething(position, something);
+                board.putSomething(position, something);
+            }
+            turn = !turn;
+        } catch (PlantsVsZombiesException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
         }
-        turn = !turn;
     }
 
     /**
@@ -112,6 +117,9 @@ public class PlantsVsZombies {
             @Override
             public void run() {
                 time++;
+                if(time % 10 == 0){
+                    incrementMoney();
+                }
             }
         }, 1000, 1000);
     }
@@ -130,6 +138,19 @@ public class PlantsVsZombies {
      */
     public void resetTime() {
         time = 0;
+    }
+
+    /**
+     * incerment the money of each player, if the player is a plant give 25, else give 50
+     */
+    private void incrementMoney() {
+        if(players.get(0).isPlant()){
+            players.get(0).setMoney(players.get(0).getMoney() + 25);
+            players.get(1).setMoney(players.get(1).getMoney() + 50);
+        } else {
+            players.get(1).setMoney(players.get(1).getMoney() + 25);
+            players.get(0).setMoney(players.get(0).getMoney() + 50);
+        }
     }
 
 }
