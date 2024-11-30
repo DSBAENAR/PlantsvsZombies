@@ -2,6 +2,7 @@ package com.PlantsvsZombiesGUI;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -29,6 +31,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
+
 public class GameScreen implements Screen {
 	private Peashooter peashooter;
     private SpriteBatch batch;
@@ -37,7 +40,6 @@ public class GameScreen implements Screen {
     private Stage stage;
     private Texture backgroundTexture;
     private Texture grassTileTexture;
-    private Texture houseTexture;
     private Texture buttonMenuTexture;
     private PlantsvsZombies game;
     private Table innerTable;
@@ -51,6 +53,7 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private ShapeRenderer shapeRenderer;
     private TextureRegion[] gridCells;
+    private Music music;
     
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
@@ -75,6 +78,11 @@ public class GameScreen implements Screen {
         parameter.borderWidth = 1; // Borde opcional
         parameter.borderColor = Color.BLACK;
         font = generator.generateFont(parameter);
+        
+        music = Gdx.audio.newMusic(Gdx.files.internal("inGame.mp3"));
+        music.setLooping(true);
+        music.setVolume(0.3f);
+        music.play(); // Inicia la música al comenzar el juego
         
         createUI();
     }
@@ -111,9 +119,7 @@ public class GameScreen implements Screen {
         Stack buttonStack = new Stack();
         buttonStack.add(buttonImage);
         buttonStack.add(textLabel);
-        
-        
-        
+
 
         // Crear la tabla interna para organizar elementos
         innerTable = new Table();
@@ -134,6 +140,9 @@ public class GameScreen implements Screen {
         menuTable.top().right();
         menuTable.setFillParent(true);
         menuTable.add(buttonStack).size(200, 60); // Tamaño del botón
+        
+
+
         
         stage.addActor(mainTable);
         stage.addActor(menuTable);
@@ -163,7 +172,7 @@ public class GameScreen implements Screen {
         	    // Implementación al salir
                 textLabel.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
-            
+        	
         });
     }
 
@@ -211,7 +220,7 @@ public class GameScreen implements Screen {
 
     private void createPlant(String plantType, float x, float y) {
         try {
-            Plant plant = PlantFactory.createPlant(plantType, x, y, null);
+            PlantCard plant = PlantFactory.createPlant(plantType, x, y, null);
             if (plant != null) {
                 System.out.println("Planta creada correctamente: " + plantType);
                 stage.addActor(plant); // Añadir al escenario

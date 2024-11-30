@@ -84,23 +84,23 @@ public class mainMenu implements Screen {
             }
         });
         
-        Table table = new Table();
-        table.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
-        table.center();
-        table.row().pad(10, 0, 10, 0);
-        table.add(btnplayActor).fillX().uniformX();
-        table.row().pad(10, 0, 10, 0);
-        table.add(btnLoadGameActor).fillX().uniformX();
-        table.row().pad(10, 0, 10, 0);
-        table.add(btnpvpGameActor).fillX().uniformX();
-        table.row().pad(10, 0, 10, 0);
-        table.add(btnmvmGameActor).fillX().uniformX();
-        table.row().pad(10, 0, 10, 0);
-        table.add(btnSaveAndExitActor).fillX().uniformX();
+        Table tableOptions = new Table();
+        tableOptions.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
+        tableOptions.center();
+        tableOptions.row().pad(10, 0, 10, 0);
+        tableOptions.add(btnplayActor).fillX().uniformX();
+        tableOptions.row().pad(10, 0, 10, 0);
+        tableOptions.add(btnLoadGameActor).fillX().uniformX();
+        tableOptions.row().pad(10, 0, 10, 0);
+        tableOptions.add(btnpvpGameActor).fillX().uniformX();
+        tableOptions.row().pad(10, 0, 10, 0);
+        tableOptions.add(btnmvmGameActor).fillX().uniformX();
+        tableOptions.row().pad(10, 0, 10, 0);
+        tableOptions.add(btnSaveAndExitActor).fillX().uniformX();
         
        
         // Agregar la tabla al stage
-        stage.addActor(table);
+        stage.addActor(tableOptions);
     }
     
     

@@ -2,7 +2,7 @@ package com.PlantsvsZombiesGUI;
 
 import com.badlogic.gdx.graphics.Texture;
 
-public class Peashooter extends Plant {
+public class Peashooter extends PlantCard {
     public Peashooter(float x, float y) {
         // Llamamos al constructor de Plant para configurar la animación
         super(
