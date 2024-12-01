@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -57,6 +58,7 @@ public class GameScreen implements Screen {
     private Music music;
     private Window optionsMenu;
     private Array<Rectangle> gridCells; // Lista de rectángulos que representan las celdas
+    private Rectangle highlightedCell = null;
     
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
@@ -157,9 +159,7 @@ public class GameScreen implements Screen {
 
         dragAndDrop = new DragAndDrop();
 
-        // Agregar cartas de ejemplo
-        addCard("PeaShooterIcon.png", "Peashooter");
-        addCard("sunflower.png", "Sunflower");
+        
 //        addCard("WallNut.png", "WallNut");
 
         // Configurar drop target
@@ -172,7 +172,7 @@ public class GameScreen implements Screen {
 
         // Crear la ventana para el menú de opciones
         Window optionsMenu = new Window("", windowStyle);
-        optionsMenu.setSize(300, 400); // Tamaño del menú
+        optionsMenu.setSize(450, 600); // Tamaño del menú
         optionsMenu.setPosition(Gdx.graphics.getWidth() / 2f - 150, Gdx.graphics.getHeight() / 2f - 200); // Centrar el menú
         optionsMenu.setVisible(false); // Ocultarlo inicialmente
 
@@ -199,6 +199,7 @@ public class GameScreen implements Screen {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 System.out.println("Opciones seleccionadas");
+                pause();
                 // Aquí puedes implementar lo que quieras que haga este botón
                 return true;
             }
@@ -256,9 +257,15 @@ public class GameScreen implements Screen {
         	        // Alternar visibilidad del menú al hacer clic
         	        isMenuVisible = !isMenuVisible;
         	        optionsMenu.setVisible(isMenuVisible);
+        	        optionsMenu.toFront();
         	        return true; // Indica que el evento fue manejado
         	    }
         });
+        optionsMenu.toFront();
+        
+     // Agregar cartas de ejemplo
+        addCard("PeaShooterIcon.png", "Peashooter");
+        addCard("sunflower.png", "Sunflower");
     }
 
     
@@ -291,16 +298,29 @@ public class GameScreen implements Screen {
         dragAndDrop.addTarget(new DragAndDrop.Target(targetArea) {
             @Override
             public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+            	highlightedCell = getCellForCoordinates(x, y); // Resaltar la celda
             	return true; // Permitir el arrastre
             }
+            	@Override
+            	public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
+            	    String plantType = (String) payload.getObject();
+            	    System.out.println("Soltando planta: " + plantType + " en (" + x + ", " + y + ")");
 
-            @Override
-            public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload, float x, float y, int pointer) {
-                String plantType = (String) payload.getObject();
-                System.out.println("Soltando planta: " + plantType + " en (" + x + ", " + y + ")");
-                createPlant(plantType, x, y); // Crear la planta
-            }
-        });
+            	    // Obtener la celda en la que se soltó la planta
+            	    Rectangle cell = getCellForCoordinates(x, y);
+            	    if (cell != null) {
+            	        // Calcular el centro de la celda
+            	        float centerX = cell.x + cell.width / 2;
+            	        float centerY = cell.y + cell.height / 2;
+            	        highlightedCell = null;
+            	        // Crear la planta y posicionarla en el centro
+            	        createPlant(plantType, centerX, centerY);
+            	    } else {
+            	        System.out.println("No se soltó en una celda válida.");
+            	    }
+            	}
+
+            });
     }
 
     private void createPlant(String plantType, float x, float y) {
@@ -308,6 +328,7 @@ public class GameScreen implements Screen {
             PlantCard plant = PlantFactory.createPlant(plantType, x, y, null);
             if (plant != null) {
                 System.out.println("Planta creada correctamente: " + plantType);
+                plant.setPosition(x - plant.getWidth() / 2, y - plant.getHeight() / 2); // Centrar la planta
                 stage.addActor(plant); // Añadir al escenario
             } else {
                 System.out.println("Error: No se pudo crear la planta.");
@@ -316,6 +337,7 @@ public class GameScreen implements Screen {
             System.out.println("Excepción al crear la planta: " + e.getMessage());
         }
     }
+
     
     private void createGrid() {
         gridCells = new Array<>();
@@ -341,8 +363,22 @@ public class GameScreen implements Screen {
     
     
     private void renderGrid() {
+        // Habilitar blending para manejar la transparencia
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        // Dibujar el fondo de la celda resaltada
+        if (highlightedCell != null) {
+            shapeRenderer.setColor(new Color(1, 1, 0, 0.5f)); // Color amarillo semitransparente
+            shapeRenderer.rect(highlightedCell.x, highlightedCell.y, highlightedCell.width, highlightedCell.height);
+        }
+
+        shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        // Dibujar las líneas de la grilla
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.setColor(Color.RED); // Color de las líneas de la grilla
 
         for (Rectangle cell : gridCells) {
             shapeRenderer.rect(cell.x, cell.y, cell.width, cell.height);
@@ -350,6 +386,17 @@ public class GameScreen implements Screen {
 
         shapeRenderer.end();
     }
+
+    
+    private Rectangle getCellForCoordinates(float x, float y) {
+        for (Rectangle cell : gridCells) {
+            if (cell.contains(x, y)) {
+                return cell; // Retorna la celda que contiene las coordenadas
+            }
+        }
+        return null; // No hay celda en esas coordenadas
+    }
+
 
 
     @Override
@@ -381,10 +428,14 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    	 music.pause(); // Pausar la música del juego
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    	 music.play(); // Reanudar música
+    }
 
     @Override
     public void hide() {}
