@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -54,6 +55,7 @@ public class GameScreen implements Screen {
     private ShapeRenderer shapeRenderer;
     private TextureRegion[] gridCells;
     private Music music;
+    private Window optionsMenu;
     
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
@@ -157,14 +159,58 @@ public class GameScreen implements Screen {
         // Configurar drop target
         addPlantDropTarget();
         
+     // Crear un estilo para la ventana
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font; // Usa la misma fuente que ya definiste
+        windowStyle.background = new TextureRegionDrawable(new TextureRegion(new Texture("menuGame.png"))); // Fondo del menú
+
+        // Crear la ventana para el menú de opciones
+        Window optionsMenu = new Window("", windowStyle);
+        optionsMenu.setSize(300, 400); // Tamaño del menú
+        optionsMenu.setPosition(Gdx.graphics.getWidth() / 2f - 150, Gdx.graphics.getHeight() / 2f - 200); // Centrar el menú
+        optionsMenu.setVisible(false); // Ocultarlo inicialmente
+
+        // Añadir botones al menú de opciones
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        buttonStyle.font = font; // Usa la misma fuente para los botones
+       
+
+        // Botón de "Opciones"
+        TextButton optionsButton = new TextButton("Opciones", buttonStyle);
+        optionsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("Opciones seleccionadas");
+                // Aquí puedes implementar lo que quieras que haga este botón
+            }
+        });
+
+        // Botón de "Salir"
+        TextButton exitButton = new TextButton("Salir", buttonStyle);
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("Saliendo del juego");
+                Gdx.app.exit(); // Salir del juego
+            }
+        });
+        // Añadir botones a la ventana
+        optionsMenu.add(optionsButton).pad(10).row();
+        optionsMenu.add(exitButton).pad(10).row();
+
+        // Añadir el menú de opciones al escenario
+        stage.addActor(optionsMenu);
         
+     
      // Añadir un InputListener para manejar el hover
         buttonStack.addListener(new InputListener() {
         	Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
+        	private boolean isMenuVisible = false;
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         	    // Implementación al entrar
                 textLabel.setColor(color); // Cambiar color del texto al pasar el cursor
+             
         	}
 
         	@Override
@@ -173,6 +219,13 @@ public class GameScreen implements Screen {
                 textLabel.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         	
+        	 @Override
+        	    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+        	        // Alternar visibilidad del menú al hacer clic
+        	        isMenuVisible = !isMenuVisible;
+        	        optionsMenu.setVisible(isMenuVisible);
+        	        return true; // Indica que el evento fue manejado
+        	    }
         });
     }
 
