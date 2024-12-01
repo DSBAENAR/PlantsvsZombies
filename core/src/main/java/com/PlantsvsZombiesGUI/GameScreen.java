@@ -111,16 +111,18 @@ public class GameScreen implements Screen {
         
         Label.LabelStyle labelStyle = new Label.LabelStyle();//Estilo Base del texto (No hoover)
         labelStyle.font = font; // Usa la fuente predeterminada
-        Label textLabel = new Label("Menu", labelStyle);
-        textLabel.setAlignment(Align.center);
-        
+        Label textLabelMenu = new Label("Menu", labelStyle);
+        textLabelMenu.setAlignment(Align.center);
+     // Crear el Label como botón de opciones
+        Label optionsLabel = new Label("Options", labelStyle);
+        optionsLabel.setAlignment(Align.center); // Alinear el texto al centro
     
         
         
         // Combinar ambos en un Stack
         Stack buttonStack = new Stack();
         buttonStack.add(buttonImage);
-        buttonStack.add(textLabel);
+        buttonStack.add(textLabelMenu);
 
 
         // Crear la tabla interna para organizar elementos
@@ -176,26 +178,55 @@ public class GameScreen implements Screen {
        
 
         // Botón de "Opciones"
-        TextButton optionsButton = new TextButton("Opciones", buttonStyle);
-        optionsButton.addListener(new ClickListener() {
+        TextButton optionsButton = new TextButton("Options", buttonStyle);
+        optionsLabel.addListener(new InputListener() {
+            Color hoverColor = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
+
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                // Cambiar color al pasar el cursor
+                optionsLabel.setColor(hoverColor);
+            }
+
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                // Restaurar el color al salir del cursor
+                optionsLabel.setColor(Color.WHITE);
+            }
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 System.out.println("Opciones seleccionadas");
                 // Aquí puedes implementar lo que quieras que haga este botón
+                return true;
             }
         });
 
         // Botón de "Salir"
-        TextButton exitButton = new TextButton("Salir", buttonStyle);
+        TextButton exitButton = new TextButton("main menu", buttonStyle);
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Saliendo del juego");
-                Gdx.app.exit(); // Salir del juego
+            	dispose();
+            	game.setScreen(new mainMenu(game)); // Cambiar al menú principal
             }
+            
+            Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
+        	@Override
+        	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+        	    // Implementación al entrar
+        		exitButton.setColor(color); // Cambiar color del texto al pasar el cursor
+             
+        	}
+
+        	@Override
+        	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+        	    // Implementación al salir
+        		exitButton.setColor(Color.WHITE); // Restaurar el color original al salir
+        	}
         });
         // Añadir botones a la ventana
-        optionsMenu.add(optionsButton).pad(10).row();
+        optionsMenu.add(optionsLabel).pad(10).row();
         optionsMenu.add(exitButton).pad(10).row();
 
         // Añadir el menú de opciones al escenario
@@ -209,14 +240,14 @@ public class GameScreen implements Screen {
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         	    // Implementación al entrar
-                textLabel.setColor(color); // Cambiar color del texto al pasar el cursor
+        		textLabelMenu.setColor(color); // Cambiar color del texto al pasar el cursor
              
         	}
 
         	@Override
         	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
         	    // Implementación al salir
-                textLabel.setColor(Color.WHITE); // Restaurar el color original al salir
+        		textLabelMenu.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         	
         	 @Override
@@ -332,10 +363,6 @@ public class GameScreen implements Screen {
         // Dibujar el escenario
         stage.act(delta);
         stage.draw();
-        
-        
-        
-        
     }
 
 
@@ -361,5 +388,6 @@ public class GameScreen implements Screen {
         backgroundTexture.dispose();
         stage.dispose();
         batch.dispose();
+        music.dispose();
     }
 }
