@@ -31,6 +31,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Rectangle;
 
 
 public class GameScreen implements Screen {
@@ -46,16 +47,16 @@ public class GameScreen implements Screen {
     private Table innerTable;
     private Table menuTable;
     private DragAndDrop dragAndDrop;
-    private final int GRID_ROWS = 5; // Número de filas
+    private final int GRID_ROWS = 6; // Número de filas
     private final int GRID_COLS = 9; // Número de columnas
-    private final float TILE_SIZE = 100; // Tamaño de cada tile
+    private final float TILE_SIZE = 150; // Tamaño de cada tile
     private float GRID_X_OFFSET; // Offset dinámico en X
     private float GRID_Y_OFFSET; // Offset dinámico en Y
     private OrthographicCamera camera;
     private ShapeRenderer shapeRenderer;
-    private TextureRegion[] gridCells;
     private Music music;
     private Window optionsMenu;
+    private Array<Rectangle> gridCells; // Lista de rectángulos que representan las celdas
     
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
@@ -85,8 +86,10 @@ public class GameScreen implements Screen {
         music.setLooping(true);
         music.setVolume(0.3f);
         music.play(); // Inicia la música al comenzar el juego
+        shapeRenderer = new ShapeRenderer();
         
         createUI();
+        createGrid();
     }
     
  // Calcular los offsets para centrar el campo de juego
@@ -115,6 +118,7 @@ public class GameScreen implements Screen {
         textLabelMenu.setAlignment(Align.center);
      // Crear el Label como botón de opciones
         Label optionsLabel = new Label("Options", labelStyle);
+        Label mainMenuInGameLabel = new Label("main menu", labelStyle);
         optionsLabel.setAlignment(Align.center); // Alinear el texto al centro
     
         
@@ -177,8 +181,6 @@ public class GameScreen implements Screen {
         buttonStyle.font = font; // Usa la misma fuente para los botones
        
 
-        // Botón de "Opciones"
-        TextButton optionsButton = new TextButton("Options", buttonStyle);
         optionsLabel.addListener(new InputListener() {
             Color hoverColor = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
 
@@ -203,8 +205,7 @@ public class GameScreen implements Screen {
         });
 
         // Botón de "Salir"
-        TextButton exitButton = new TextButton("main menu", buttonStyle);
-        exitButton.addListener(new ClickListener() {
+        mainMenuInGameLabel.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
             	dispose();
@@ -215,19 +216,19 @@ public class GameScreen implements Screen {
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         	    // Implementación al entrar
-        		exitButton.setColor(color); // Cambiar color del texto al pasar el cursor
+        		mainMenuInGameLabel.setColor(color); // Cambiar color del texto al pasar el cursor
              
         	}
 
         	@Override
         	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
         	    // Implementación al salir
-        		exitButton.setColor(Color.WHITE); // Restaurar el color original al salir
+        		mainMenuInGameLabel.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         });
         // Añadir botones a la ventana
         optionsMenu.add(optionsLabel).pad(10).row();
-        optionsMenu.add(exitButton).pad(10).row();
+        optionsMenu.add(mainMenuInGameLabel).pad(10).row();
 
         // Añadir el menú de opciones al escenario
         stage.addActor(optionsMenu);
@@ -316,33 +317,39 @@ public class GameScreen implements Screen {
         }
     }
     
-//    public void drawGrid() {
-//        shapeRenderer.setColor(1, 1, 1, 1); // Color blanco para las líneas
-//
-//        // Dibujar líneas horizontales
-//        for (int row = 0; row <= GRID_ROWS; row++) {
-//            float y = GRID_Y_OFFSET + row * CELL_HEIGHT;
-//            shapeRenderer.line(GRID_X_OFFSET, y, GRID_X_OFFSET + GRID_COLS * CELL_WIDTH, y);
-//        }
-//
-//        // Dibujar líneas verticales
-//        for (int col = 0; col <= GRID_COLS; col++) {
-//            float x = GRID_X_OFFSET + col * CELL_WIDTH;
-//            shapeRenderer.line(x, GRID_Y_OFFSET, x, GRID_Y_OFFSET + GRID_ROWS * CELL_HEIGHT);
-//        }
-//    }
-    
-    
-    private void drawTileGrid(SpriteBatch batch) {
-		// TODO Auto-generated method stub
-    	for (int row = 0; row < GRID_ROWS; row++) {
+    private void createGrid() {
+        gridCells = new Array<>();
+        float fieldWidth = GRID_COLS * TILE_SIZE;
+        float fieldHeight = GRID_ROWS * TILE_SIZE;
+
+        GRID_X_OFFSET = (Gdx.graphics.getWidth() - fieldWidth)+15;
+        GRID_Y_OFFSET = (Gdx.graphics.getHeight() - fieldHeight)-125;
+
+        for (int row = 0; row < GRID_ROWS; row++) {
             for (int col = 0; col < GRID_COLS; col++) {
                 float x = GRID_X_OFFSET + col * TILE_SIZE;
                 float y = GRID_Y_OFFSET + row * TILE_SIZE;
-                batch.draw(grassTileTexture, x, y, TILE_SIZE, TILE_SIZE);
+
+                // Crear un rectángulo para cada celda
+                Rectangle cell = new Rectangle(x, y, TILE_SIZE, TILE_SIZE);
+                gridCells.add(cell);
             }
         }
-	}
+    }
+
+    
+    
+    
+    private void renderGrid() {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.RED);
+
+        for (Rectangle cell : gridCells) {
+            shapeRenderer.rect(cell.x, cell.y, cell.width, cell.height);
+        }
+
+        shapeRenderer.end();
+    }
 
 
     @Override
@@ -359,12 +366,11 @@ public class GameScreen implements Screen {
         batch.begin();
         batch.draw(backgroundTexture,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
-
+        renderGrid();
         // Dibujar el escenario
         stage.act(delta);
         stage.draw();
     }
-
 
 
 
