@@ -7,7 +7,7 @@ package com.PlantsvsZombiesDomain;
 public abstract class AttackPlant extends Plant{
 
     private int damage;
-    private double attackSpeed;
+	private double attackSpeed;
 
 
     /**
@@ -20,6 +20,10 @@ public abstract class AttackPlant extends Plant{
     public AttackPlant(int[] position, int health, int price, Player owner) throws PlantsVsZombiesException {
         super(position,health,price,owner);
     }
+    
+    public void setDamage(int damage) {
+		this.damage = damage;
+	}
 
     /**
      * get the attack speed
@@ -28,8 +32,13 @@ public abstract class AttackPlant extends Plant{
     public double getAttackSpeed() {
         return attackSpeed;
     }
+    
+    
+    public void setAttackSpeed(double attackSpeed) {
+		this.attackSpeed = attackSpeed;
+	}
 
-    /**
+	/**
      * get the damage
      * @return
      */
