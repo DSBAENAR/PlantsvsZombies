@@ -59,6 +59,7 @@ public class GameScreen implements Screen {
     private Window optionsMenu;
     private Array<Rectangle> gridCells; // Lista de rectángulos que representan las celdas
     private Rectangle highlightedCell = null;
+    private Label sunCounterLabel;
     
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
@@ -68,10 +69,6 @@ public class GameScreen implements Screen {
         batch = new SpriteBatch();
         stage  = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
-    	// Configurar la cámara
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.update();
 
         // Inicializar recursos
         backgroundTexture = new Texture("lawn.png");
@@ -122,6 +119,10 @@ public class GameScreen implements Screen {
         Label optionsLabel = new Label("Options", labelStyle);
         Label mainMenuInGameLabel = new Label("main menu", labelStyle);
         optionsLabel.setAlignment(Align.center); // Alinear el texto al centro
+        CharSequence suncounter = "50";
+		sunCounterLabel = new Label(suncounter, labelStyle);
+        sunCounterLabel.setAlignment(Align.center); // Alinear texto
+
     
         
         
@@ -134,15 +135,15 @@ public class GameScreen implements Screen {
         // Crear la tabla interna para organizar elementos
         innerTable = new Table();
         innerTable.top().left();
+        innerTable.add(sunCounterLabel).padTop(65).padLeft(-160);
         
 
         // Crear una tabla principal que contiene la barra y la tabla interna
-        Table mainTable = new Table();
-        mainTable.setFillParent(true);
-        mainTable.top().left();
-        mainTable.add(seedBankImage).width(400).height(100).row();
-        mainTable.add(innerTable).padTop(-100).padLeft(10);
-
+        Table seedbankTable = new Table();
+        seedbankTable.setFillParent(true);
+        seedbankTable.top().left();
+        seedbankTable.add(seedBankImage).width(400).height(100).row();
+        seedbankTable.add(innerTable).padTop(-100).padLeft(10);
         // Agregar la tabla principal al stage
         
         
@@ -154,7 +155,7 @@ public class GameScreen implements Screen {
 
 
         
-        stage.addActor(mainTable);
+        stage.addActor(seedbankTable);
         stage.addActor(menuTable);
 
         dragAndDrop = new DragAndDrop();
