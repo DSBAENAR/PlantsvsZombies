@@ -22,9 +22,9 @@ public class PlantsVsZombiesTest {
 
     @BeforeEach
     void setUp() {
-        board = new Board(5, 10);
         player1 = new HumanPlayer("Barbosa", 1000, true);
         player2 = new HumanPlayer("Baena", 1000, false);
+        board = new Board(5, 10, player1, player2);
         pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
         zombies = new ArrayList<>();
         plants = new ArrayList<>();
@@ -33,18 +33,18 @@ public class PlantsVsZombiesTest {
     @Test
     void testPutSomething() throws PlantsVsZombiesException {
         int[] position = new int[]{0, 1};
-        SunFlower sunFlower1 = new SunFlower(position, player1);
+        SunFlower sunFlower1 = new SunFlower(position, player1, board);
         pvsz.putSomething(position, sunFlower1);
         assertEquals(sunFlower1, pvsz.getBoard().getMatrixBoard()[0][1]);
-        assertEquals(sunFlower1, pvsz.getPlayers().get(0).getInventory().get(0));
+        assertEquals(sunFlower1, pvsz.getPlayer1().getInventory().get(0));
 
         assertFalse(pvsz.getTurn());
 
         int[] position2 = new int[]{0, 9};
-        NormalZombie normalZombie1 = new NormalZombie(position2, player2);
+        NormalZombie normalZombie1 = new NormalZombie(position2, player2, board);
         pvsz.putSomething(position2, normalZombie1);
-        assertEquals(normalZombie1, pvsz.getBoard().getMatrixBoard()[0][9]);
-        assertEquals(normalZombie1, pvsz.getPlayers().get(1).getInventory().get(0));
+        assertEquals(normalZombie1, pvsz.getBoard().getTrack(0).get(0));
+        assertEquals(normalZombie1, pvsz.getPlayer2().getInventory().get(0));
         assertTrue(pvsz.getTurn());
     }
 
@@ -52,24 +52,24 @@ public class PlantsVsZombiesTest {
     @Test
     void testGenerateMoneyPlant() throws PlantsVsZombiesException {
         int[] position = new int[]{0, 1};
-        pvsz.putSomething(position, new SunFlower(position, player1));
+        pvsz.putSomething(position, new SunFlower(position, player1, board));
         int moneyAfterPurchase = player1.getMoney();
         try {
             Thread.sleep(20100);
         } catch (InterruptedException e) {
-            e.printStackTrace();  // Captura la excepción y la maneja (puedes loguear o hacer lo que necesites)
+            e.printStackTrace();
         }
 
         int moneyAfterGeneration = player1.getMoney();
-        assertEquals(moneyAfterPurchase + 50 + 50, moneyAfterGeneration);
+        assertEquals(moneyAfterPurchase + 50 + 25, moneyAfterGeneration);
     }
 
     @Test
     void testGenerateMoneyZombie() throws PlantsVsZombiesException {
         int[] position = new int[]{0, 1};
-        pvsz.putSomething(position, new SunFlower(position, player1));
+        pvsz.putSomething(position, new SunFlower(position, player1, board));
         int[] position2 = new int[]{0, 9};
-        pvsz.putSomething(position2, new BrainsteinZombie(position2, player2));
+        pvsz.putSomething(position2, new BrainsteinZombie(position2, player2, board));
         int moneyAfterPurchase = player2.getMoney();
         try {
             Thread.sleep(20100);
@@ -78,7 +78,7 @@ public class PlantsVsZombiesTest {
         }
 
         int moneyAfterGeneration = player2.getMoney();
-        assertEquals(moneyAfterPurchase + 50 + 100, moneyAfterGeneration);
+        assertEquals(moneyAfterPurchase + 25 + 100, moneyAfterGeneration);
     }
 
     @Test
@@ -96,5 +96,60 @@ public class PlantsVsZombiesTest {
         assertEquals(initialMoneyP2 + 50, finalMoneyP2);
     }
 
+    @Test
+    void testmoveZombie() throws PlantsVsZombiesException {
+        int[] position = new int[]{0, 1};
+        pvsz.putSomething(position, new SunFlower(position, player1, board));
+        int[] position2 = new int[]{0, 9};
+        pvsz.putSomething(position2, new NormalZombie(position2, player2, board));
+        try {
+            Thread.sleep(3100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(8, pvsz.getBoard().getTrack(0).get(0).getZombiePosition()[1]);
+        try {
+            Thread.sleep(3100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(7, pvsz.getBoard().getTrack(0).get(0).getZombiePosition()[1]);
+    }
 
+
+    @Test
+    void testAttack() throws PlantsVsZombiesException {
+        int[] position = new int[]{0, 1};
+        pvsz.putSomething(position, new PeaShooter(position, player1, board));
+        int[] position2 = new int[]{0, 9};
+        pvsz.putSomething(position2, new NormalZombie(position2, player2, board));
+        int zombieInitialHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        int zombieCurrentHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
+        assertEquals(zombieInitialHealth - 20, zombieCurrentHealth);
+    }
+
+    @Test
+    void testAttackWhithTwoPeaShooter() throws PlantsVsZombiesException {
+        int[] position = new int[]{0, 1};
+        pvsz.putSomething(position, new PeaShooter(position, player1, board));
+        int[] position2 = new int[]{0, 9};
+        pvsz.putSomething(position2, new NormalZombie(position2, player2, board));
+        int[] positionAnotherPeaShooter = new int[]{0, 2};
+        pvsz.putSomething(positionAnotherPeaShooter, new PeaShooter(positionAnotherPeaShooter, player1, board));
+        int[] positionAnotherZombie = new int[]{1, 9};
+        pvsz.putSomething(positionAnotherZombie, new NormalZombie(positionAnotherZombie, player2, board));
+        int zombieInitialHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        int zombieCurrentHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
+        assertEquals(zombieInitialHealth - 40, zombieCurrentHealth);
+    }
 }

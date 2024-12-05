@@ -1,29 +1,41 @@
 package com.PlantsvsZombiesDomain;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Class Zombie that extends Something class, this class is for the zombies
  */
 public abstract class Zombie extends Something {
 
     private int[] initalPosition;
+    private int column;
+    private int track;
     private int health;
     private int price;
     private boolean itsAlive;
     protected Player owner;
+    protected Timer timerAlive;
+    private int timerTicks = 0;
 
     /**
      * Constructor for Zombie
+     *
      * @param initalPosition initial position
-     * @param health health of the zombie
-     * @param price price of the zombie
-     * @param owner owner
+     * @param health         health of the zombie
+     * @param price          price of the zombie
+     * @param owner          owner
+     * @param board
      */
-    public Zombie(int[] initalPosition, int health, int price, Player owner) throws PlantsVsZombiesException {
-        super(initalPosition);
+    public Zombie(int[] initalPosition, int health, int price, Player owner, Board board) throws PlantsVsZombiesException {
+        super(initalPosition, board);
+        this.column = initalPosition[1];
+        this.track = initalPosition[0];
         this.health = health;
         this.price = price;
         this.itsAlive = true;
         this.owner = owner;
+        startTimer();
     }
 
     /**
@@ -51,6 +63,14 @@ public abstract class Zombie extends Something {
     }
 
     /**
+     * set the health
+     * @param health health
+     */
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    /**
      * get the price
      * @return price
      */
@@ -64,6 +84,11 @@ public abstract class Zombie extends Something {
      */
     public boolean getItsAlive() {
         return itsAlive;
+    }
+
+    public int[] getZombiePosition() {
+        int[] zombiePosition = new int[]{track, column};
+        return zombiePosition;
     }
 
     /**
@@ -84,5 +109,36 @@ public abstract class Zombie extends Something {
             throw new PlantsVsZombiesException(PlantsVsZombiesException.ARGUMENTS_NOT_VALID);
         }
         return position;
+    }
+
+    /**
+     * start generating money
+     */
+    protected void startTimer() {
+        timerAlive = new Timer();
+        timerAlive.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (getItsAlive()) {
+                    moveZombie();
+                } else {
+                    stopTimer();
+                }
+            }
+        }, 3000, 3000); // Primera ejecución después de 3 segundos, luego cada 3 segundos
+    }
+
+    private void moveZombie() {
+        column = (column - 1);
+    }
+
+    /**
+     * stop generating money
+     */
+    public void stopTimer() {
+        if (timerAlive != null) {
+            timerAlive.cancel();
+            timerAlive = null;
+        }
     }
 }

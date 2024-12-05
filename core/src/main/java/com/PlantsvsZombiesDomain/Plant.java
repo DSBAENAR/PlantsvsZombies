@@ -12,13 +12,15 @@ public abstract class Plant extends Something{
 
     /**
      * Constructor of the Plant
+     *
      * @param position position of the plant
-     * @param health health of the plant
-     * @param price price of the plant
-     * @param owner owner of the plant
+     * @param health   health of the plant
+     * @param price    price of the plant
+     * @param owner    owner of the plant
+     * @param board
      */
-    public Plant(int[] position, int health, int price, Player owner)  throws PlantsVsZombiesException {
-        super(position);
+    public Plant(int[] position, int health, int price, Player owner, Board board)  throws PlantsVsZombiesException {
+        super(position, board);
         this.health = health;
         this.price = price;
         this.itsAlive = true;

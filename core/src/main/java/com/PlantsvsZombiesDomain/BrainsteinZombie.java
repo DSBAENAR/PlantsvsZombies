@@ -7,10 +7,12 @@ public class BrainsteinZombie extends UtilityZombie{
 
     /**
      * Constructor of BrainsteinZombie
+     *
      * @param position position of the zombie
-     * @param owner owner of the zombie
+     * @param owner    owner of the zombie
+     * @param board
      */
-    public BrainsteinZombie(int[] position, Player owner) throws PlantsVsZombiesException {
-        super(validatePosition(position), 300, 50, 25, owner);
+    public BrainsteinZombie(int[] position, Player owner, Board board) throws PlantsVsZombiesException {
+        super(validatePosition(position), 300, 50, 25, owner, board);
     }
 }

@@ -1,26 +1,40 @@
 package com.PlantsvsZombiesDomain;
 
 
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Abstract class AttackPlant that extends Plant class, this class is for the attack plants
  */
 public abstract class AttackPlant extends Plant{
 
-    private int damage;
-	private double attackSpeed;
-
+    protected int damage;
+    protected long attackSpeed;
+    protected Timer timer;
+    protected ArrayList<Zombie> trackZombies;
+    protected Board board;
+    protected int row;
 
     /**
      * Constructor of AttackPlant
+     *
      * @param position position of the plant
-     * @param health health of the plant
-     * @param price price of the plant
-     * @param owner owner of the plant
+     * @param health   health of the plant
+     * @param price    price of the plant
+     * @param owner    owner of the plant
+     * @param board    board of the game
      */
-    public AttackPlant(int[] position, int health, int price, Player owner) throws PlantsVsZombiesException {
-        super(position,health,price,owner);
+    public AttackPlant(int[] position, int health, int price, int damage, long attackSpeed, Player owner, Board board) throws PlantsVsZombiesException {
+        super(position,health,price,owner, board);
+        this.damage = damage;
+        this.attackSpeed = attackSpeed;
+        this.trackZombies = board.getTrack(position[0]);
+        this.board = board;
+        this.row = position[0];
     }
-    
+
     public void setDamage(int damage) {
 		this.damage = damage;
 	}
@@ -32,9 +46,9 @@ public abstract class AttackPlant extends Plant{
     public double getAttackSpeed() {
         return attackSpeed;
     }
-    
-    
-    public void setAttackSpeed(double attackSpeed) {
+
+
+    public void setAttackSpeed(long attackSpeed) {
 		this.attackSpeed = attackSpeed;
 	}
 
@@ -47,7 +61,11 @@ public abstract class AttackPlant extends Plant{
     }
 
     /**
-     * This method is for the attack of each plant
+     * start generating money
      */
-    public abstract void attack();
+    public abstract void startAttack();
+    /**
+     * stop generating money
+     */
+
 }

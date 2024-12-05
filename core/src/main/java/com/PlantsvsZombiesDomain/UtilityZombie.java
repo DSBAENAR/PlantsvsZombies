@@ -13,14 +13,16 @@ public abstract class UtilityZombie extends Zombie{
 
     /**
      * Constructor of UtilityZombie
-     * @param position position of the zombie
-     * @param health health of the zombie
-     * @param price price of the zombie
+     *
+     * @param position    position of the zombie
+     * @param health      health of the zombie
+     * @param price       price of the zombie
      * @param MoneySupply money supply
-     * @param owner owner
+     * @param owner       owner
+     * @param board
      */
-    public UtilityZombie(int[] position, int health, int price, int MoneySupply, Player owner) throws PlantsVsZombiesException {
-        super(position, health, price, owner);
+    public UtilityZombie(int[] position, int health, int price, int MoneySupply, Player owner, Board board) throws PlantsVsZombiesException {
+        super(position, health, price, owner, board);
         this.moneySupply = MoneySupply;
         startGeneratingMoney();
     }
@@ -59,7 +61,7 @@ public abstract class UtilityZombie extends Zombie{
                     stopGeneratingMoney();
                 }
             }
-        }, 0, 20000);
+        }, 20000, 20000);
     }
 
     /**

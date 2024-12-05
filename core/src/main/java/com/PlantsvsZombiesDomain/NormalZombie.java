@@ -10,11 +10,13 @@ public class NormalZombie extends Zombie{
 
     /**
      * Constructor of NormalZombie
+     *
      * @param initalPosition initial position of the zombie
-     * @param owner player that owns the zombie
+     * @param owner          player that owns the zombie
+     * @param board
      */
-    public NormalZombie(int[] initalPosition, Player owner) throws PlantsVsZombiesException {
-        super(validatePosition(initalPosition), 100, 100, owner);
+    public NormalZombie(int[] initalPosition, Player owner, Board board) throws PlantsVsZombiesException {
+        super(validatePosition(initalPosition), 100, 100, owner, board);
     }
 
     /**

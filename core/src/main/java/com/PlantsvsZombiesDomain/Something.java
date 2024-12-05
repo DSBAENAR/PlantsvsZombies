@@ -5,13 +5,17 @@ package com.PlantsvsZombiesDomain;
  */
 public abstract class Something{
     private int[] position;
+    private Board board;
 
     /**
      * Constructor of Something
+     *
      * @param position
+     * @param board
      */
-    public Something(int[] position) {
+    public Something(int[] position, Board board) {
         this.position = position;
+        this.board = board;
     }
 
     /**

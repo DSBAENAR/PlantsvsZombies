@@ -9,15 +9,17 @@ public abstract class HelmetZombie extends Zombie {
 
     /**
      * Constructor of HelmetZombie
+     *
      * @param initalPosition initial position of the zombie
-     * @param health health of the zombie
-     * @param price price of the zombie
-     * @param damage damage of the zombie
-     * @param attackSpeed attack speed of the zombie
-     * @param owner owner of the zombie
+     * @param health         health of the zombie
+     * @param price          price of the zombie
+     * @param damage         damage of the zombie
+     * @param attackSpeed    attack speed of the zombie
+     * @param owner          owner of the zombie
+     * @param board
      */
-    public HelmetZombie(int[] initalPosition, int health, int price, int damage, double attackSpeed, Player owner) throws PlantsVsZombiesException {
-        super(validatePosition(initalPosition), health, price, owner);
+    public HelmetZombie(int[] initalPosition, int health, int price, int damage, double attackSpeed, Player owner, Board board) throws PlantsVsZombiesException {
+        super(validatePosition(initalPosition), health, price, owner, board);
         this.damage = damage;
         this.attackSpeed = attackSpeed;
     }

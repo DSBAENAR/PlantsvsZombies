@@ -11,7 +11,8 @@ import java.util.ArrayList;
 public class PlantsVsZombies {
 
     private Board board;
-    private ArrayList<Player> players ;
+    private Player player1;
+    private Player player2;
     private int time;
     private Timer timer;
     private String gameMode;
@@ -29,10 +30,9 @@ public class PlantsVsZombies {
      * @param player2 the other player
      */
     public PlantsVsZombies(Board board, int time, String gameMode, Player player1, Player player2){
+        this.player1 = player1;
+        this.player2 = player2;
         this.board = board;
-        this.players = new ArrayList<>();
-        this.players.add(player1);
-        this.players.add(player2);
         this.time = time;
         this.gameMode = gameMode;
         player1Inventory = new ArrayList<>();
@@ -50,11 +50,35 @@ public class PlantsVsZombies {
     }
 
     /**
-     * get the players
-     * @return the players
+     * get the player 2
+     * @return the player 2
      */
-    public ArrayList<Player> getPlayers() {
-        return players;
+    public Player getPlayer2() {
+        return player2;
+    }
+
+    /**
+     * set the player 2
+     * @param player2 the player 2
+     */
+    public void setPlayer2(Player player2) {
+        this.player2 = player2;
+    }
+
+    /**
+     * get the player 1
+     * @return the player 1
+     */
+    public Player getPlayer1() {
+        return player1;
+    }
+
+    /**
+     * set the player 1
+     * @param player1 the player 1
+     */
+    public void setPlayer1(Player player1) {
+        this.player1 = player1;
     }
 
     /**
@@ -82,10 +106,10 @@ public class PlantsVsZombies {
     public void putSomething(int[] position, Something something){
         try {
             if (turn) {
-                players.get(0).putSomething(position, something);
+                player1.putSomething(position, something);
                 board.putSomething(position, something);
             } else {
-                players.get(1).putSomething(position, something);
+                player2.putSomething(position, something);
                 board.putSomething(position, something);
             }
             turn = !turn;
@@ -101,9 +125,9 @@ public class PlantsVsZombies {
      */
     public void deleteSomething(int[] position, Something something){
         if(turn){
-            players.get(0).deleteSomething(position, something);
+            player1.deleteSomething(position, something);
         }else{
-            players.get(1).deleteSomething(position, something);
+            player2.deleteSomething(position, something);
         }
     }
 
@@ -144,12 +168,12 @@ public class PlantsVsZombies {
      * incerment the money of each player, if the player is a plant give 25, else give 50
      */
     private void incrementMoney() {
-        if(players.get(0).isPlant()){
-            players.get(0).setMoney(players.get(0).getMoney() + 25);
-            players.get(1).setMoney(players.get(1).getMoney() + 50);
+        if(player1.isPlant()){
+            player1.setMoney(player1.getMoney() + 25);
+            player2.setMoney(player2.getMoney() + 50);
         } else {
-            players.get(1).setMoney(players.get(1).getMoney() + 25);
-            players.get(0).setMoney(players.get(0).getMoney() + 50);
+            player2.setMoney(player2.getMoney() + 25);
+            player1.setMoney(player1.getMoney() + 50);
         }
     }
 
