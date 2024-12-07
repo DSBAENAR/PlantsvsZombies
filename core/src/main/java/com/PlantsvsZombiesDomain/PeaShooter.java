@@ -32,18 +32,5 @@ public class PeaShooter extends AttackPlant {
         }
     }
 
-    /**
-     * This method is for the attack of each plant
-     */
-    public void attack() {
-        ArrayList<Zombie> track = board.getTrack(this.row);
-        if (!track.isEmpty()) {
-            Zombie targetZombie = track.get(0);
-            targetZombie.setHealth(targetZombie.getHealth() - 20);
-        }
-    }
-
-
-
 
 }

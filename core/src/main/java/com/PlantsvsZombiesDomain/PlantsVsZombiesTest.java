@@ -20,6 +20,13 @@ public class PlantsVsZombiesTest {
     private PlantsVsZombies pvsz;
 
 
+    @BeforeEach
+    void setUp() throws Exception {
+        player1 = new HumanPlayer("Barbosa", 1000, true);
+        player2 = new HumanPlayer("Baena", 1000, false);
+        board = new Board(5, 10, player1, player2);
+        pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+    }
 
 
     @Test
@@ -148,32 +155,82 @@ public class PlantsVsZombiesTest {
 
     @Test
     void testZombieAttack() throws PlantsVsZombiesException {
-        player1 = new HumanPlayer("Barbosa", 1000, true);
-        player2 = new HumanPlayer("Baena", 1000, false);
-        board = new Board(5, 10, player1, player2);
-        pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-        zombies = new ArrayList<>();
-        plants = new ArrayList<>();
-
         int [] position = new int[]{0, 9};
-        pvsz.putSomething(position, new WallNut(position, player1, board));
-        int[] position2 = new int[]{0, 9};
-        pvsz.putSomething(position2, new Buckethead(position2, player2, board));
+        WallNut wallNut = new WallNut(position, player1, board);
+        pvsz.putSomething(position, wallNut);
         int plantInitialHealth = ((Plant) pvsz.getBoard().getMatrixBoard()[0][9]).getHealth();
-        System.out.println(plantInitialHealth);
+        int[] position2 = new int[]{0, 9};
+        Buckethead buckethead = new Buckethead(position2, player2, board);
+        pvsz.putSomething(position2, buckethead);
         try {
-            Thread.sleep(510);
+            Thread.sleep(600);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         int plantCurrentHealth = ((Plant) pvsz.getBoard().getMatrixBoard()[0][9]).getHealth();
-        assertEquals(plantInitialHealth - 200, plantCurrentHealth);
-        try {
-            Thread.sleep(510);
+        assertEquals(plantInitialHealth - buckethead.getDamage(), plantCurrentHealth);        try {
+            Thread.sleep(560);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         plantCurrentHealth = ((Plant) pvsz.getBoard().getMatrixBoard()[0][9]).getHealth();
-        assertEquals(plantInitialHealth - 300, plantCurrentHealth);
+        assertEquals(plantInitialHealth - 2*buckethead.getDamage(), plantCurrentHealth);
     }
+
+
+    @Test
+    void testPlantDeath() throws PlantsVsZombiesException {
+        int[] position = new int[]{0, 9};
+        SunFlower sunFlower = new SunFlower(position, player1, board);
+        pvsz.putSomething(position, sunFlower);
+        int[] position2 = new int[]{0, 9};
+        NormalZombie normalZombie = new NormalZombie(position2, player2, board);
+        pvsz.putSomething(position2, normalZombie);
+        assertEquals(true, sunFlower.getItsAlive());
+        assertEquals(sunFlower, pvsz.getBoard().getMatrixBoard()[0][9]);
+        assertTrue(player1.getInventory().contains(sunFlower));
+        try {
+            Thread.sleep(1700);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(false, sunFlower.getItsAlive());
+        assertNull(pvsz.getBoard().getMatrixBoard()[0][9]);
+        assertFalse(player1.getInventory().contains(sunFlower));
+    }
+
+    @Test
+    void testZombieDeath() throws PlantsVsZombiesException {
+        int[] position = new int[]{0, 1};
+        PeaShooter peaShooter = new PeaShooter(position, player1, board);
+        pvsz.putSomething(position, peaShooter);
+        int[] position2 = new int[]{0, 9};
+        NormalZombie normalZombie = new NormalZombie(position2, player2, board);
+        pvsz.putSomething(position2, normalZombie);
+
+        assertEquals(true, normalZombie.getItsAlive());
+        assertEquals(normalZombie, pvsz.getBoard().getTrack(0).get(0));
+        assertTrue(player2.getInventory().contains(normalZombie));
+
+        NormalZombie normalZombie2 = new NormalZombie(position2, player2, board);
+        pvsz.putSomething(position2, normalZombie2);
+
+        int[] wallNutPosition = new int[]{0, 2};
+        WallNut wallNut = new WallNut(wallNutPosition, player1, board);
+        pvsz.putSomething(wallNutPosition, wallNut);
+
+
+
+
+        try {
+            Thread.sleep(7800);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(false, normalZombie.getItsAlive());
+        assertFalse(player2.getInventory().contains(normalZombie));
+    }
+
+
+
 }

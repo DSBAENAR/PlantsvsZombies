@@ -5,7 +5,7 @@ package com.PlantsvsZombiesDomain;
  */
 public abstract class AttackZombie extends Zombie {
     protected int damage;
-    protected double attackSpeed;
+    protected long attackSpeed;
     protected Board board;
     /**
      * Constructor of AttackZombie
@@ -18,8 +18,8 @@ public abstract class AttackZombie extends Zombie {
      * @param owner          owner of the zombie
      * @param board
      */
-    public AttackZombie(int[] initalPosition, int health, int price, int damage, double attackSpeed, Player owner, Board board) throws PlantsVsZombiesException{
-        super(initalPosition, health, price, owner, board);
+    public AttackZombie(int[] initalPosition, int health, int price, int damage, long attackSpeed, Player owner, Board board) throws PlantsVsZombiesException{
+        super(initalPosition, health, price, damage, attackSpeed, owner, board);
         this.damage = damage;
         this.attackSpeed = attackSpeed;
     }
@@ -28,7 +28,7 @@ public abstract class AttackZombie extends Zombie {
      * getter of attack speed
      * @return attack speed
      */
-    public double getAttackSpeed() {
+    public long getAttackSpeed() {
         return attackSpeed;
     }
 

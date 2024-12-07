@@ -23,13 +23,11 @@ public abstract class HelmetZombie extends Zombie {
      * @param board
      */
     public HelmetZombie(int[] initalPosition, int health, int price, int damage, long attackSpeed, Player owner, Board board) throws PlantsVsZombiesException {
-        super(validatePosition(initalPosition), health, price, owner, board);
+        super(validatePosition(initalPosition), health, price, damage, attackSpeed, owner, board);
         this.damage = damage;
         this.attackSpeed = attackSpeed;
         this.board = board;
-        startAttack();
     }
-
     public long getAttackSpeed() {
         return attackSpeed;
     }
@@ -38,13 +36,4 @@ public abstract class HelmetZombie extends Zombie {
         return damage;
     }
 
-
-    /**
-     * start generating money
-     */
-    public abstract void startAttack();
-
-    public  abstract void attack();
-
-    public abstract void stopAttack();
 }

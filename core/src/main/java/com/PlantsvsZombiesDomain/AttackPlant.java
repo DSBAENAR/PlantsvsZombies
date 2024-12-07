@@ -65,5 +65,25 @@ public abstract class AttackPlant extends Plant{
      */
     public abstract void startAttack();
 
+    /**
+     * This method is for the attack of each plant
+     */
+    public void attack() {
+        ArrayList<Zombie> track = board.getTrack(this.row);
+        if (!track.isEmpty()) {
+            Zombie targetZombie = track.get(0);
+            int actualHealth = targetZombie.getHealth();
+            if(actualHealth - damage <= 0){
+                targetZombie.setItsAlive(false);
+                Player owner = targetZombie.getOwner();
+                ArrayList<Something> inventory = owner.getInventory();
+                inventory.remove(targetZombie);
+                owner.setInventory(inventory);
+                track.remove(0);
+            } else {
+                targetZombie.setHealth(targetZombie.getHealth() - damage);
+            }
 
+        }
+    }
 }

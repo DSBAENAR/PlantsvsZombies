@@ -22,7 +22,7 @@ public abstract class UtilityZombie extends Zombie{
      * @param board
      */
     public UtilityZombie(int[] position, int health, int price, int MoneySupply, Player owner, Board board) throws PlantsVsZombiesException {
-        super(position, health, price, owner, board);
+        super(position, health, price, 0,0, owner, board);
         this.moneySupply = MoneySupply;
         startGeneratingMoney();
     }
