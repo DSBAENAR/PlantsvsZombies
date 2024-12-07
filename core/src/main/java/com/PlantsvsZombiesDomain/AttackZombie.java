@@ -4,9 +4,9 @@ package com.PlantsvsZombiesDomain;
  * Abstract class AttackZombie that extends Zombie class, this class is for the attack zombies
  */
 public abstract class AttackZombie extends Zombie {
-    private int damage;
-    private double attackSpeed;
-
+    protected int damage;
+    protected double attackSpeed;
+    protected Board board;
     /**
      * Constructor of AttackZombie
      *

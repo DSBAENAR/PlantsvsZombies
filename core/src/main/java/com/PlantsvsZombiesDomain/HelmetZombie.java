@@ -1,11 +1,15 @@
 package com.PlantsvsZombiesDomain;
 
+import java.util.Timer;
+
 /**
  * Abstract class HelmetZombie that extends Zombie class, this class is for the helmet zombies
  */
 public abstract class HelmetZombie extends Zombie {
-    private int damage;
-    private double attackSpeed;
+    protected int damage;
+    protected long attackSpeed;
+    protected Timer timer;
+    protected Board board;
 
     /**
      * Constructor of HelmetZombie
@@ -18,18 +22,29 @@ public abstract class HelmetZombie extends Zombie {
      * @param owner          owner of the zombie
      * @param board
      */
-    public HelmetZombie(int[] initalPosition, int health, int price, int damage, double attackSpeed, Player owner, Board board) throws PlantsVsZombiesException {
+    public HelmetZombie(int[] initalPosition, int health, int price, int damage, long attackSpeed, Player owner, Board board) throws PlantsVsZombiesException {
         super(validatePosition(initalPosition), health, price, owner, board);
         this.damage = damage;
         this.attackSpeed = attackSpeed;
+        this.board = board;
+        startAttack();
     }
 
-    public double getAttackSpeed() {
+    public long getAttackSpeed() {
         return attackSpeed;
     }
 
     public int getDamage() {
         return damage;
     }
-    public abstract void attack();
+
+
+    /**
+     * start generating money
+     */
+    public abstract void startAttack();
+
+    public  abstract void attack();
+
+    public abstract void stopAttack();
 }

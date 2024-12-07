@@ -92,31 +92,27 @@ public class Board implements GameMoves {
     @Override
     public  void putSomething(int[] position, Something something) throws PlantsVsZombiesException{
         if(something instanceof Zombie){
-            if(matrixBoard[position[0]][position[1]] != null){
-                throw new PlantsVsZombiesException(PlantsVsZombiesException.SOMETHING_ALREADY_IN_POSITION);
-            } else {
-                // If the column is 9 (Only zombies in column 9)
-                if (position[1] == 9) {
-                    switch (position[0]) {
-                        case 0:
-                            track0.add((Zombie) something);
-                            break;
-                        case 1:
-                            track1.add((Zombie) something);
-                            break;
-                        case 2:
-                            track2.add((Zombie) something);
-                            break;
-                        case 3:
-                            track3.add((Zombie) something);
-                            break;
-                        case 4:
-                            track4.add((Zombie) something);
-                            break;
-                    }
-                } else {
-                    throw new PlantsVsZombiesException(PlantsVsZombiesException.ARGUMENTS_NOT_VALID);
+            // If the column is 9 (Only zombies in column 9)
+            if (position[1] == 9) {
+                switch (position[0]) {
+                    case 0:
+                        track0.add((Zombie) something);
+                        break;
+                    case 1:
+                        track1.add((Zombie) something);
+                        break;
+                    case 2:
+                        track2.add((Zombie) something);
+                        break;
+                    case 3:
+                        track3.add((Zombie) something);
+                        break;
+                    case 4:
+                        track4.add((Zombie) something);
+                        break;
                 }
+            } else {
+                throw new PlantsVsZombiesException(PlantsVsZombiesException.ARGUMENTS_NOT_VALID);
             }
         } else {
             if(matrixBoard[position[0]][position[1]] != null){

@@ -20,15 +20,7 @@ public class PlantsVsZombiesTest {
     private PlantsVsZombies pvsz;
 
 
-    @BeforeEach
-    void setUp() {
-        player1 = new HumanPlayer("Barbosa", 1000, true);
-        player2 = new HumanPlayer("Baena", 1000, false);
-        board = new Board(5, 10, player1, player2);
-        pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-        zombies = new ArrayList<>();
-        plants = new ArrayList<>();
-    }
+
 
     @Test
     void testPutSomething() throws PlantsVsZombiesException {
@@ -151,5 +143,37 @@ public class PlantsVsZombiesTest {
         }
         int zombieCurrentHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
         assertEquals(zombieInitialHealth - 40, zombieCurrentHealth);
+    }
+
+
+    @Test
+    void testZombieAttack() throws PlantsVsZombiesException {
+        player1 = new HumanPlayer("Barbosa", 1000, true);
+        player2 = new HumanPlayer("Baena", 1000, false);
+        board = new Board(5, 10, player1, player2);
+        pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        zombies = new ArrayList<>();
+        plants = new ArrayList<>();
+
+        int [] position = new int[]{0, 9};
+        pvsz.putSomething(position, new WallNut(position, player1, board));
+        int[] position2 = new int[]{0, 9};
+        pvsz.putSomething(position2, new Buckethead(position2, player2, board));
+        int plantInitialHealth = ((Plant) pvsz.getBoard().getMatrixBoard()[0][9]).getHealth();
+        System.out.println(plantInitialHealth);
+        try {
+            Thread.sleep(510);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        int plantCurrentHealth = ((Plant) pvsz.getBoard().getMatrixBoard()[0][9]).getHealth();
+        assertEquals(plantInitialHealth - 200, plantCurrentHealth);
+        try {
+            Thread.sleep(510);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        plantCurrentHealth = ((Plant) pvsz.getBoard().getMatrixBoard()[0][9]).getHealth();
+        assertEquals(plantInitialHealth - 300, plantCurrentHealth);
     }
 }

@@ -36,6 +36,14 @@ public abstract class Plant extends Something{
     }
 
     /**
+     * set the health
+     * @param health health
+     */
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    /**
      * get the price
      * @return price
      */

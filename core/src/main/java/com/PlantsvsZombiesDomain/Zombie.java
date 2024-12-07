@@ -8,11 +8,11 @@ import java.util.TimerTask;
  */
 public abstract class Zombie extends Something {
 
-    private int[] initalPosition;
-    private int column;
-    private int track;
-    private int health;
-    private int price;
+    protected int[] initalPosition;
+    protected int column;
+    protected int track;
+    protected int health;
+    protected int price;
     private boolean itsAlive;
     protected Player owner;
     protected Timer timerAlive;

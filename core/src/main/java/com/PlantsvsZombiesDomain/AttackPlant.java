@@ -64,8 +64,6 @@ public abstract class AttackPlant extends Plant{
      * start generating money
      */
     public abstract void startAttack();
-    /**
-     * stop generating money
-     */
+
 
 }
