@@ -31,6 +31,8 @@ public class Board implements GameMoves {
         this.sizeHeight = sizeHeight;
         this.sizeWidth = sizeWidth;
         this.matrixBoard = new Something[sizeHeight][sizeWidth];
+        this.player1 = player1;
+        this.player2 = player2;
         this.track0 = new ArrayList<>();
         this.track1 = new ArrayList<>();
         this.track2 = new ArrayList<>();
@@ -38,6 +40,26 @@ public class Board implements GameMoves {
         this.track4 = new ArrayList<>();
     }
 
+    /**
+     * get the player 1
+     * @return player 1
+     */
+    public Player getPlayer1() {
+        return player1;
+    }
+
+    /**
+     * get the player 2
+     * @return player 2
+     */
+    public Player getPlayer2() {
+        return player2;
+    }
+
+    /**
+     * get a specific track
+     * @return zombies
+     */
     public ArrayList<Zombie> getTrack(int track) {
         switch (track) {
             case 0:
@@ -55,6 +77,11 @@ public class Board implements GameMoves {
         }
     }
 
+    /**
+     * set a specific track
+     * @param track track
+     * @param numbertrack number of the track
+     */
     public void setTrack(ArrayList<Zombie> track, int numbertrack) {
         switch (numbertrack) {
             case 0:

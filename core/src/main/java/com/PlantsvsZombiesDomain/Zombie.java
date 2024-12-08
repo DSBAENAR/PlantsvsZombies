@@ -1,5 +1,6 @@
 package com.PlantsvsZombiesDomain;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -13,7 +14,10 @@ public abstract class Zombie extends Something {
     protected int track;
     protected int health;
     protected int price;
+    protected int damage;
+    protected long attackSpeed;
     private boolean itsAlive;
+    protected Board board;
     protected Player owner;
     protected Timer timerAlive;
     private int timerTicks = 0;
@@ -27,12 +31,15 @@ public abstract class Zombie extends Something {
      * @param owner          owner
      * @param board
      */
-    public Zombie(int[] initalPosition, int health, int price, Player owner, Board board) throws PlantsVsZombiesException {
+    public Zombie(int[] initalPosition, int health, int price, int damage, long attackSpeed, Player owner, Board board) throws PlantsVsZombiesException {
         super(initalPosition, board);
         this.column = initalPosition[1];
         this.track = initalPosition[0];
         this.health = health;
         this.price = price;
+        this.damage = damage;
+        this.attackSpeed = attackSpeed;
+        this.board = board;
         this.itsAlive = true;
         this.owner = owner;
         startTimer();
@@ -112,28 +119,35 @@ public abstract class Zombie extends Something {
     }
 
     /**
-     * start generating money
+     * start time
      */
     protected void startTimer() {
         timerAlive = new Timer();
         timerAlive.scheduleAtFixedRate(new TimerTask() {
+
+            private long elapsedTime = 0;
+
             @Override
             public void run() {
-                if (getItsAlive()) {
-                    moveZombie();
-                } else {
+                if (!getItsAlive()) {
                     stopTimer();
+                    return;
                 }
+                // Movimiento cada 3000 ms
+                if (elapsedTime > 0 && elapsedTime % 3000 == 0) {
+                    moveZombie();
+                }
+                // Ataque cada 500 ms, pero solo después del primer intervalo
+                if (elapsedTime > 0 && elapsedTime % 500 == 0) {
+                    attack();
+                }
+                elapsedTime += 500;
             }
-        }, 3000, 3000); // Primera ejecución después de 3 segundos, luego cada 3 segundos
-    }
-
-    private void moveZombie() {
-        column = (column - 1);
+        }, 0, 500);
     }
 
     /**
-     * stop generating money
+     * stop timer
      */
     public void stopTimer() {
         if (timerAlive != null) {
@@ -141,4 +155,35 @@ public abstract class Zombie extends Something {
             timerAlive = null;
         }
     }
+
+    protected void moveZombie() {
+        if (column == 0) {
+            stopTimer();
+        } else {
+            column = (column - 1);
+        }
+    }
+
+    /**
+     * This method is for the attack of each zombie, it can be overridden for different attacks
+     */
+    protected void attack() {
+        Something[][] matrixBoard = board.getMatrixBoard();
+        if(matrixBoard[track][column] != null && matrixBoard[track][column] instanceof Plant){
+            Plant targetPlant = (Plant) matrixBoard[track][column];
+            Player owner = targetPlant.getOwner();
+            int actualHealth = targetPlant.getHealth();
+            if ((actualHealth - damage) <= 0){
+                targetPlant.setItsAlive(false);
+                matrixBoard[track][column] = null;
+                ArrayList<Something> inventory = owner.getInventory();
+                inventory.remove(targetPlant);
+                owner.setInventory(inventory);
+
+            } else {
+                targetPlant.setHealth(actualHealth - damage);
+            }
+        }
+    }
+
 }
