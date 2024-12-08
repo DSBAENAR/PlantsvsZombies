@@ -1,9 +1,15 @@
 package com.PlantsvsZombiesGUI;
 
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -84,6 +90,17 @@ public class mainMenu implements Screen {
             }
         });
         
+      //Agregar un listener para manejar el clic en el botón
+        btnLoadGameActor.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+            	loadGame(); // Ejemplo de transición a la pantalla del menú principal
+            }
+
+				
+			
+        });
+        
         Table tableOptions = new Table();
         tableOptions.setFillParent(true); // Hace que la tabla ocupe toda la pantalla
         tableOptions.center();
@@ -101,9 +118,81 @@ public class mainMenu implements Screen {
        
         // Agregar la tabla al stage
         stage.addActor(tableOptions);
+    
     }
     
     
+
+    private String selectFile(boolean save) {
+        final String[] selectedFile = {null}; // Usar un arreglo para almacenar el resultado
+        Thread thread = new Thread(() -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle(save ? "Guardar archivo" : "Cargar archivo");
+
+            int result = save ? fileChooser.showSaveDialog(null) : fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                selectedFile[0] = fileChooser.getSelectedFile().getAbsolutePath();
+            }
+        });
+
+        thread.start(); // Ejecutar el selector de archivos en un hilo separado
+
+        try {
+            thread.join(); // Esperar a que el usuario cierre el diálogo
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return selectedFile[0];
+    }
+
+
+
+    
+    private void loadGame() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                JFileChooser chooser = new JFileChooser();
+                JFrame frame = new JFrame();
+                
+                // Configurar el JFrame auxiliar
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.setVisible(true);
+                frame.toFront();
+                frame.setVisible(false); // No mostrar realmente la ventana
+                int result = chooser.showOpenDialog(frame);
+                frame.dispose(); // Cerrar el JFrame auxiliar
+                
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    FileHandle file = Gdx.files.absolute(chooser.getSelectedFile().getAbsolutePath());
+                    if (!file.exists()) {
+                        System.out.println("El archivo no existe: " + file.path());
+                        return;
+                    }
+
+                    try {
+                        // Leer y cargar los datos guardados
+                        Json json = new Json();
+                        SaveData saveData = json.fromJson(SaveData.class, file.readString());
+                        
+                        // Restaurar el estado del juego
+                        GameScreen gameScreen = new GameScreen(game);
+                        gameScreen.restoreGameState(saveData);
+                        Gdx.app.postRunnable(() -> game.setScreen(gameScreen)); // Cambiar de pantalla en el hilo principal
+
+                        System.out.println("Juego cargado con éxito desde: " + file.path());
+                    } catch (Exception e) {
+                        System.out.println("Error al cargar el archivo: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("No se seleccionó un archivo.");
+                }
+            }
+        }).start();
+    }
+
+
     
     
     @Override
@@ -148,3 +237,23 @@ public class mainMenu implements Screen {
         btnPlay.dispose();
     }
 }
+
+class SaveData {
+    public Array<PlantData> plants;
+    public Array<ZombieData> zombies;
+    public int sun;
+}
+
+class PlantData {
+    public String type;
+    public int x;
+    public int y;
+}
+
+class ZombieData {
+    public String type;
+    public int x;
+    public int y;
+    public int health;
+}
+

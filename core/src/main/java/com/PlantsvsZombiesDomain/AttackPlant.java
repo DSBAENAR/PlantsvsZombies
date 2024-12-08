@@ -59,7 +59,6 @@ public abstract class AttackPlant extends Plant{
     public int getDamage() {
         return damage;
     }
-
     /**
      * start generating money
      */

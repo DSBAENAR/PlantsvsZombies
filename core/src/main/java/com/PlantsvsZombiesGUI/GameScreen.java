@@ -1,8 +1,17 @@
 package com.PlantsvsZombiesGUI;
 
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+
+import com.PlantsvsZombiesDomain.AttackPlant;
+import com.PlantsvsZombiesDomain.Board;
+import com.PlantsvsZombiesDomain.HumanPlayer;
+import com.PlantsvsZombiesDomain.Player;
+import com.PlantsvsZombiesDomain.Zombie;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -31,13 +40,13 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 
 
 public class GameScreen implements Screen {
-	private Peashooter peashooter;
-    private SpriteBatch batch;
+	private SpriteBatch batch;
     private BitmapFont font;
     private FitViewport viewport;
     private Stage stage;
@@ -50,9 +59,9 @@ public class GameScreen implements Screen {
     private DragAndDrop dragAndDrop;
     private final int GRID_ROWS = 6; // Número de filas
     private final int GRID_COLS = 9; // Número de columnas
-    private final float TILE_SIZE = 150; // Tamaño de cada tile
-    private float GRID_X_OFFSET; // Offset dinámico en X
-    private float GRID_Y_OFFSET; // Offset dinámico en Y
+    public final static float TILE_SIZE = 150; // Tamaño de cada tile
+    public static float GRID_X_OFFSET; // Offset dinámico en X
+    public static float GRID_Y_OFFSET; // Offset dinámico en Y
     private OrthographicCamera camera;
     private ShapeRenderer shapeRenderer;
     private Music music;
@@ -60,9 +69,20 @@ public class GameScreen implements Screen {
     private Array<Rectangle> gridCells; // Lista de rectángulos que representan las celdas
     private Rectangle highlightedCell = null;
     private Label sunCounterLabel;
+    private Array<Zombie> zombies; // Lista lógica de zombies
+    private Array<AttackPlant> attackPlants; // Lista lógica de plantas de ataque
+    private Board board;
+    
+
+
     
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
+        zombies = new Array<>();
+        attackPlants = new Array<>();
+        this.board = new Board(GRID_ROWS, GRID_COLS, new HumanPlayer("Player 1",50,true), new HumanPlayer("Player 2",50,true)); // Crear con jugadores
+        // Otros inicializadores
+
         // Inicializar el viewport
         viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         // Inicializar otros recursos
@@ -91,6 +111,8 @@ public class GameScreen implements Screen {
         createGrid();
     }
     
+    
+    
  // Calcular los offsets para centrar el campo de juego
     private void updateGridOffsets() {
         float fieldWidth = GRID_COLS * TILE_SIZE;
@@ -118,7 +140,9 @@ public class GameScreen implements Screen {
      // Crear el Label como botón de opciones
         Label optionsLabel = new Label("Options", labelStyle);
         Label mainMenuInGameLabel = new Label("main menu", labelStyle);
+        Label saveLabel = new Label("Save", labelStyle);
         optionsLabel.setAlignment(Align.center); // Alinear el texto al centro
+        saveLabel.setAlignment(Align.center); // Alinear el texto al centro
         CharSequence suncounter = "50";
 		sunCounterLabel = new Label(suncounter, labelStyle);
         sunCounterLabel.setAlignment(Align.center); // Alinear texto
@@ -172,7 +196,7 @@ public class GameScreen implements Screen {
         windowStyle.background = new TextureRegionDrawable(new TextureRegion(new Texture("menuGame.png"))); // Fondo del menú
 
         // Crear la ventana para el menú de opciones
-        Window optionsMenu = new Window("", windowStyle);
+        optionsMenu = new Window("", windowStyle);
         optionsMenu.setSize(450, 600); // Tamaño del menú
         optionsMenu.setPosition(Gdx.graphics.getWidth() / 2f - 150, Gdx.graphics.getHeight() / 2f - 200); // Centrar el menú
         optionsMenu.setVisible(false); // Ocultarlo inicialmente
@@ -206,7 +230,7 @@ public class GameScreen implements Screen {
             }
         });
 
-        // Botón de "Salir"
+        // Botón de "Main Menu"
         mainMenuInGameLabel.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -228,9 +252,36 @@ public class GameScreen implements Screen {
         		mainMenuInGameLabel.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         });
+        
+        
+     // Botón de "Guardar"
+        saveLabel.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+            	saveGame();
+            	dispose();
+            	
+            }
+            
+            Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
+        	@Override
+        	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+        	    // Implementación al entrar
+        		mainMenuInGameLabel.setColor(color); // Cambiar color del texto al pasar el cursor
+             
+        	}
+
+        	@Override
+        	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+        	    // Implementación al salir
+        		mainMenuInGameLabel.setColor(Color.WHITE); // Restaurar el color original al salir
+        	}
+        });
+        
         // Añadir botones a la ventana
         optionsMenu.add(optionsLabel).pad(10).row();
         optionsMenu.add(mainMenuInGameLabel).pad(10).row();
+        optionsMenu.add(saveLabel).pad(10).row();
 
         // Añadir el menú de opciones al escenario
         stage.addActor(optionsMenu);
@@ -326,7 +377,7 @@ public class GameScreen implements Screen {
 
     private void createPlant(String plantType, float x, float y) {
         try {
-            PlantCard plant = PlantFactory.createPlant(plantType, x, y, null);
+            PlantCard plant = PlantFactory.createPlant(plantType, (int) x, (int) y, board);
             if (plant != null) {
                 System.out.println("Planta creada correctamente: " + plantType);
                 plant.setPosition(x - plant.getWidth() / 2, y - plant.getHeight() / 2); // Centrar la planta
@@ -338,6 +389,50 @@ public class GameScreen implements Screen {
             System.out.println("Excepción al crear la planta: " + e.getMessage());
         }
     }
+
+
+
+
+
+    private void saveGame() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                JFileChooser chooser = new JFileChooser();
+                JFrame frame = new JFrame();
+
+                // Configurar el JFrame auxiliar
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.setVisible(true);
+                frame.toFront();
+                frame.setVisible(false); // No mostrar realmente la ventana
+                int result = chooser.showSaveDialog(frame);
+                frame.dispose(); // Cerrar el JFrame auxiliar
+
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    FileHandle file = Gdx.files.absolute(chooser.getSelectedFile().getAbsolutePath());
+
+                    try {
+                        // Crear y guardar los datos del juego
+                        SaveData saveData = new SaveData();
+                        GameScreen gameScreen = (GameScreen) game.getScreen();
+                        gameScreen.restoreGameState(saveData);
+
+                        Json json = new Json();
+                        file.writeString(json.toJson(saveData), false);
+
+                        System.out.println("Juego guardado con éxito en: " + file.path());
+                    } catch (Exception e) {
+                        System.out.println("Error al guardar el archivo: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("No se seleccionó un archivo para guardar.");
+                }
+            }
+        }).start();
+    }
+
+
 
     
     private void createGrid() {
@@ -397,12 +492,98 @@ public class GameScreen implements Screen {
         }
         return null; // No hay celda en esas coordenadas
     }
+    
+//    private void spawnZombie(String zombieType, float x, float y) {
+//        // Usar la fábrica para crear el zombie
+//        AnimatedActor zombie = ZombieFactory.createZombie(zombieType, x, y);
+//
+//        // Añadir el zombie al escenario
+//        stage.addActor(zombie);
+//    }
+    
+    private void checkPlantAttacks(float delta) {
+        for (AttackPlant plant : attackPlants) {
+            int plantRow = plant.getPosition()[1];
+            System.out.println("planta detectada en la fila: " + plantRow);
+            for (Zombie zombie : zombies) {
+                int zombieRow = zombie.getPosition()[1];
+                if (plantRow == zombieRow) {
+                    System.out.println("Zombie detectado en la misma fila: " + zombieRow);
+                    plant.startAttack();
+                    shootProjectile(plant);
+                    break;
+                }
+            }
+        }
+    }
+
+
+    
+    private void checkCollisions() {
+        Array<Actor> projectiles = stage.getActors();
+        for (Actor actor : projectiles) {
+            if (actor instanceof ProjectileActor) {
+                ProjectileActor projectile = (ProjectileActor) actor;
+
+                for (Zombie zombie : zombies) {
+                    Rectangle projectileRect = projectile.getBoundingRectangle();
+                    Rectangle zombieRect = new Rectangle(
+                        zombie.getPosition()[0] * TILE_SIZE,
+                        zombie.getPosition()[1] * TILE_SIZE,
+                        TILE_SIZE,
+                        TILE_SIZE
+                    );
+
+                    if (projectileRect.overlaps(zombieRect)) {
+                        // Reduce la salud del zombie
+                        zombie.setHealth(zombie.getHealth() - 20);
+
+                        // Elimina el proyectil
+                        projectile.remove();
+
+                        // Si el zombie muere, elimínalo
+                        if (zombie.getHealth() <= 0) {
+                            zombies.removeValue(zombie, true);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    
+    
+    private void shootProjectile(AttackPlant plant) {
+        // Coordenadas iniciales del proyectil según la posición de la planta
+        int[] position = plant.getPosition();
+
+        // Calcula las coordenadas en píxeles desde la posición en la grilla
+        float startX = position[1] * TILE_SIZE + TILE_SIZE / 2;
+        float startY = position[0] * TILE_SIZE + TILE_SIZE / 2;
+
+        // Crea la textura y el actor del proyectil
+        Texture projectileTexture = new Texture(Gdx.files.internal("pea.png")); // Cambia por la ruta correcta de tu textura
+        ProjectileActor projectile = new ProjectileActor(projectileTexture, startX, startY);
+
+        // Añade el proyectil al escenario
+        stage.addActor(projectile);
+    }
+
+
 
 
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(stage);
+    	// Crear varios zombies de diferentes tipos
+//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 100);
+//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 200);
+//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 350);
+//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 550);
+//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 650);
+//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 800);
+//        Gdx.input.setInputProcessor(stage);
     }
 
 
@@ -415,9 +596,30 @@ public class GameScreen implements Screen {
         batch.draw(backgroundTexture,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
         renderGrid();
-        // Dibujar el escenario
+        checkPlantAttacks(delta); // Verifica ataques
+        checkCollisions(); // Detecta colisiones
         stage.act(delta);
         stage.draw();
+    }
+    
+    public void restoreGameState(SaveData saveData) {
+        // Restaurar las plantas
+        for (PlantData plantData : saveData.plants) {
+            createPlant(plantData.type, plantData.x, plantData.y);
+        }
+
+        // Restaurar los zombies
+        zombies.clear(); // Limpiar lista actual
+        for (ZombieData zombieData : saveData.zombies) {
+            ZombieCard zombieCard = ZombieFactory.createZombie(zombieData.type, zombieData.x, zombieData.y, board);
+            Zombie zombie = zombieCard.getZombie(); // Obtener el Zombie lógico
+            zombie.setHealth(zombieData.health); // Establecer la salud
+            zombies.add(zombie); // Agregar el Zombie lógico a la lista
+            stage.addActor(zombieCard); // Agregar el ZombieCard al escenario
+        }
+
+        // Restaurar el contador de sol
+        sunCounterLabel.setText(String.valueOf(saveData.sun));
     }
 
 
