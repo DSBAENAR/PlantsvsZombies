@@ -42,6 +42,14 @@ public abstract class Plant extends Something{
     public void setHealth(int health) {
         this.health = health;
     }
+    
+
+    public void reduceHealth(int amount) {
+        health -= amount;
+        if (health < 0) {
+            health = 0; // Asegurarse de que la salud no sea negativa
+        }
+    }
 
     /**
      * get the price

@@ -16,10 +16,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
 
 
@@ -33,6 +33,7 @@ public class mainMenu implements Screen {
     private Texture btnLoadGame;
     private Texture btnpvp; //Player vs Player
     private Texture btnmvm; //Machine vs Machine
+    private Skin skin;
     
     private Stage stage;
 
@@ -47,12 +48,13 @@ public class mainMenu implements Screen {
         btnLoadGame = new Texture("button_load.png");
         btnpvp = new Texture("button_pvp.png");
         btnmvm = new Texture("button_mvm.png");
-        
+//        skin = new Skin(Gdx.files.internal("uiskin.json"));
         
      // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Gdx.input.setInputProcessor(stage);
         createUI();
+        
         
     }
     
@@ -118,79 +120,56 @@ public class mainMenu implements Screen {
        
         // Agregar la tabla al stage
         stage.addActor(tableOptions);
-    
+        
+//        FileSelector fileSelector = new FileSelector(stage, skin, new FileSelector.FileSelectorCallback() {
+//            @Override
+//            public void onFileSelected(FileHandle file) {
+//                System.out.println("Archivo seleccionado: " + file.path());
+//                // Aquí puedes guardar o cargar datos desde el archivo
+//            }
+//
+//            @Override
+//            public void onCancel() {
+//                System.out.println("Selección de archivo cancelada.");
+//            }
+//
+//            @Override
+//            public void onError(String error) {
+//                System.out.println("Error: " + error);
+//            }
+//        });
+//
+//        // Mostrar el selector
+//        fileSelector.show();
+//    
     }
     
     
 
-    private String selectFile(boolean save) {
-        final String[] selectedFile = {null}; // Usar un arreglo para almacenar el resultado
-        Thread thread = new Thread(() -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle(save ? "Guardar archivo" : "Cargar archivo");
-
-            int result = save ? fileChooser.showSaveDialog(null) : fileChooser.showOpenDialog(null);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                selectedFile[0] = fileChooser.getSelectedFile().getAbsolutePath();
-            }
-        });
-
-        thread.start(); // Ejecutar el selector de archivos en un hilo separado
-
-        try {
-            thread.join(); // Esperar a que el usuario cierre el diálogo
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        return selectedFile[0];
-    }
-
-
-
-    
     private void loadGame() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                JFileChooser chooser = new JFileChooser();
-                JFrame frame = new JFrame();
-                
-                // Configurar el JFrame auxiliar
-                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                frame.setVisible(true);
-                frame.toFront();
-                frame.setVisible(false); // No mostrar realmente la ventana
-                int result = chooser.showOpenDialog(frame);
-                frame.dispose(); // Cerrar el JFrame auxiliar
-                
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    FileHandle file = Gdx.files.absolute(chooser.getSelectedFile().getAbsolutePath());
-                    if (!file.exists()) {
-                        System.out.println("El archivo no existe: " + file.path());
-                        return;
-                    }
+        // Ruta fija para cargar el archivo
+        FileHandle saveFile = Gdx.files.local("saves/gameState.json");
 
-                    try {
-                        // Leer y cargar los datos guardados
-                        Json json = new Json();
-                        SaveData saveData = json.fromJson(SaveData.class, file.readString());
-                        
-                        // Restaurar el estado del juego
-                        GameScreen gameScreen = new GameScreen(game);
-                        gameScreen.restoreGameState(saveData);
-                        Gdx.app.postRunnable(() -> game.setScreen(gameScreen)); // Cambiar de pantalla en el hilo principal
+        if (saveFile.exists()) {
+            try {
+                // Leer los datos guardados
+                Json json = new Json();
+                SaveData saveData = json.fromJson(SaveData.class, saveFile.readString());
 
-                        System.out.println("Juego cargado con éxito desde: " + file.path());
-                    } catch (Exception e) {
-                        System.out.println("Error al cargar el archivo: " + e.getMessage());
-                    }
-                } else {
-                    System.out.println("No se seleccionó un archivo.");
-                }
+                // Cambiar a GameScreen y restaurar el estado
+                GameScreen gameScreen = new GameScreen(game);
+                gameScreen.restoreGameState(saveData);
+                game.setScreen(gameScreen);
+
+                System.out.println("Juego cargado automáticamente desde: " + saveFile.path());
+            } catch (Exception e) {
+                System.out.println("Error al cargar el juego: " + e.getMessage());
             }
-        }).start();
+        } else {
+            System.out.println("No se encontró un archivo de guardado en: " + saveFile.path());
+        }
     }
+
 
 
     
@@ -246,8 +225,8 @@ class SaveData {
 
 class PlantData {
     public String type;
-    public int x;
-    public int y;
+    public float x;
+    public float y;
 }
 
 class ZombieData {

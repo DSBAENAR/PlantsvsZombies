@@ -10,6 +10,7 @@ public class Board implements GameMoves {
     private Something[][] matrixBoard;
     private int sizeHeight;
     private int sizeWidth;
+    private float tileSize;
     private ArrayList<Zombie> zombies;
     private ArrayList<Plant> plants;
     private ArrayList<Zombie> track0;
@@ -40,6 +41,20 @@ public class Board implements GameMoves {
         this.track4 = new ArrayList<>();
     }
 
+    public float getTileSize() {
+        return tileSize;
+    }
+
+    public int getSizeHeight() {
+        return sizeHeight;
+    }
+
+    public int getSizeWidth() {
+        return sizeWidth;
+    }
+    
+    
+    
     /**
      * get the player 1
      * @return player 1

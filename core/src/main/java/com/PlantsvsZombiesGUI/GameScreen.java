@@ -1,7 +1,10 @@
 package com.PlantsvsZombiesGUI;
 
+import java.awt.EventQueue;
+
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.PlantsvsZombiesDomain.AttackPlant;
 import com.PlantsvsZombiesDomain.Board;
@@ -26,12 +29,15 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -40,6 +46,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.DelayedRemovalArray;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
@@ -58,7 +65,7 @@ public class GameScreen implements Screen {
     private Table menuTable;
     private DragAndDrop dragAndDrop;
     private final int GRID_ROWS = 6; // Número de filas
-    private final int GRID_COLS = 9; // Número de columnas
+    public final static int GRID_COLS = 9; // Número de columnas
     public final static float TILE_SIZE = 150; // Tamaño de cada tile
     public static float GRID_X_OFFSET; // Offset dinámico en X
     public static float GRID_Y_OFFSET; // Offset dinámico en Y
@@ -68,10 +75,14 @@ public class GameScreen implements Screen {
     private Window optionsMenu;
     private Array<Rectangle> gridCells; // Lista de rectángulos que representan las celdas
     private Rectangle highlightedCell = null;
-    private Label sunCounterLabel;
+    private static Label sunCounterLabel;
+    private static int sunCounter = 1050;
     private Array<Zombie> zombies; // Lista lógica de zombies
     private Array<AttackPlant> attackPlants; // Lista lógica de plantas de ataque
     private Board board;
+    private Skin skin;
+    private DelayedRemovalArray<Actor> actors = new DelayedRemovalArray<>();
+
     
 
 
@@ -82,6 +93,8 @@ public class GameScreen implements Screen {
         attackPlants = new Array<>();
         this.board = new Board(GRID_ROWS, GRID_COLS, new HumanPlayer("Player 1",50,true), new HumanPlayer("Player 2",50,true)); // Crear con jugadores
         // Otros inicializadores
+        
+        
 
         // Inicializar el viewport
         viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -143,7 +156,7 @@ public class GameScreen implements Screen {
         Label saveLabel = new Label("Save", labelStyle);
         optionsLabel.setAlignment(Align.center); // Alinear el texto al centro
         saveLabel.setAlignment(Align.center); // Alinear el texto al centro
-        CharSequence suncounter = "50";
+        CharSequence suncounter = String.valueOf(sunCounter);
 		sunCounterLabel = new Label(suncounter, labelStyle);
         sunCounterLabel.setAlignment(Align.center); // Alinear texto
 
@@ -267,14 +280,14 @@ public class GameScreen implements Screen {
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         	    // Implementación al entrar
-        		mainMenuInGameLabel.setColor(color); // Cambiar color del texto al pasar el cursor
+        		saveLabel.setColor(color); // Cambiar color del texto al pasar el cursor
              
         	}
 
         	@Override
         	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
         	    // Implementación al salir
-        		mainMenuInGameLabel.setColor(Color.WHITE); // Restaurar el color original al salir
+        		saveLabel.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         });
         
@@ -316,8 +329,9 @@ public class GameScreen implements Screen {
         optionsMenu.toFront();
         
      // Agregar cartas de ejemplo
-        addCard("PeaShooterIcon.png", "Peashooter");
+        addCard("PeaShooterIcon.png", "PeaShooter");
         addCard("sunflower.png", "Sunflower");
+       
     }
 
     
@@ -393,47 +407,6 @@ public class GameScreen implements Screen {
 
 
 
-
-    private void saveGame() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                JFileChooser chooser = new JFileChooser();
-                JFrame frame = new JFrame();
-
-                // Configurar el JFrame auxiliar
-                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                frame.setVisible(true);
-                frame.toFront();
-                frame.setVisible(false); // No mostrar realmente la ventana
-                int result = chooser.showSaveDialog(frame);
-                frame.dispose(); // Cerrar el JFrame auxiliar
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    FileHandle file = Gdx.files.absolute(chooser.getSelectedFile().getAbsolutePath());
-
-                    try {
-                        // Crear y guardar los datos del juego
-                        SaveData saveData = new SaveData();
-                        GameScreen gameScreen = (GameScreen) game.getScreen();
-                        gameScreen.restoreGameState(saveData);
-
-                        Json json = new Json();
-                        file.writeString(json.toJson(saveData), false);
-
-                        System.out.println("Juego guardado con éxito en: " + file.path());
-                    } catch (Exception e) {
-                        System.out.println("Error al guardar el archivo: " + e.getMessage());
-                    }
-                } else {
-                    System.out.println("No se seleccionó un archivo para guardar.");
-                }
-            }
-        }).start();
-    }
-
-
-
     
     private void createGrid() {
         gridCells = new Array<>();
@@ -452,6 +425,20 @@ public class GameScreen implements Screen {
                 Rectangle cell = new Rectangle(x, y, TILE_SIZE, TILE_SIZE);
                 gridCells.add(cell);
             }
+        }
+    }
+    
+
+    private int[] convertCoordinatesToMatrixIndices(float x, float y) {
+        int col = (int) ((x - GRID_X_OFFSET) / TILE_SIZE);
+        int row = (int) ((y - GRID_Y_OFFSET) / TILE_SIZE);
+
+        // Validar los índices
+        if (row >= 0 && row < GRID_ROWS && col >= 0 && col < GRID_COLS) {
+            return new int[]{row, col};
+        } else {
+            System.out.println("Error: Coordenadas fuera del grid. Row: " + row + ", Col: " + col);
+            return null; // Coordenadas no válidas
         }
     }
 
@@ -501,74 +488,186 @@ public class GameScreen implements Screen {
 //        stage.addActor(zombie);
 //    }
     
-    private void checkPlantAttacks(float delta) {
-        for (AttackPlant plant : attackPlants) {
-            int plantRow = plant.getPosition()[1];
-            System.out.println("planta detectada en la fila: " + plantRow);
-            for (Zombie zombie : zombies) {
-                int zombieRow = zombie.getPosition()[1];
-                if (plantRow == zombieRow) {
-                    System.out.println("Zombie detectado en la misma fila: " + zombieRow);
-                    plant.startAttack();
-                    shootProjectile(plant);
-                    break;
-                }
+    public void checkAllPlantsAndZombies() {
+        Array<ZombieCard> zombies = new Array<>();
+        Array<PlantCard> plants = new Array<>();
+
+        // Clasifica los actores en zombies y plantas
+        for (Actor actor : stage.getActors()) {
+            if (actor instanceof ZombieCard) {
+                zombies.add((ZombieCard) actor);
+            } else if (actor instanceof PlantCard) {
+                plants.add((PlantCard) actor);
             }
+        }
+
+        // Verifica cada planta contra todos los zombies
+        for (PlantCard plant : plants) {
+            plant.checkForZombies(zombies);
         }
     }
 
 
     
     private void checkCollisions() {
-        Array<Actor> projectiles = stage.getActors();
-        for (Actor actor : projectiles) {
+        Array<Actor> actors = stage.getActors(); // Obtener todos los actores del escenario
+
+        for (int i = 0; i < actors.size; i++) {
+            Actor actor = actors.get(i);
+
             if (actor instanceof ProjectileActor) {
                 ProjectileActor projectile = (ProjectileActor) actor;
+                Rectangle projectileRect = projectile.getBoundingRectangle();
 
-                for (Zombie zombie : zombies) {
-                    Rectangle projectileRect = projectile.getBoundingRectangle();
-                    Rectangle zombieRect = new Rectangle(
-                        zombie.getPosition()[0] * TILE_SIZE,
-                        zombie.getPosition()[1] * TILE_SIZE,
-                        TILE_SIZE,
-                        TILE_SIZE
-                    );
+                for (int j = 0; j < actors.size; j++) {
+                    Actor zombieActor = actors.get(j);
 
-                    if (projectileRect.overlaps(zombieRect)) {
-                        // Reduce la salud del zombie
-                        zombie.setHealth(zombie.getHealth() - 20);
+                    if (zombieActor instanceof ZombieCard) {
+                        ZombieCard zombie = (ZombieCard) zombieActor;
+                        Rectangle zombieRect = zombie.getBoundingRectangle();
 
-                        // Elimina el proyectil
-                        projectile.remove();
+                        // Verificar colisión
+                        if (projectileRect.overlaps(zombieRect)) {
+                            zombie.reduceHealth(20); // Reducir salud del zombie
+                            projectile.remove(); // Eliminar el proyectil
+                            System.out.println("Proyectil impactó al zombie. Salud restante: " + zombie.getHealth());
 
-                        // Si el zombie muere, elimínalo
-                        if (zombie.getHealth() <= 0) {
-                            zombies.removeValue(zombie, true);
+                            // Restablecer el estado de la planta
+                            PlantCard parentPlant = projectile.getParentPlant();
+                            if (parentPlant != null) {
+                                parentPlant.setHasActiveProjectile(false); // Actualiza el estado
+                            }
+
+                            // Eliminar zombie si está muerto
+                            if (!zombie.isAlive()) {
+                                zombie.remove();
+                                System.out.println("Zombie eliminado.");
+                            }
+
+                            // Salir del bucle interno una vez que se detecta una colisión con este proyectil
+                            break;
                         }
-                        break;
                     }
                 }
             }
         }
     }
 
-    
-    
-    private void shootProjectile(AttackPlant plant) {
-        // Coordenadas iniciales del proyectil según la posición de la planta
-        int[] position = plant.getPosition();
 
-        // Calcula las coordenadas en píxeles desde la posición en la grilla
-        float startX = position[1] * TILE_SIZE + TILE_SIZE / 2;
-        float startY = position[0] * TILE_SIZE + TILE_SIZE / 2;
 
-        // Crea la textura y el actor del proyectil
-        Texture projectileTexture = new Texture(Gdx.files.internal("pea.png")); // Cambia por la ruta correcta de tu textura
-        ProjectileActor projectile = new ProjectileActor(projectileTexture, startX, startY);
 
-        // Añade el proyectil al escenario
-        stage.addActor(projectile);
+
+    public static void incrementSunCounter(int amount) {
+        sunCounter += amount;
+        sunCounterLabel.setText(String.valueOf(sunCounter)); // Actualizar visualmente
     }
+
+    public static boolean spendSun(int amount) {
+        if (sunCounter >= amount) {
+            sunCounter -= amount;
+            sunCounterLabel.setText(String.valueOf(sunCounter)); // Actualizar visualmente
+            return true;
+        }
+        return false;
+    }
+
+    
+
+    
+    private void saveGame() {
+        // Ruta fija para guardar el archivo
+        FileHandle saveFile = Gdx.files.local("saves/gameState.json");
+
+        try {
+            // Crear un objeto de datos de guardado
+            SaveData saveData = new SaveData();
+
+            // Guardar las plantas
+            saveData.plants = new Array<>();
+            for (Actor actor : stage.getActors()) {
+                if (actor instanceof PlantCard) {
+                    PlantCard plant = (PlantCard) actor;
+                    PlantData plantData = new PlantData();
+                    plantData.type = plant.getType();
+                    plantData.x = (int) plant.getX();
+                    plantData.y = (int) plant.getX();
+                    saveData.plants.add(plantData);
+                }
+            }
+
+            // Guardar los zombies
+            saveData.zombies = new Array<>();
+            for (Zombie zombie : zombies) {
+                ZombieData zombieData = new ZombieData();
+                zombieData.type = zombie.getClass().getSimpleName();
+                zombieData.x = zombie.getPosition()[0];
+                zombieData.y = zombie.getPosition()[1];
+                zombieData.health = zombie.getHealth();
+                saveData.zombies.add(zombieData);
+            }
+
+            // Guardar el contador de sol
+            saveData.sun = Integer.parseInt(sunCounterLabel.getText().toString());
+
+            // Escribir los datos en el archivo
+            Json json = new Json();
+            saveFile.writeString(json.toJson(saveData), false);
+
+            System.out.println("Juego guardado automáticamente en: " + saveFile.path());
+        } catch (Exception e) {
+            System.out.println("Error al guardar el juego: " + e.getMessage());
+        }
+    }
+
+
+
+
+    private void spawnZombie(String zombieType, float x, float y) {
+        // Convertir las coordenadas visuales a índices lógicos
+        int[] indices = convertCoordinatesToMatrixIndices(x, y);
+
+        if (indices == null) {
+            System.out.println("Coordenadas fuera del grid. No se pudo crear el zombie.");
+            return;
+        }
+
+        int row = indices[0]; // Fila lógica en el grid
+        int col = GRID_COLS - 1; // Forzamos la columna lógica al borde derecho del grid
+
+        // Validar si la fila está dentro del rango permitido
+        if (row < 0 || row >= GRID_ROWS) {
+            System.out.println("Fila fuera del rango del grid: " + row);
+            return;
+        }
+
+        // Ajustar la posición visual para que esté justo fuera del borde derecho visible
+        float visualX = GRID_X_OFFSET + (col + 1) * TILE_SIZE; // Una columna adicional fuera del grid
+        float visualY = GRID_Y_OFFSET + row * TILE_SIZE; // Alinear con la fila calculada
+
+        try {
+            // Crear el zombie utilizando la fábrica
+            ZombieCard zombieCard = ZombieFactory.createZombie(zombieType, row, col, TILE_SIZE);
+
+            if (zombieCard != null) {
+                // Añadir el zombie al escenario
+                zombieCard.setPosition(visualX, visualY);
+                stage.addActor(zombieCard);
+
+                System.out.println("Zombie creado: " + zombieType + " en fila " + row + " y fuera del borde derecho.");
+            } else {
+                System.out.println("Error: No se pudo crear el zombie.");
+            }
+        } catch (Exception e) {
+            System.out.println("Excepción al generar el zombie: " + e.getMessage());
+        }
+    }
+
+
+
+
+
+
+
 
 
 
@@ -576,47 +675,45 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-    	// Crear varios zombies de diferentes tipos
-//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 100);
-//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 200);
-//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 350);
-//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 550);
-//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 650);
-//        spawnZombie("basic", Gdx.graphics.getWidth() - 100, 800);
-//        Gdx.input.setInputProcessor(stage);
+//    	 //Crear varios zombies de diferentes tipos
+    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 0 * TILE_SIZE);
+    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 1 * TILE_SIZE);
+    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 2 * TILE_SIZE);
+    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 3 * TILE_SIZE);
+    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 4 * TILE_SIZE);
+    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 5 * TILE_SIZE);
+        Gdx.input.setInputProcessor(stage);
     }
 
 
     @Override
     public void render(float delta) {
     	ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-
         // Dibujar el fondo
         batch.begin();
         batch.draw(backgroundTexture,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
         renderGrid();
-        checkPlantAttacks(delta); // Verifica ataques
+        checkAllPlantsAndZombies(); // Verifica ataques
         checkCollisions(); // Detecta colisiones
         stage.act(delta);
         stage.draw();
+        
     }
     
     public void restoreGameState(SaveData saveData) {
         // Restaurar las plantas
         for (PlantData plantData : saveData.plants) {
-            createPlant(plantData.type, plantData.x, plantData.y);
-        }
+        	 // Calcular la posición en píxeles del centro de la celda
+            float pixelX = GRID_X_OFFSET + plantData.x * TILE_SIZE + TILE_SIZE / 2;
+            float pixelY = GRID_Y_OFFSET + plantData.y * TILE_SIZE + TILE_SIZE / 2;
+
+            System.out.println("Restaurando planta: " + plantData.type + " en posición (" + pixelX + ", " + pixelY + ")");
+            createPlant(plantData.type, pixelX, pixelY);
+            }
 
         // Restaurar los zombies
         zombies.clear(); // Limpiar lista actual
-        for (ZombieData zombieData : saveData.zombies) {
-            ZombieCard zombieCard = ZombieFactory.createZombie(zombieData.type, zombieData.x, zombieData.y, board);
-            Zombie zombie = zombieCard.getZombie(); // Obtener el Zombie lógico
-            zombie.setHealth(zombieData.health); // Establecer la salud
-            zombies.add(zombie); // Agregar el Zombie lógico a la lista
-            stage.addActor(zombieCard); // Agregar el ZombieCard al escenario
-        }
 
         // Restaurar el contador de sol
         sunCounterLabel.setText(String.valueOf(saveData.sun));
@@ -645,9 +742,44 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        backgroundTexture.dispose();
-        stage.dispose();
-        batch.dispose();
-        music.dispose();
+    	// Liberar la textura de fondo
+        if (backgroundTexture != null) {
+            backgroundTexture.dispose();
+        }
+
+        // Liberar texturas adicionales
+        if (grassTileTexture != null) {
+            grassTileTexture.dispose();
+        }
+
+        if (buttonMenuTexture != null) {
+            buttonMenuTexture.dispose();
+        }
+
+        // Liberar la fuente generada
+        if (font != null) {
+            font.dispose();
+        }
+
+        // Liberar el stage
+        if (stage != null) {
+            stage.dispose();
+        }
+
+        // Liberar el batch de renderizado
+        if (batch != null) {
+            batch.dispose();
+        }
+
+        // Liberar el shapeRenderer
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
+        }
+
+        // Detener y liberar la música
+        if (music != null) {
+            music.stop();
+            music.dispose();
+        }
     }
 }

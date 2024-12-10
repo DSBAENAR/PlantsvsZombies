@@ -1,51 +1,47 @@
 package com.PlantsvsZombiesGUI;
 
-import com.PlantsvsZombiesDomain.Board;
-import com.PlantsvsZombiesDomain.BrainsteinZombie;
-import com.PlantsvsZombiesDomain.Buckethead;
-import com.PlantsvsZombiesDomain.HelmetZombie;
-import com.PlantsvsZombiesDomain.NormalZombie;
-import com.PlantsvsZombiesDomain.Zombie.*;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public class ZombieFactory {
-    public static ZombieCard createZombie(String zombieType, int x, int y, Board board) {
+
+    public static ZombieCard createZombie(String zombieType, int row, int col, float tileSize) {
         Texture zombieSheet;
         int frameCols, frameRows;
         float frameDuration;
 
         try {
+            // Calcular posiciones visuales
+            float adjustedX = GameScreen.GRID_X_OFFSET + col * tileSize + tileSize / 2;
+            float adjustedY = GameScreen.GRID_Y_OFFSET + row * tileSize + tileSize / 2;
+
             // Configurar los valores según el tipo de zombie
-            if (zombieType.equalsIgnoreCase("Normal")) {
-                NormalZombie normalZombie = new NormalZombie(new int[]{x, y}, null, board);
-                zombieSheet = new Texture("NormalZombiePrepare.png"); // Ruta a tu sprite
+            if (zombieType.equalsIgnoreCase("NormalZombie")) {
+                zombieSheet = new Texture("NormalZombiePrepare.png");
                 frameCols = 15;
                 frameRows = 1;
                 frameDuration = 0.1f;
-                return new ZombieCard(x, y, normalZombie, zombieSheet, frameCols, frameRows, frameDuration);
-            } 
-            else if (zombieType.equalsIgnoreCase("Brainstein")) {
-                BrainsteinZombie fastZombie = new BrainsteinZombie(new int[]{x, y}, null, board);
-                zombieSheet = new Texture("FastZombieSprite.png"); // Ruta a tu sprite
+                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,100);
+
+            } else if (zombieType.equalsIgnoreCase("Brainstein")) {
+                zombieSheet = new Texture("FastZombieSprite.png");
                 frameCols = 8;
                 frameRows = 1;
-                frameDuration = 0.05f; // Animación más rápida
-                return new ZombieCard(x, y, fastZombie, zombieSheet, frameCols, frameRows, frameDuration);
-            } 
-            else if (zombieType.equalsIgnoreCase("Bucket")) {
-                HelmetZombie Helmet = new Buckethead(new int[]{x, y}, null, board);
-                zombieSheet = new Texture("StrongZombieSprite.png"); // Ruta a tu sprite
+                frameDuration = 0.05f;
+                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,100);
+
+            } else if (zombieType.equalsIgnoreCase("Buckethead")) {
+                zombieSheet = new Texture("StrongZombieSprite.png");
                 frameCols = 6;
                 frameRows = 1;
-                frameDuration = 0.15f; // Animación más lenta
-                return new ZombieCard(x, y, Helmet, zombieSheet, frameCols, frameRows, frameDuration);
-            } 
-            else {
+                frameDuration = 0.15f;
+                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,100);
+
+            } else {
                 throw new IllegalArgumentException("Tipo de zombie desconocido: " + zombieType);
             }
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Error al crear el zombie de tipo: " + zombieType);
             return null; // En caso de error, retorna null
         }
     }

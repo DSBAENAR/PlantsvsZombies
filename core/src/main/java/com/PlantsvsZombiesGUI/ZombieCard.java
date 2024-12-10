@@ -1,35 +1,48 @@
 package com.PlantsvsZombiesGUI;
 
-import com.PlantsvsZombiesDomain.Zombie;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.math.Rectangle;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ZombieCard extends Actor {
-	private Animation<TextureRegion> animation;
-	private float stateTime;
-	private Texture texture;
-    private Zombie zombie; // Referencia al objeto lógico Zombie
-    private Stage stage;
+    private Animation<TextureRegion> animation;
+    private float stateTime;
+    private Texture texture;
+    private int[] position; // Posición lógica del zombie
+    private boolean isAlive;
     private boolean isAnimated;
-    
+    private int health; // Salud del zombie
+    private final int damage = 100; // Daño infligido por mordida
+    private final float attackInterval = 0.5f; // Intervalo de ataque en segundos
+    private boolean isAttacking;
+    private float attackCooldown = 1.5f; // Tiempo entre ataques en segundos
+    private float attackTimer = 0f; // Temporizador para el ataque
 
-    public ZombieCard(float x, float y,Zombie zombie, Texture spriteSheet, int frameCols, int frameRows, float frameDuration) {
+
+    public ZombieCard(float x, float y, Texture spriteSheet, int frameCols, int frameRows, float frameDuration, int initialHealth) {
         this.stateTime = 0f;
-        this.zombie = zombie; // Enlace a la lógica
-        this.stage = stage;
+        this.texture = spriteSheet;
+        this.position = new int[]{(int) (y / GameScreen.TILE_SIZE), (int) (x / GameScreen.TILE_SIZE)};
+        this.isAlive = true;
+        this.isAnimated = true;
+        this.health = initialHealth; // Inicializar la salud
+        this.isAttacking = false;
         
+
         // Dividir el sprite sheet en frames
         TextureRegion[][] tmp = TextureRegion.split(
-            spriteSheet,
-            spriteSheet.getWidth() / frameCols,
-            spriteSheet.getHeight() / frameRows
+                spriteSheet,
+                spriteSheet.getWidth() / frameCols,
+                spriteSheet.getHeight() / frameRows
         );
-        
-     // Convertir la matriz en un array lineal
+
+        // Convertir la matriz en un array lineal
         TextureRegion[] frames = new TextureRegion[frameCols * frameRows];
         int index = 0;
         for (int i = 0; i < frameRows; i++) {
@@ -45,7 +58,19 @@ public class ZombieCard extends Actor {
         setPosition(x, y);
         setSize(frames[0].getRegionWidth(), frames[0].getRegionHeight());
     }
-    
+
+    public int[] getPosition() {
+        return position;
+    }
+
+    public void setAlive(boolean isAlive) {
+        this.isAlive = isAlive;
+    }
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (isAnimated) {
@@ -60,18 +85,87 @@ public class ZombieCard extends Actor {
     @Override
     public void act(float delta) {
         super.act(delta);
-        
-        // Sincronizar posición lógica con la visual
-        int[] logicalPosition = zombie.getZombiePosition();
-        setPosition(logicalPosition[1] * 100, logicalPosition[0] * 100); // Ajusta escala según tus celdas
-        
-        // Eliminar el zombie si su salud llega a 0
-        if (!zombie.getItsAlive() || zombie.getHealth() <= 0) {
-            stage.getActors().removeValue(this, true); // Elimina del escenario
+
+        if (!isAlive) {
+            remove();
+            return;
+        }
+
+        // Incrementar el temporizador del ataque
+        attackTimer += delta;
+
+        // Mover el zombie hacia la izquierda si no está atacando
+        if (attackTimer >= attackCooldown) {
+            float newX = getX() - 50 * delta; // Velocidad del zombie
+            setX(newX);
+        }
+
+        // Actualizar la posición lógica del zombie
+        int col = (int) ((getX() - GameScreen.GRID_X_OFFSET) / GameScreen.TILE_SIZE);
+        position[1] = Math.max(col, 0); // Evita que salga del tablero
+
+        // Comprobar colisión con plantas
+        for (Actor actor : getStage().getActors()) {
+            if (actor instanceof PlantCard) {
+                PlantCard plantCard = (PlantCard) actor;
+
+                // Verificar colisión
+                if (collidesWithPlant(plantCard)) {
+                    // Detener el movimiento y atacar
+                    if (attackTimer >= attackCooldown) {
+                        attackPlant(plantCard); // Atacar la planta
+                        attackTimer = 0f; // Reiniciar el temporizador del ataque
+                    }
+                    return; // Detener el movimiento mientras ataca
+                }
+            }
+        }
+
+        // Detener al zombie si llega al borde izquierdo
+        if (getX() < GameScreen.GRID_X_OFFSET) {
+            setX(GameScreen.GRID_X_OFFSET); // Mantén al zombie en el borde
+            isAlive = false; // Considerar al zombie "muerto" o detenido
+            System.out.println("Zombie alcanzó el borde izquierdo.");
         }
     }
 
-    public Zombie getZombie() {
-        return zombie;
+    public int getHealth() {
+        return health;
     }
+
+    public void reduceHealth(int amount) {
+        if (isAlive) {
+            health -= amount; // Reducir la salud
+            System.out.println("Zombie dañado. Salud restante: " + health);
+            if (health <= 0) {
+                isAlive = false; // Marcar como muerto
+                remove(); // Eliminar del escenario
+                System.out.println("Zombie eliminado.");
+            }
+        }
+    }
+
+    public Rectangle getBoundingRectangle() {
+        return new Rectangle(getX(), getY(), getWidth(), getHeight());
+    }
+
+    private boolean collidesWithPlant(PlantCard plantCard) {
+        return getBoundingRectangle().overlaps(plantCard.getBoundingRectangle());
+    }
+
+    public void attackPlant(PlantCard plantCard) {
+        if (plantCard.getPlantLogic() != null) {
+            // Reducir la vida de la planta
+            plantCard.getPlantLogic().reduceHealth(100); // Cada mordida inflige 100 puntos de daño
+            System.out.println("Zombie atacó a una planta. Salud restante de la planta: " + plantCard.getPlantLogic().getHealth());
+
+            // Si la planta muere, eliminarla
+            if (plantCard.getPlantLogic().getHealth() <= 0) {
+                plantCard.remove();
+                System.out.println("Planta destruida por el zombie.");
+            }
+        }
+    }
+
+   
 }

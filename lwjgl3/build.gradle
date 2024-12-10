@@ -30,6 +30,22 @@ if (JavaVersion.current().isJava9Compatible()) {
         compileJava.options.release.set(8)
 }
 
+allprojects {
+    // Define variables compartidas aquí
+    ext {
+        gdxVersion = "1.12.0"         // Versión de LibGDX
+        visuiVersion = "1.5.0"        // Versión de 
+
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org' }
+        gradlePluginPortal()
+        google()
+    }
+}
+
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"

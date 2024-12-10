@@ -10,6 +10,7 @@ public abstract class UtilityPlant extends Plant{
 
     protected int moneySupply;
     protected Timer timer;
+    private Runnable onMoneyGeneratedCallback;
 
     /**
      * Constructor UtilityPlant
@@ -35,6 +36,9 @@ public abstract class UtilityPlant extends Plant{
         return moneySupply;
     }
 
+    public void setOnMoneyGeneratedCallback(Runnable callback) {
+        this.onMoneyGeneratedCallback = callback;
+    }
 
     /**
      * Give the generated money to the owner
@@ -43,7 +47,12 @@ public abstract class UtilityPlant extends Plant{
         if (owner != null) {
             int initialMoney = owner.getMoney();
             owner.setMoney(initialMoney + moneySupply);
+         // Notificar al callback si está configurado
+            if (onMoneyGeneratedCallback != null) {
+                onMoneyGeneratedCallback.run();
+            }
 
+            
         } else {
             System.out.println("The owner of the plant is null. Excepcion para crear");}
     }
