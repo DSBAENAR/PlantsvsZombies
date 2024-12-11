@@ -78,22 +78,13 @@ public class GameScreen implements Screen {
     private static Label sunCounterLabel;
     private static int sunCounter = 1050;
     private Array<Zombie> zombies; // Lista lógica de zombies
-    private Array<AttackPlant> attackPlants; // Lista lógica de plantas de ataque
     private Board board;
-    private Skin skin;
-    private DelayedRemovalArray<Actor> actors = new DelayedRemovalArray<>();
-
-    
-
-
-    
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
         zombies = new Array<>();
-        attackPlants = new Array<>();
+        new Array<>();
         this.board = new Board(GRID_ROWS, GRID_COLS, new HumanPlayer("Player 1",50,true), new HumanPlayer("Player 2",50,true)); // Crear con jugadores
         // Otros inicializadores
-        
         
 
         // Inicializar el viewport
@@ -661,16 +652,6 @@ public class GameScreen implements Screen {
             System.out.println("Excepción al generar el zombie: " + e.getMessage());
         }
     }
-
-
-
-
-
-
-
-
-
-
 
 
     @Override
