@@ -52,9 +52,11 @@ public class Board implements GameMoves {
     public int getSizeWidth() {
         return sizeWidth;
     }
-    
-    
-    
+
+
+
+
+
     /**
      * get the player 1
      * @return player 1
@@ -123,6 +125,14 @@ public class Board implements GameMoves {
      */
     public Something[][] getMatrixBoard() {
         return matrixBoard;
+    }
+
+    /**
+     * This method sets the matrix of the board
+     * @param matrixBoard
+     */
+    public void setMatrixBoard(Something[][] matrixBoard) {
+        this.matrixBoard = matrixBoard;
     }
 
     /**

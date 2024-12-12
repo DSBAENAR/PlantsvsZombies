@@ -83,6 +83,7 @@ public abstract class AttackPlant extends Plant implements Attack{
                     inventory.remove(targetZombie);
                     owner.setInventory(inventory);
                     track.remove(0);
+                    board.setTrack(track, row);
                 } else {
                     targetZombie.setHealth(targetZombie.getHealth() - damage);
                 }

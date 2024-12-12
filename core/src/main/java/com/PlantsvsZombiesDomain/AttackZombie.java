@@ -63,6 +63,7 @@ public abstract class AttackZombie extends Zombie {
                     if ((actualHealth - damage) <= 0){
                         targetPlant.setItsAlive(false);
                         matrixBoard[row][i] = null;
+                        board.setMatrixBoard(matrixBoard);
                         ArrayList<Something> inventory = owner.getInventory();
                         inventory.remove(targetPlant);
                         owner.setInventory(inventory);

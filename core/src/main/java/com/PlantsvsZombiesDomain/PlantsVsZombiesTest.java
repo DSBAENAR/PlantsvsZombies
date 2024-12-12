@@ -329,4 +329,58 @@ public class PlantsVsZombiesTest {
         int moneyAfterGeneration = player1.getMoney();
         assertEquals(moneyAfterPurchase + 50 + 50, moneyAfterGeneration);
     }
+
+    @Test
+    void testDontMoveWhileAttacking() throws PlantsVsZombiesException {
+
+        Player player1 = new HumanPlayer("Barbosa", 1000, true);
+        Player player2 = new HumanPlayer("Baena", 1000, false);
+        Board board = new Board(5, 10, player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+
+        int[] position = new int[]{0, 9};
+        WallNut wallNut = new WallNut(position, player1, board);
+        pvsz.putSomething(position, wallNut);
+        int[] position2 = new int[]{0, 9};
+        Conehead conehead = new Conehead(position2, player2, board);
+        pvsz.putSomething(position2, conehead);
+        int zombieInitialPosition = pvsz.getBoard().getTrack(0).get(0).getPosition()[0];
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(zombieInitialPosition , pvsz.getBoard().getTrack(0).get(0).getPosition()[0]);
+    }
+
+
+    @Test
+    void testPotatoMine() throws PlantsVsZombiesException {
+
+        Player player1 = new HumanPlayer("Barbosa", 1000, true);
+        Player player2 = new HumanPlayer("Baena", 1000, false);
+        Board board = new Board(5, 10, player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+
+        int[] position = new int[]{0, 9};
+        PotatoMine potatoMine = new PotatoMine(position, player1, board);
+        pvsz.putSomething(position, potatoMine);
+        assertFalse(potatoMine.getItsActive());
+        try {
+            Thread.sleep(14100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertTrue(potatoMine.getItsActive());
+        int[] position2 = new int[]{0, 9};
+        NormalZombie normalZombie = new NormalZombie(position2, player2, board);
+        pvsz.putSomething(position2, normalZombie);
+        try {
+            Thread.sleep(600);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertFalse(normalZombie.getItsAlive());
+        assertFalse(potatoMine.getItsAlive());
+    }
 }

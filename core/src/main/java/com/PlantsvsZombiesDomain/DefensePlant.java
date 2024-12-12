@@ -5,6 +5,8 @@ package com.PlantsvsZombiesDomain;
  */
 public abstract class DefensePlant extends Plant {
 
+    protected Board board;
+
     /**
      * Constructor for objects of class DefensePlant
      *
@@ -16,6 +18,7 @@ public abstract class DefensePlant extends Plant {
      */
     public DefensePlant(int[] position, int health, int price, Player owner, Board board) throws PlantsVsZombiesException{
         super(position, health, price, owner, board);
+        this.board = board;
     }
 
 }

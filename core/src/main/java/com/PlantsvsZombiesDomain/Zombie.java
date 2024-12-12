@@ -21,6 +21,7 @@ public abstract class Zombie extends Something implements Attack{
     protected Player owner;
     protected Timer timerAlive;
     private int timerTicks = 0;
+    protected boolean itsAttacking = false;
 
     /**
      * Constructor for Zombie
@@ -135,11 +136,14 @@ public abstract class Zombie extends Something implements Attack{
                 }
 
                 if (elapsedTime > 0 && elapsedTime % 3000 == 0) {
-                    moveZombie();
+                    if(!itsAttacking){
+                        moveZombie();
+                    }
                 }
                 if (elapsedTime > 0 && attackSpeed != 0) {
                     if (elapsedTime % attackSpeed  == 0 ){
                         attack();
+                        itsAttacking = false;
                     }
                 }
                 elapsedTime += 500;
@@ -169,6 +173,7 @@ public abstract class Zombie extends Something implements Attack{
      * This method is for the attack of each zombie, it can be overridden for different attacks
      */
     public void attack() {
+        itsAttacking = true;
         Something[][] matrixBoard = board.getMatrixBoard();
         if(matrixBoard[track][column] != null && matrixBoard[track][column] instanceof Plant){
             Plant targetPlant = (Plant) matrixBoard[track][column];
@@ -177,10 +182,10 @@ public abstract class Zombie extends Something implements Attack{
             if ((actualHealth - damage) <= 0){
                 targetPlant.setItsAlive(false);
                 matrixBoard[track][column] = null;
+                board.setMatrixBoard(matrixBoard);
                 ArrayList<Something> inventory = owner.getInventory();
                 inventory.remove(targetPlant);
                 owner.setInventory(inventory);
-
             } else {
                 targetPlant.setHealth(actualHealth - damage);
             }

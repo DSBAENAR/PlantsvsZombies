@@ -4,7 +4,7 @@ package com.PlantsvsZombiesDomain;
  * Abstract class Something, somethic cuold be a Zombie, a Plant or a Pruner
  */
 public abstract class Something{
-    private int[] position;
+    protected int[] position;
     private Board board;
 
     /**

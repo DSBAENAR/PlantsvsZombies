@@ -7,7 +7,7 @@ public abstract class Plant extends Something{
 
     private int health;
     private int price;
-    private boolean itsAlive;
+    protected boolean itsAlive;
     protected Player owner;
 
     /**
@@ -42,7 +42,7 @@ public abstract class Plant extends Something{
     public void setHealth(int health) {
         this.health = health;
     }
-    
+
 
     public void reduceHealth(int amount) {
         health -= amount;
