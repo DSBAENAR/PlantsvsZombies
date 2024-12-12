@@ -25,12 +25,4 @@ public class PeaShooter extends AttackPlant {
         }, 1500, 1500);
     }
 
-    public void stopAttack() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
-
 }

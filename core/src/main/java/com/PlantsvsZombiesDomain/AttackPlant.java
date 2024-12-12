@@ -8,7 +8,7 @@ import java.util.TimerTask;
 /**
  * Abstract class AttackPlant that extends Plant class, this class is for the attack plants
  */
-public abstract class AttackPlant extends Plant{
+public abstract class AttackPlant extends Plant implements Attack{
 
     protected int damage;
     protected long attackSpeed;
@@ -59,14 +59,17 @@ public abstract class AttackPlant extends Plant{
     public int getDamage() {
         return damage;
     }
+
     /**
      * start generating money
      */
     public abstract void startAttack();
 
+
     /**
      * This method is for the attack of each plant
      */
+
     public void attack() {
         ArrayList<Zombie> track = board.getTrack(this.row);
         if (track != null && !track.isEmpty()) {
@@ -86,4 +89,12 @@ public abstract class AttackPlant extends Plant{
             }
         }
     }
+
+    public  void stopAttack(){
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
+
 }

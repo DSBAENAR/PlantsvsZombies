@@ -7,7 +7,7 @@ import java.util.TimerTask;
 /**
  * Class Zombie that extends Something class, this class is for the zombies
  */
-public abstract class Zombie extends Something {
+public abstract class Zombie extends Something implements Attack{
 
     protected int[] initalPosition;
     protected int column;
@@ -16,7 +16,7 @@ public abstract class Zombie extends Something {
     protected int price;
     protected int damage;
     protected long attackSpeed;
-    private boolean itsAlive;
+    protected boolean itsAlive;
     protected Board board;
     protected Player owner;
     protected Timer timerAlive;
@@ -133,13 +133,14 @@ public abstract class Zombie extends Something {
                     stopTimer();
                     return;
                 }
-                // Movimiento cada 3000 ms
+
                 if (elapsedTime > 0 && elapsedTime % 3000 == 0) {
                     moveZombie();
                 }
-                // Ataque cada 500 ms, pero solo después del primer intervalo
-                if (elapsedTime > 0 && elapsedTime % 500 == 0) {
-                    attack();
+                if (elapsedTime > 0 && attackSpeed != 0) {
+                    if (elapsedTime % attackSpeed  == 0 ){
+                        attack();
+                    }
                 }
                 elapsedTime += 500;
             }
@@ -167,7 +168,7 @@ public abstract class Zombie extends Something {
     /**
      * This method is for the attack of each zombie, it can be overridden for different attacks
      */
-    protected void attack() {
+    public void attack() {
         Something[][] matrixBoard = board.getMatrixBoard();
         if(matrixBoard[track][column] != null && matrixBoard[track][column] instanceof Plant){
             Plant targetPlant = (Plant) matrixBoard[track][column];
@@ -186,4 +187,13 @@ public abstract class Zombie extends Something {
         }
     }
 
+    /**
+     * stop the attack
+     */
+    public  void stopAttack(){
+        if (timerAlive != null) {
+            timerAlive.cancel();
+            timerAlive = null;
+        }
+    }
 }

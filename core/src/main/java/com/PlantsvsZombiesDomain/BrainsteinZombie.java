@@ -15,4 +15,11 @@ public class BrainsteinZombie extends UtilityZombie{
     public BrainsteinZombie(int[] position, Player owner, Board board) throws PlantsVsZombiesException {
         super(validatePosition(position), 300, 50, 25, owner, board);
     }
+
+    /**
+     * In this case the zombie doesn't move
+     */
+    @Override
+    public void moveZombie() {
+    }
 }
