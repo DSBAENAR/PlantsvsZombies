@@ -123,11 +123,10 @@ public class PlantsVsZombies {
      * @param position position of the something
      * @param something the something
      */
-    public void deleteSomething(int[] position, Something something){
+    public void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException {
         if(turn){
             player1.deleteSomething(position, something);
-        }else{
-            player2.deleteSomething(position, something);
+            board.deleteSomething(position, something);
         }
     }
 

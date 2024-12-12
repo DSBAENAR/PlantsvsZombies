@@ -189,7 +189,20 @@ public class Board implements GameMoves {
      */
     @Override
     public  void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException{
-        //In construction...
+
+        if (matrixBoard[position[0]][position[1]] == null) {
+            throw new PlantsVsZombiesException(PlantsVsZombiesException.NO_SOMETHING_IN_POSITION);
+        }
+        if (!matrixBoard[position[0]][position[1]].equals(something)) {
+            throw new PlantsVsZombiesException(PlantsVsZombiesException.DONT_MATCH_OBJECTS);
+        }
+        if (something instanceof Plant) {
+            Plant plant = (Plant) something;
+            plant.setItsAlive(false);
+            plant.setOwner(null);
+        }
+        matrixBoard[position[0]][position[1]] = null;
+
     }
 
     /**

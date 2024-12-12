@@ -120,12 +120,18 @@ public abstract class Player implements GameMoves{
     }
 
     /**
-     * To delete something in the board (Plants, Zombies, Pruners)
+     * To delete something in the inventory (Plants)
      * @param position position of the something
      * @param something the something
      */
     @Override
-    public void deleteSomething(int[] position, Something something){
-
+    public void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException{
+        for(Something inventory : this.inventory){
+            if(inventory.equals(something)){
+                this.inventory.remove(inventory);
+                break;
+            }
+        }
     }
+
 }

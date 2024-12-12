@@ -236,7 +236,7 @@ public class PlantsVsZombiesTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertEquals(false, sunFlower.getItsAlive());
+        assertFalse(sunFlower.getItsAlive());
         assertNull(pvsz.getBoard().getMatrixBoard()[0][9]);
         assertFalse(player1.getInventory().contains(sunFlower));
     }
@@ -256,7 +256,7 @@ public class PlantsVsZombiesTest {
         NormalZombie normalZombie = new NormalZombie(position2, player2, board);
         pvsz.putSomething(position2, normalZombie);
 
-        assertEquals(true, normalZombie.getItsAlive());
+        assertTrue(normalZombie.getItsAlive());
         assertEquals(normalZombie, pvsz.getBoard().getTrack(0).get(0));
         assertTrue(player2.getInventory().contains(normalZombie));
 
@@ -275,7 +275,7 @@ public class PlantsVsZombiesTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertEquals(false, normalZombie.getItsAlive());
+        assertFalse(normalZombie.getItsAlive());
         assertFalse(player2.getInventory().contains(normalZombie));
     }
 
@@ -506,6 +506,28 @@ public class PlantsVsZombiesTest {
         assertFalse(normalZombie2.getItsAlive());
         assertEquals(0, board.getTrack(1).size());
         assertFalse(((LawnMower) board.getMatrixBoard()[1][0]).getItsAlive());
+    }
+
+    @Test
+    void testDeleteSomething() throws PlantsVsZombiesException {
+        Player player1 = new HumanPlayer("Barbosa", 1000, true);
+        Player player2 = new HumanPlayer("Baena", 1000, false);
+        Board board = new Board(5, 10, player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        int[] position1 = new int[]{2, 1};
+        int[] position3 = new int[]{2, 2};
+        int[] position2 = new int[]{1, 9};
+
+        SunFlower sunFlower = new SunFlower(position1, player1, board);
+        pvsz.putSomething(position1, sunFlower);
+
+        NormalZombie normalZombie = new NormalZombie(position2, player2, board);
+        pvsz.putSomething(position2, normalZombie);
+
+        pvsz.deleteSomething(position1, sunFlower);
+
+        assertFalse(sunFlower.getItsAlive());
+        assertNull(pvsz.getBoard().getMatrixBoard()[2][1]);
     }
 
 }
