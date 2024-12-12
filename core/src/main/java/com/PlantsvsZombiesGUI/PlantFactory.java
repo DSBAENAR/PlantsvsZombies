@@ -1,3 +1,4 @@
+
 package com.PlantsvsZombiesGUI;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -11,7 +12,7 @@ public class PlantFactory {
                 if (GameScreen.spendSun(price)) { // Validar si hay suficientes soles
                     AttackPlant peashooterLogic = new PeaShooter(new int[]{x, y}, new HumanPlayer("Player 1",50,true), board);
                     Texture spriteSheet = new Texture("PeaShooterSprite.png"); // Ruta a tu sprite
-                    return new PlantCard(x, y, spriteSheet, 25, 1, 0.05f, peashooterLogic);
+                    return new PlantCard(x, y, spriteSheet, 25, 1, 0.1f, peashooterLogic);
                 } else {
                     System.out.println("No tienes suficientes soles para plantar un PeaShooter.");
                 }

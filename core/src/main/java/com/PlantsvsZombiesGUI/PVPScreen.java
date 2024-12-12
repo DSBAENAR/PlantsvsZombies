@@ -1,4 +1,3 @@
-
 package com.PlantsvsZombiesGUI;
 
 import com.PlantsvsZombiesDomain.Board;
@@ -38,21 +37,22 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 
 
-public class GameScreen implements Screen {
+public class PVPScreen implements Screen {
 	private SpriteBatch batch;
     private BitmapFont font;
     private FitViewport viewport;
     private Stage stage;
-    private Texture backgroundTexture;    
+    private Texture backgroundTexture;
+    private Texture secondaryBackgroundTexture;
+    private Texture grassTileTexture;
     private Texture buttonMenuTexture;
-    private Texture shovelTexture;
     private PlantsvsZombies game;
     private Table innerTable;
     private Table menuTable;
     private DragAndDrop dragAndDrop;
     private final int GRID_ROWS = 6; // Número de filas
     public final static int GRID_COLS = 9; // Número de columnas
-    public final static float TILE_SIZE = 150; // Tamaño de cada tile
+    public final static float TILE_SIZE = 82; // Tamaño de cada tile
     public static float GRID_X_OFFSET; // Offset dinámico en X
     public static float GRID_Y_OFFSET; // Offset dinámico en Y
     private ShapeRenderer shapeRenderer;
@@ -64,25 +64,23 @@ public class GameScreen implements Screen {
     private static int sunCounter = 1050;
     private Array<Zombie> zombies; // Lista lógica de zombies
     private Board board;
-    public GameScreen(PlantsvsZombies game) {
+    
+    public PVPScreen(PlantsvsZombies game) {
         this.game = game;
         zombies = new Array<>();
-        new Array<>();
-        this.board = new Board(GRID_ROWS, GRID_COLS, new HumanPlayer("Player 1",50,true), new HumanPlayer("Player 2",50,true)); // Crear con jugadores
-        // Otros inicializadores
-        
+        this.board = new Board(GRID_ROWS, GRID_COLS, new HumanPlayer("Player 1", 50, true), new HumanPlayer("Player 2", 50, true)); // Crear con jugadores
 
-        // Inicializar el viewport
-        viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        // Inicializar otros recursos
+        // Otros inicializadores
         batch = new SpriteBatch();
-        stage  = new Stage(viewport);
+        stage = new Stage(); // Inicializar el Stage sin un Viewport
         Gdx.input.setInputProcessor(stage);
 
         // Inicializar recursos
-        backgroundTexture = new Texture("lawn.png");
-        
-     // Generar la fuente desde un archivo TTF
+        backgroundTexture = new Texture("Background1.jpg");
+        secondaryBackgroundTexture = new Texture("BackgroundPvP.jpg");
+
+
+        // Generar la fuente desde un archivo TTF
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ZOMBIE.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 32; // Tamaño de la fuente
@@ -90,16 +88,19 @@ public class GameScreen implements Screen {
         parameter.borderWidth = 1; // Borde opcional
         parameter.borderColor = Color.BLACK;
         font = generator.generateFont(parameter);
-        
+        generator.dispose();
+
         music = Gdx.audio.newMusic(Gdx.files.internal("inGame.mp3"));
         music.setLooping(true);
         music.setVolume(0.3f);
         music.play(); // Inicia la música al comenzar el juego
+
         shapeRenderer = new ShapeRenderer();
-        
+
         createUI();
         createGrid();
     }
+
     
     
     
@@ -114,6 +115,7 @@ public class GameScreen implements Screen {
     
 
     private void createUI() {
+        
         // Crear la barra SeedBank como una imagen
         Image seedBankImage = new Image(new Texture("SeedBank.png"));
         
@@ -136,7 +138,14 @@ public class GameScreen implements Screen {
 		sunCounterLabel = new Label(suncounter, labelStyle);
         sunCounterLabel.setAlignment(Align.center); // Alinear texto
 
-    
+     // Configurar la tabla interna
+        innerTable = new Table();
+        innerTable.top().left();
+     // Añadir el contador de soles con tamaño dinámico
+        innerTable.add(sunCounterLabel)
+            .expandX() // Permitir que la celda ocupe el espacio necesario
+            .align(Align.left) // Alinear el contador a la izquierda
+            .padRight(20); // Agregar algo de espacio para separarlo de las cartas
         
         
         // Combinar ambos en un Stack
@@ -145,10 +154,9 @@ public class GameScreen implements Screen {
         buttonStack.add(textLabelMenu);
 
 
-        // Crear la tabla interna para organizar elementos
-        innerTable = new Table();
-        innerTable.top().left();
-        innerTable.add(sunCounterLabel).padTop(65).padLeft(-160);
+        new Table();
+        innerTable.top().center();
+        innerTable.add(sunCounterLabel).padTop(65).padLeft(-140);
         
 
         // Crear una tabla principal que contiene la barra y la tabla interna
@@ -305,29 +313,41 @@ public class GameScreen implements Screen {
         optionsMenu.toFront();
         
      // Agregar cartas de ejemplo
-        addCard("PeaShooterIcon.png", "PeaShooter");
-        addCard("sunflower.png", "Sunflower");
+        addCard("PeaShooterIcon.png", "PeaShooter", 100);
+        addCard("sunflower.png", "Sunflower", 50);
+        addCard("WallNutIcon.png", "WallNut", 50);
        
     }
 
     
-    private void addCard(String texturePath, String plantType) {
+    private void addCard(String texturePath, String plantType, int plantPrice) {
         TextureRegionDrawable cardDrawable = new TextureRegionDrawable(new TextureRegion(new Texture(texturePath)));
         ImageButton cardButton = new ImageButton(cardDrawable);
 
-        // Agregar funcionalidad de arrastrar y soltar para la carta
+        // Crear el texto del precio
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = font; // Usa la misma fuente que el contador de soles
+        Label priceLabel = new Label(String.valueOf(plantPrice), labelStyle);
+        priceLabel.setAlignment(Align.center);
+
+        // Combinar el botón y el texto en una tabla
+        Table cardTable = new Table();
+        cardTable.add(cardButton).size(80, 80).row(); // Tamaño fijo para el botón
+        cardTable.add(priceLabel).padTop(-15).align(Align.center);// Texto debajo del botón
+
+        // Añadir funcionalidad de arrastrar y soltar para la carta
         dragAndDrop.addSource(new DragAndDrop.Source(cardButton) {
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
-                payload.setDragActor(new Image(cardDrawable)); // Imagen arrastrada
-                payload.setObject(plantType); // Tipo de planta
+                payload.setDragActor(new Image(cardDrawable));
+                payload.setObject(plantType);
                 return payload;
             }
         });
 
-        // Añadir el botón de la carta al panel
-        innerTable.add(cardButton).size(80, 80).padRight(10);
+        // Añadir la tabla de la carta al panel
+        innerTable.add(cardTable).padRight(10).expandX().align(Align.top);
     }
 
     private void addPlantDropTarget() {
@@ -389,8 +409,8 @@ public class GameScreen implements Screen {
         float fieldWidth = GRID_COLS * TILE_SIZE;
         float fieldHeight = GRID_ROWS * TILE_SIZE;
 
-        GRID_X_OFFSET = (Gdx.graphics.getWidth() - fieldWidth)+15;
-        GRID_Y_OFFSET = (Gdx.graphics.getHeight() - fieldHeight)-125;
+        GRID_X_OFFSET = (Gdx.graphics.getWidth() - fieldWidth)-670;
+        GRID_Y_OFFSET = (Gdx.graphics.getHeight() - fieldHeight)-300;
 
         for (int row = 0; row < GRID_ROWS; row++) {
             for (int col = 0; col < GRID_COLS; col++) {
@@ -419,21 +439,10 @@ public class GameScreen implements Screen {
     }
 
     
-    private void initializeLawnMowerActors() {
-        for (int i = 0; i < GRID_ROWS; i++) {
-            // Crear un LawnMowerActor para cada fila
-            LawnMowerActor mowerActor = new LawnMowerActor(i);
-
-            // Agregar el LawnMowerActor al Stage
-            stage.addActor(mowerActor);
-        }
-    }
-
-
-
     
     
     private void renderGrid() {
+        // Habilitar blending para manejar la transparencia
         Gdx.gl.glEnable(GL20.GL_BLEND);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -441,6 +450,17 @@ public class GameScreen implements Screen {
         if (highlightedCell != null) {
             shapeRenderer.setColor(new Color(1, 1, 0, 0.5f)); // Color amarillo semitransparente
             shapeRenderer.rect(highlightedCell.x, highlightedCell.y, highlightedCell.width, highlightedCell.height);
+        }
+
+        shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        // Dibujar las líneas de la grilla
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.RED); // Color de las líneas de la grilla
+
+        for (Rectangle cell : gridCells) {
+            shapeRenderer.rect(cell.x, cell.y, cell.width, cell.height);
         }
 
         shapeRenderer.end();
@@ -456,98 +476,15 @@ public class GameScreen implements Screen {
         return null; // No hay celda en esas coordenadas
     }
     
+//    private void spawnZombie(String zombieType, float x, float y) {
+//        // Usar la fábrica para crear el zombie
+//        AnimatedActor zombie = ZombieFactory.createZombie(zombieType, x, y);
+//
+//        // Añadir el zombie al escenario
+//        stage.addActor(zombie);
+//    }
     
-    public void checkAllPlantsAndZombies() {
-        Array<ZombieCard> zombies = new Array<>();
-        Array<PlantCard> plants = new Array<>();
-
-        // Clasifica los actores en zombies y plantas
-        for (Actor actor : stage.getActors()) {
-            if (actor instanceof ZombieCard) {
-                zombies.add((ZombieCard) actor);
-            } else if (actor instanceof PlantCard) {
-                plants.add((PlantCard) actor);
-            }
-        }
-
-        // Verifica cada planta contra todos los zombies
-        for (PlantCard plant : plants) {
-            plant.checkForZombies(zombies);
-        }
-    }
-
-
-    
-    private void checkCollisions() {
-        Array<Actor> actors = stage.getActors();
-
-        // Crear listas separadas para diferentes tipos de actores
-        Array<ProjectileActor> projectiles = new Array<>();
-        Array<ZombieCard> zombies = new Array<>();
-        Array<LawnMowerActor> lawnMowers = new Array<>();
-
-        // Clasificar los actores
-        for (Actor actor : actors) {
-            if (actor instanceof ProjectileActor) {
-                projectiles.add((ProjectileActor) actor);
-            } else if (actor instanceof ZombieCard) {
-                zombies.add((ZombieCard) actor);
-            } else if (actor instanceof LawnMowerActor) {
-                lawnMowers.add((LawnMowerActor) actor);
-            }
-        }
-
-        // Detectar colisiones entre proyectiles y zombies
-        for (ProjectileActor projectile : projectiles) {
-            Rectangle projectileRect = projectile.getBoundingRectangle();
-            for (ZombieCard zombie : zombies) {
-                Rectangle zombieRect = zombie.getBoundingRectangle();
-
-                if (projectileRect.overlaps(zombieRect)) {
-                    zombie.reduceHealth(20); // Reducir salud del zombie
-                    projectile.remove(); // Eliminar el proyectil
-                    System.out.println("Proyectil impactó al zombie. Salud restante: " + zombie.getHealth());
-
-                    // Restablecer el estado de la planta
-                    PlantCard parentPlant = projectile.getParentPlant();
-                    if (parentPlant != null) {
-                        parentPlant.setHasActiveProjectile(false);
-                    }
-
-                    // Eliminar zombie si está muerto
-                    if (!zombie.isAlive()) {
-                        zombie.remove();
-                        System.out.println("Zombie eliminado.");
-                    }
-                    break; // Un proyectil solo afecta a un zombie
-                }
-            }
-        }
-
-        // Detectar colisiones entre cortadoras y zombies
-        for (LawnMowerActor lawnMower : lawnMowers) {
-            if (!lawnMower.getItsAlive()) continue; // Ignorar cortadoras inactivas
-
-            Rectangle mowerRect = lawnMower.getBoundingRectangle();
-            for (ZombieCard zombie : zombies) {
-                Rectangle zombieRect = zombie.getBoundingRectangle();
-
-                if (mowerRect.overlaps(zombieRect)) {
-                    System.out.println("Colisión detectada entre cortadora y zombie en fila: " + lawnMower.getRow());
-                    lawnMower.activateLawnMower(); // Activar cortadora
-                    zombie.remove(); // Eliminar zombie
-                    System.out.println("Zombie eliminado por cortadora de césped.");
-                    break; // Una cortadora se activa por el primer zombie que encuentra
-                }
-            }
-        }
-    }
-
-
-
-
-
-
+   
 
     public static void incrementSunCounter(int amount) {
         sunCounter += amount;
@@ -580,7 +517,7 @@ public class GameScreen implements Screen {
                 if (actor instanceof PlantCard) {
                     PlantCard plant = (PlantCard) actor;
                     PlantData plantData = new PlantData();
-                    plantData.type = plant.getType();
+//                    plantData.type = plant.getType();
                     plantData.x = (int) plant.getX();
                     plantData.y = (int) plant.getX();
                     saveData.plants.add(plantData);
@@ -613,120 +550,30 @@ public class GameScreen implements Screen {
 
 
 
-    private void spawnZombie(String zombieType, float x, float y) {
-        // Convertir las coordenadas visuales a índices lógicos
-        int[] indices = convertCoordinatesToMatrixIndices(x, y);
-
-        if (indices == null) {
-            System.out.println("Coordenadas fuera del grid. No se pudo crear el zombie.");
-            return;
-        }
-
-        int row = indices[0]; // Fila lógica en el grid
-        int col = GRID_COLS - 1; // Forzamos la columna lógica al borde derecho del grid
-
-        // Validar si la fila está dentro del rango permitido
-        if (row < 0 || row >= GRID_ROWS) {
-            System.out.println("Fila fuera del rango del grid: " + row);
-            return;
-        }
-
-        // Ajustar la posición visual para que esté justo fuera del borde derecho visible
-        float visualX = GRID_X_OFFSET + (col + 1) * TILE_SIZE; // Una columna adicional fuera del grid
-        float visualY = GRID_Y_OFFSET + row * TILE_SIZE; // Alinear con la fila calculada
-
-        try {
-            // Crear el zombie utilizando la fábrica
-            ZombieCard zombieCard = ZombieFactory.createZombie(zombieType, row, col, TILE_SIZE);
-
-            if (zombieCard != null) {
-                // Añadir el zombie al escenario
-                zombieCard.setPosition(visualX, visualY);
-                stage.addActor(zombieCard);
-
-                System.out.println("Zombie creado: " + zombieType + " en fila " + row + " y fuera del borde derecho.");
-            } else {
-                System.out.println("Error: No se pudo crear el zombie.");
-            }
-        } catch (Exception e) {
-            System.out.println("Excepción al generar el zombie: " + e.getMessage());
-        }
-    }
-    
-    
-    
-//    private void initializeLawnMowers() {
-//        lawnMowers = new ArrayList<>();
-//        for (int i = 0; i < board.getRow(); i++) { // Supongamos que `board` tiene un método `getRowCount()`
-//            int[] position = {i, 0}; // Coloca la cortadora en la columna 0
-//            LawnMower mower = new LawnMower(position, board);
-//            lawnMowers.add(mower);
-//        }
-//    }
-
-
-
     @Override
     public void show() {
-//    	 //Crear varios zombies de diferentes tipos
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 0 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 1 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 2 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 3 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 4 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 5 * TILE_SIZE);
-    	for (Actor actor : stage.getActors()) {
-    	    System.out.println(actor.getClass().getSimpleName() + " en posición (" + actor.getX() + ", " + actor.getY() + ")");
-    	}
-    	initializeLawnMowerActors();
-        Gdx.input.setInputProcessor(stage);
     }
 
 
     @Override
     public void render(float delta) {
     	ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+    	
+    	float x = (Gdx.graphics.getWidth() - backgroundTexture.getWidth()) / 2f;
+    	float y = (Gdx.graphics.getHeight() - backgroundTexture.getHeight()) / 2f;
+    	
         // Dibujar el fondo
         batch.begin();
-        batch.draw(backgroundTexture,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(secondaryBackgroundTexture, 0, 0);
+        batch.draw(backgroundTexture, x, y);
+
         batch.end();
         renderGrid();
-        checkAllPlantsAndZombies(); // Verifica ataques
-        checkCollisions(); // Detecta colisiones
-        stage.act(delta);
-        stage.draw();
-        
-     // Dibujar colliders
-        shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        for (Actor actor : stage.getActors()) {
-            if (actor instanceof PlantCard) {
-                PlantCard plant = (PlantCard) actor;
-                shapeRenderer.setColor(0, 0, 1, 1); // Azul para plantas
-                Rectangle rect = plant.getBoundingRectangle();
-                shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-            } else if (actor instanceof ZombieCard) {
-                ZombieCard zombie = (ZombieCard) actor;
-                shapeRenderer.setColor(1, 0, 0, 1); // Rojo para zombies
-                Rectangle rect = zombie.getBoundingRectangle();
-                shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-            }
-            
-            else if (actor instanceof LawnMowerActor) {
-            	LawnMowerActor lawn = (LawnMowerActor) actor;
-                shapeRenderer.setColor(1, 1, 0, 1); // Rojo para zombies
-                Rectangle rect = lawn.getBoundingRectangle();
-                shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-            }
-        }
-
-        shapeRenderer.end();
         stage.act(delta);
         stage.draw();
         
     }
-   
+    
     public void restoreGameState(SaveData saveData) {
         // Restaurar las plantas
         for (PlantData plantData : saveData.plants) {
@@ -773,6 +620,10 @@ public class GameScreen implements Screen {
             backgroundTexture.dispose();
         }
 
+        // Liberar texturas adicionales
+        if (grassTileTexture != null) {
+            grassTileTexture.dispose();
+        }
 
         if (buttonMenuTexture != null) {
             buttonMenuTexture.dispose();

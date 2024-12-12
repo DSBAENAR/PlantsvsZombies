@@ -4,8 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
@@ -13,18 +11,16 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
 
 
-public class mainMenu implements Screen {
+public class PvPMenu implements Screen {
 
 	Music backgroundMusic;
     final PlantsvsZombies game;
@@ -35,21 +31,21 @@ public class mainMenu implements Screen {
     private Texture btnpvp; //Player vs Player
     private Texture btnmvm; //Machine vs Machine
     private Stage stage;
-    private Stage loadStage; // Nuevo campo para el Stage del selector de archivos
-    private boolean isLoadStageActive = false; // Indica si el selector está activo
+    private Texture titleTexture;
 
 
-    public mainMenu(final PlantsvsZombies game) {
+
+    public PvPMenu(final PlantsvsZombies game) {
         this.game = game;
 
         // Cargar texturas
-        background = new Texture("start_resized.png");
+        background = new Texture("PvPMenu.png");
         btnSaveAndExit = new Texture("button_exit.png");
         btnPlay = new Texture("button_play.png");
         btnLoadGame = new Texture("button_load.png");
         btnpvp = new Texture("button_pvp.png");
         btnmvm = new Texture("button_mvm.png");
-//        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        titleTexture = new Texture("TextPvP.png");
         
      // Crear un Stage para gestionar los elementos de UI
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -110,7 +106,7 @@ public class mainMenu implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
             	game.dispose();
-                game.setScreen(new PvPMenu(game));
+                game.setScreen(new PVPScreen(game));
             }
           
 				
@@ -132,6 +128,14 @@ public class mainMenu implements Screen {
         tableOptions.add(btnmvmGameActor).fillX().uniformX();
         tableOptions.row().pad(10, 0, 10, 0);
         tableOptions.add(btnSaveAndExitActor).fillX().uniformX();
+        
+        
+        Table titleTable = new Table();
+        titleTable.setFillParent(true); // Asegura que la tabla ocupe toda la pantalla
+        titleTable.top(); // Posiciona el contenido en la parte superior
+        titleTable.add(new Image(new TextureRegionDrawable(new TextureRegion(titleTexture)))).center().padTop(20);
+        stage.addActor(titleTable); // Agrega la tabla al stage
+
         
        
         // Agregar la tabla al stage
@@ -163,104 +167,26 @@ public class mainMenu implements Screen {
     
 
     private void loadGame() {
-        // Crea la fuente
-        BitmapFont font = new BitmapFont(); // Fuente predeterminada incluida en LibGDX
-        font.getData().setScale(2f); // Escala para que el texto sea más visible
+        // Ruta fija para cargar el archivo
+        FileHandle saveFile = Gdx.files.local("saves/gameState.json");
 
-        // Crea el estilo del Label
-        Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = font; // Asigna la fuente al estilo
-        labelStyle.fontColor = Color.WHITE; // Color del texto
+        if (saveFile.exists()) {
+            try {
+                // Leer los datos guardados
+                Json json = new Json();
+                SaveData saveData = json.fromJson(SaveData.class, saveFile.readString());
 
-        // Crea el estilo del TextButton
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font; // Asigna la fuente al estilo
-        buttonStyle.fontColor = Color.WHITE; // Color del texto
+                // Cambiar a GameScreen y restaurar el estado
+                GameScreen gameScreen = new GameScreen(game);
+                gameScreen.restoreGameState(saveData);
+                game.setScreen(gameScreen);
 
-        // Directorio de archivos guardados
-        FileHandle saveDirectory = Gdx.files.local("saves/");
-
-        // Filtra archivos con extensión .json
-        FileHandle[] saveFiles = saveDirectory.list();
-        Array<FileHandle> filteredFiles = new Array<>();
-        for (FileHandle file : saveFiles) {
-            if (file.name().endsWith(".json")) {
-                filteredFiles.add(file);
+                System.out.println("Juego cargado automáticamente desde: " + saveFile.path());
+            } catch (Exception e) {
+                System.out.println("Error al cargar el juego: " + e.getMessage());
             }
-        }
-
-        if (filteredFiles.size == 0) {
-            System.out.println("No hay archivos de guardado disponibles.");
-            return;
-        }
-
-        // Crear el Stage y la tabla para mostrar los archivos
-        loadStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
-
-        Label title = new Label("Selecciona un archivo para cargar", labelStyle); // Usa el estilo creado
-        table.add(title).pad(10);
-        table.row();
-
-        for (FileHandle file : filteredFiles) {
-            TextButton fileButton = new TextButton(file.name(), buttonStyle); // Usa el estilo creado
-            fileButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    loadGameFromFile(file); // Carga el archivo seleccionado
-                    Gdx.input.setInputProcessor(stage); // Regresa al menú principal
-                    loadStage = null; // Libera el Stage del selector
-                    isLoadStageActive = false; // Desactiva el selector
-                }
-            });
-            table.add(fileButton).pad(5).fillX();
-            table.row();
-        }
-
-        TextButton cancelButton = new TextButton("Cancelar", buttonStyle); // Usa el estilo creado
-        cancelButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.input.setInputProcessor(stage); // Regresa al menú principal
-                loadStage = null; // Libera el Stage del selector
-                isLoadStageActive = false; // Desactiva el selector
-            }
-        });
-
-        table.add(cancelButton).pad(10);
-        loadStage.addActor(table);
-        Gdx.input.setInputProcessor(loadStage); // Cambia el InputProcessor al nuevo Stage
-        isLoadStageActive = true; // Activa el nuevo Stage
-    }
-
-
-
-    // Carga los datos desde un archivo seleccionado
-    private void loadGameFromFile(FileHandle file) {
-        try {
-            Json json = new Json();
-            SaveData saveData = json.fromJson(SaveData.class, file);
-
-            // Cargar las plantas
-            for (PlantData plant : saveData.plants) {
-                System.out.println("Planta: " + plant.type + " en (" + plant.x + ", " + plant.y + ")");
-                // Aquí puedes añadir lógica para recrear las plantas en tu juego
-            }
-
-            // Cargar los zombis
-            for (ZombieData zombie : saveData.zombies) {
-                System.out.println("Zombi: " + zombie.type + " en (" + zombie.x + ", " + zombie.y + ") con vida: " + zombie.health);
-                // Aquí puedes añadir lógica para recrear los zombis en tu juego
-            }
-
-            // Actualizar el sol
-            System.out.println("Cantidad de sol: " + saveData.sun);
-            // Aplica el estado del sol al juego actual
-
-        } catch (Exception e) {
-            System.out.println("Error al cargar el archivo: " + e.getMessage());
+        } else {
+            System.out.println("No se encontró un archivo de guardado en: " + saveFile.path());
         }
     }
 
@@ -278,14 +204,9 @@ public class mainMenu implements Screen {
         game.getBatch().draw(background, 0, 0,Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.getBatch().end();
         
-     // Renderizar el Stage principal o el selector de archivos
-        if (isLoadStageActive && loadStage != null) {
-            loadStage.act(delta);
-            loadStage.draw();
-        } else {
-            stage.act(delta);
-            stage.draw();
-        }
+     // Dibujar el Stage (y por lo tanto los botones)
+        stage.act(delta);
+        stage.draw();
     }
         
 
@@ -315,23 +236,3 @@ public class mainMenu implements Screen {
         btnPlay.dispose();
     }
 }
-
-class SaveData {
-    public Array<PlantData> plants;
-    public Array<ZombieData> zombies;
-    public int sun;
-}
-
-class PlantData {
-    public String type;
-    public float x;
-    public float y;
-}
-
-class ZombieData {
-    public String type;
-    public int x;
-    public int y;
-    public int health;
-}
-

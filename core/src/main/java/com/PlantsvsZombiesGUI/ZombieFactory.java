@@ -23,20 +23,29 @@ public class ZombieFactory {
                 return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,100);
 
             } else if (zombieType.equalsIgnoreCase("Brainstein")) {
-                zombieSheet = new Texture("FastZombieSprite.png");
+                zombieSheet = new Texture("BrainsteinSprite.png");
                 frameCols = 8;
                 frameRows = 1;
                 frameDuration = 0.05f;
                 return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,100);
 
             } else if (zombieType.equalsIgnoreCase("Buckethead")) {
-                zombieSheet = new Texture("StrongZombieSprite.png");
-                frameCols = 6;
+                zombieSheet = new Texture("BucketheadSprite.png");
+                frameCols = 47;
                 frameRows = 1;
                 frameDuration = 0.15f;
-                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,100);
+                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,800);
+               
 
-            } else {
+            }
+            else if (zombieType.equalsIgnoreCase("Conehead")) {
+                zombieSheet = new Texture("ConeheadSprite.png");
+                frameCols = 47;
+                frameRows = 1;
+                frameDuration = 0.15f;
+                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,380);
+            }
+            else {
                 throw new IllegalArgumentException("Tipo de zombie desconocido: " + zombieType);
             }
         } catch (Exception e) {

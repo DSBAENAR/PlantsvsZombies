@@ -7,9 +7,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.math.Rectangle;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class ZombieCard extends Actor {
     private Animation<TextureRegion> animation;
     private float stateTime;
@@ -18,9 +15,6 @@ public class ZombieCard extends Actor {
     private boolean isAlive;
     private boolean isAnimated;
     private int health; // Salud del zombie
-    private final int damage = 100; // Daño infligido por mordida
-    private final float attackInterval = 0.5f; // Intervalo de ataque en segundos
-    private boolean isAttacking;
     private float attackCooldown = 1.5f; // Tiempo entre ataques en segundos
     private float attackTimer = 0f; // Temporizador para el ataque
 
@@ -32,9 +26,6 @@ public class ZombieCard extends Actor {
         this.isAlive = true;
         this.isAnimated = true;
         this.health = initialHealth; // Inicializar la salud
-        this.isAttacking = false;
-        
-
         // Dividir el sprite sheet en frames
         TextureRegion[][] tmp = TextureRegion.split(
                 spriteSheet,
@@ -145,12 +136,17 @@ public class ZombieCard extends Actor {
         }
     }
 
-    public Rectangle getBoundingRectangle() {
-        return new Rectangle(getX(), getY(), getWidth(), getHeight());
-    }
-
     private boolean collidesWithPlant(PlantCard plantCard) {
         return getBoundingRectangle().overlaps(plantCard.getBoundingRectangle());
+    }
+    
+    public Rectangle getBoundingRectangle() {
+        // Ajustar los márgenes del colider si el sprite incluye áreas transparentes
+        float offsetX = getWidth() * 0.1f; // Reducir los lados
+        float offsetY = getHeight() * 0.1f; // Reducir la parte superior e inferior
+        float adjustedWidth = getWidth() * 0.8f; // Ajustar el ancho
+        float adjustedHeight = getHeight() * 0.8f; // Ajustar la altura
+        return new Rectangle(getX() + offsetX, getY() + offsetY, adjustedWidth, adjustedHeight);
     }
 
     public void attackPlant(PlantCard plantCard) {
@@ -166,6 +162,10 @@ public class ZombieCard extends Actor {
             }
         }
     }
+
+	public int getRowFromPosition(float y) {
+		return (int) ((y - GameScreen.GRID_Y_OFFSET) / GameScreen.TILE_SIZE);
+	}
 
    
 }

@@ -35,4 +35,6 @@ public class PlantsvsZombies extends Game {
 	public void setBatch(SpriteBatch batch) {
 		this.batch = batch;
 	}
+	
+	
 }
