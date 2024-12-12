@@ -162,10 +162,12 @@ public abstract class Zombie extends Something implements Attack{
     }
 
     protected void moveZombie() {
-        if (column == 0) {
+        if (this.column == 0) {
             stopTimer();
         } else {
-            column = (column - 1);
+            this.column = (this.column - 1);
+            position[1] = this.column;
+            setColumn(this.column);
         }
     }
 

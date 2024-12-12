@@ -39,6 +39,7 @@ public class Board implements GameMoves {
         this.track2 = new ArrayList<>();
         this.track3 = new ArrayList<>();
         this.track4 = new ArrayList<>();
+        fillBoardWithLawnMowers();
     }
 
     public float getTileSize() {
@@ -189,5 +190,14 @@ public class Board implements GameMoves {
     @Override
     public  void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException{
         //In construction...
+    }
+
+    /**
+     * Used to fill the board with LawnMowers in the first row of the board
+     */
+    private void fillBoardWithLawnMowers() {
+        for (int i = 0; i < sizeHeight; i++) {
+            matrixBoard[i][0] = new LawnMower(new int[] { i, 0 }, this);
+        }
     }
 }

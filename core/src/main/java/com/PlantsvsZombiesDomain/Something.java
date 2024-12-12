@@ -6,6 +6,8 @@ package com.PlantsvsZombiesDomain;
 public abstract class Something{
     protected int[] position;
     private Board board;
+    protected int row;
+    protected int column;
 
     /**
      * Constructor of Something
@@ -16,6 +18,8 @@ public abstract class Something{
     public Something(int[] position, Board board) {
         this.position = position;
         this.board = board;
+        this.row = position[0];
+        this.column = position[1];
     }
 
     /**
@@ -24,6 +28,38 @@ public abstract class Something{
      */
     public int[] getPosition() {
         return position;
+    }
+
+    /**
+     * get the Row of the something
+     * @return row of the something
+     */
+    public int getRow() {
+        return row;
+    }
+
+    /**
+     * set the Column of the something
+     * @param row
+     */
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    /**
+     * get the Column of the something
+     * @return column of the something
+     */
+    public int getColumn() {
+        return column;
+    }
+
+    /**
+     * set the Column of the something
+     * @param column of the something
+     */
+    public void setColumn(int column) {
+        this.column = column;
     }
 
     /**
