@@ -669,6 +669,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
+    	
+    	
+    	
 //    	 //Crear varios zombies de diferentes tipos
     	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 0 * TILE_SIZE);
     	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 1 * TILE_SIZE);
