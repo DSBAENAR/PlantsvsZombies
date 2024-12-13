@@ -1,4 +1,3 @@
-
 buildscript {
   repositories {
     gradlePluginPortal()
@@ -34,7 +33,6 @@ allprojects {
     // Define variables compartidas aquí
     ext {
         gdxVersion = "1.12.0"         // Versión de LibGDX
-        visuiVersion = "1.5.0"        // Versión de 
 
     }
 
