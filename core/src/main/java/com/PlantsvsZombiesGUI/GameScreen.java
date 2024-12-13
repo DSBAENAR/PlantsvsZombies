@@ -64,6 +64,7 @@ public class GameScreen implements Screen {
     private static int sunCounter = 1050;
     private Array<Zombie> zombies; // Lista lógica de zombies
     private Board board;
+	private Table seedbankTable = new Table();
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
         zombies = new Array<>();
