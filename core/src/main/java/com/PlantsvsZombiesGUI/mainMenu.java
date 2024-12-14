@@ -2,7 +2,6 @@ package com.PlantsvsZombiesGUI;
 
 import java.io.File;
 import java.io.FileFilter;
-import com.PlantsvsZombiesGUI.FileChooser.ResultListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
