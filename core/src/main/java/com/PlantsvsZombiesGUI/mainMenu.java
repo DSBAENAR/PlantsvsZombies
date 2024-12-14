@@ -1,24 +1,24 @@
 package com.PlantsvsZombiesGUI;
 
+import java.io.File;
+import java.io.FileFilter;
+import com.PlantsvsZombiesGUI.FileChooser.ResultListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
@@ -38,6 +38,7 @@ public class mainMenu implements Screen {
     private Stage loadStage; // Nuevo campo para el Stage del selector de archivos
     private boolean isLoadStageActive = false; // Indica si el selector está activo
 
+    Skin skin;
 
     public mainMenu(final PlantsvsZombies game) {
         this.game = game;
@@ -162,78 +163,114 @@ public class mainMenu implements Screen {
     
     
 
+//    private void loadGame() {
+//        // Crea la fuente
+//        BitmapFont font = new BitmapFont(); // Fuente predeterminada incluida en LibGDX
+//        font.getData().setScale(2f); // Escala para que el texto sea más visible
+//
+//        // Crea el estilo del Label
+//        Label.LabelStyle labelStyle = new Label.LabelStyle();
+//        labelStyle.font = font; // Asigna la fuente al estilo
+//        labelStyle.fontColor = Color.WHITE; // Color del texto
+//
+//        // Crea el estilo del TextButton
+//        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+//        buttonStyle.font = font; // Asigna la fuente al estilo
+//        buttonStyle.fontColor = Color.WHITE; // Color del texto
+//
+//        // Directorio de archivos guardados
+//        FileHandle saveDirectory = Gdx.files.local("saves/");
+//
+//        // Filtra archivos con extensión .json
+//        FileHandle[] saveFiles = saveDirectory.list();
+//        Array<FileHandle> filteredFiles = new Array<>();
+//        for (FileHandle file : saveFiles) {
+//            if (file.name().endsWith(".json")) {
+//                filteredFiles.add(file);
+//            }
+//        }
+//
+//        if (filteredFiles.size == 0) {
+//            System.out.println("No hay archivos de guardado disponibles.");
+//            return;
+//        }
+//
+//        // Crear el Stage y la tabla para mostrar los archivos
+//        loadStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+//        Table table = new Table();
+//        table.setFillParent(true);
+//        table.center();
+//
+//        Label title = new Label("Selecciona un archivo para cargar", labelStyle); // Usa el estilo creado
+//        table.add(title).pad(10);
+//        table.row();
+//
+//        for (FileHandle file : filteredFiles) {
+//            TextButton fileButton = new TextButton(file.name(), buttonStyle); // Usa el estilo creado
+//            fileButton.addListener(new ClickListener() {
+//                @Override
+//                public void clicked(InputEvent event, float x, float y) {
+//                    loadGameFromFile(file); // Carga el archivo seleccionado
+//                    Gdx.input.setInputProcessor(stage); // Regresa al menú principal
+//                    loadStage = null; // Libera el Stage del selector
+//                    isLoadStageActive = false; // Desactiva el selector
+//                }
+//            });
+//            table.add(fileButton).pad(5).fillX();
+//            table.row();
+//        }
+//
+//        TextButton cancelButton = new TextButton("Cancelar", buttonStyle); // Usa el estilo creado
+//        cancelButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                Gdx.input.setInputProcessor(stage); // Regresa al menú principal
+//                loadStage = null; // Libera el Stage del selector
+//                isLoadStageActive = false; // Desactiva el selector
+//            }
+//        });
+//
+//        table.add(cancelButton).pad(10);
+//        loadStage.addActor(table);
+//        Gdx.input.setInputProcessor(loadStage); // Cambia el InputProcessor al nuevo Stage
+//        isLoadStageActive = true; // Activa el nuevo Stage
+//    }
+    
     private void loadGame() {
-        // Crea la fuente
-        BitmapFont font = new BitmapFont(); // Fuente predeterminada incluida en LibGDX
-        font.getData().setScale(2f); // Escala para que el texto sea más visible
+        // Inicializa el Skin para el diálogo
+        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        // Crea el estilo del Label
-        Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = font; // Asigna la fuente al estilo
-        labelStyle.fontColor = Color.WHITE; // Color del texto
+        // Crea el FileChooser para seleccionar archivos guardados
+        FileChooser fileChooser = FileChooser.createPickDialog("Select a file to load", skin, Gdx.files.local("saves/"));
 
-        // Crea el estilo del TextButton
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font; // Asigna la fuente al estilo
-        buttonStyle.fontColor = Color.WHITE; // Color del texto
-
-        // Directorio de archivos guardados
-        FileHandle saveDirectory = Gdx.files.local("saves/");
-
-        // Filtra archivos con extensión .json
-        FileHandle[] saveFiles = saveDirectory.list();
-        Array<FileHandle> filteredFiles = new Array<>();
-        for (FileHandle file : saveFiles) {
-            if (file.name().endsWith(".json")) {
-                filteredFiles.add(file);
-            }
-        }
-
-        if (filteredFiles.size == 0) {
-            System.out.println("No hay archivos de guardado disponibles.");
-            return;
-        }
-
-        // Crear el Stage y la tabla para mostrar los archivos
-        loadStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
-
-        Label title = new Label("Selecciona un archivo para cargar", labelStyle); // Usa el estilo creado
-        table.add(title).pad(10);
-        table.row();
-
-        for (FileHandle file : filteredFiles) {
-            TextButton fileButton = new TextButton(file.name(), buttonStyle); // Usa el estilo creado
-            fileButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    loadGameFromFile(file); // Carga el archivo seleccionado
-                    Gdx.input.setInputProcessor(stage); // Regresa al menú principal
-                    loadStage = null; // Libera el Stage del selector
-                    isLoadStageActive = false; // Desactiva el selector
-                }
-            });
-            table.add(fileButton).pad(5).fillX();
-            table.row();
-        }
-
-        TextButton cancelButton = new TextButton("Cancelar", buttonStyle); // Usa el estilo creado
-        cancelButton.addListener(new ClickListener() {
+        // Configura el filtro para mostrar solo archivos con extensión .json
+        fileChooser.setFilter(new FileFilter() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.input.setInputProcessor(stage); // Regresa al menú principal
-                loadStage = null; // Libera el Stage del selector
-                isLoadStageActive = false; // Desactiva el selector
+            public boolean accept(File pathname) {
+                return pathname.getName().endsWith(".json");
             }
         });
 
-        table.add(cancelButton).pad(10);
-        loadStage.addActor(table);
-        Gdx.input.setInputProcessor(loadStage); // Cambia el InputProcessor al nuevo Stage
-        isLoadStageActive = true; // Activa el nuevo Stage
+        // Configura el listener de resultado
+        fileChooser.setResultListener(new FileChooser.ResultListener() {
+            @Override
+            public boolean result(boolean success, FileHandle result) {
+                if (success) {
+                    System.out.println("Archivo seleccionado: " + result.path());
+                    loadGameFromFile(result); // Llama al método para cargar los datos del archivo
+                } else {
+                    System.out.println("Selección de archivo cancelada.");
+                }
+                return true;
+            }
+        });
+
+        // Muestra el diálogo en el stage actual
+        fileChooser.show(stage);
     }
+
+
+
 
 
 

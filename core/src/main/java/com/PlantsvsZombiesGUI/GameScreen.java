@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -45,12 +46,11 @@ public class GameScreen implements Screen {
     private Stage stage;
     private Texture backgroundTexture;    
     private Texture buttonMenuTexture;
-    private Texture shovelTexture;
     private PlantsvsZombies game;
     private Table innerTable;
     private Table menuTable;
     private DragAndDrop dragAndDrop;
-    private final int GRID_ROWS = 6; // Número de filas
+    private final int GRID_ROWS = 5; // Número de filas
     public final static int GRID_COLS = 9; // Número de columnas
     public final static float TILE_SIZE = 150; // Tamaño de cada tile
     public static float GRID_X_OFFSET; // Offset dinámico en X
@@ -64,7 +64,8 @@ public class GameScreen implements Screen {
     private static int sunCounter = 1050;
     private Array<Zombie> zombies; // Lista lógica de zombies
     private Board board;
-	private Table seedbankTable = new Table();
+	private Table plantsTable;
+	private boolean isRemovalMode = false;
     public GameScreen(PlantsvsZombies game) {
         this.game = game;
         zombies = new Array<>();
@@ -115,8 +116,7 @@ public class GameScreen implements Screen {
     
 
     private void createUI() {
-        // Crear la barra SeedBank como una imagen
-        Image seedBankImage = new Image(new Texture("SeedBank.png"));
+        new Image(new Texture("SeedBank.png"));
         
         buttonMenuTexture = new Texture("ButtonMenu.png");
         
@@ -136,7 +136,44 @@ public class GameScreen implements Screen {
         CharSequence suncounter = String.valueOf(sunCounter);
 		sunCounterLabel = new Label(suncounter, labelStyle);
         sunCounterLabel.setAlignment(Align.center); // Alinear texto
+     
+        
+        
+        Texture sunTexture = new Texture("Sun.png");
+        Image sunImage = new Image(new TextureRegionDrawable(new TextureRegion(sunTexture)));
 
+        // Crear una tabla para el sol y el contador de soles
+        Table sunTable = new Table();
+        sunTable.add(sunImage).size(60, 60).padRight(10); // Imagen del sol con un poco de espacio a la derecha
+        sunTable.add(sunCounterLabel).align(Align.left); // Contador de soles
+        
+        
+        // Agregar la pala debajo de las cartas
+        Texture shovelTexture = new Texture("Shovel.png");
+        ImageButton shovelButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(shovelTexture)));
+        innerTable = new Table();
+        innerTable.top().left(); // Alinear hacia arriba y a la izquierda
+        innerTable.setFillParent(false); // Ajustar dinámicamente al contenido
+        // Agregar la tabla de sol y contador de soles
+        innerTable.add(sunTable)
+            .padBottom(10) // Espaciado debajo
+            .expandX()
+            .align(Align.center)
+            .row(); // Mover a la siguiente fila
+        
+     // Agregar el contador de soles en la parte superior
+        innerTable.add(sunCounterLabel)
+            .padBottom(20) // Espaciado hacia abajo
+            .expandX()
+            .align(Align.center)
+            .row(); // Mover a una nueva fila
+
+        innerTable.row(); // Crear nueva fila para la pala
+        innerTable.add(shovelButton)
+            .size(80, 80)
+            .padTop(10) // Espaciado hacia arriba
+            .align(Align.left);
+        
     
         
         
@@ -146,19 +183,18 @@ public class GameScreen implements Screen {
         buttonStack.add(textLabelMenu);
 
 
-        // Crear la tabla interna para organizar elementos
-        innerTable = new Table();
-        innerTable.top().left();
-        innerTable.add(sunCounterLabel).padTop(65).padLeft(-160);
+  
         
+        // Crear la tabla principal
+        Table mainTable = new Table();
+        mainTable.setFillParent(true);
+        mainTable.top().left(); // Alinear todo en la esquina superior izquierda
+        mainTable.add(innerTable).padTop(10).padLeft(10); // Posicionar la tabla interna
 
-        // Crear una tabla principal que contiene la barra y la tabla interna
-        Table seedbankTable = new Table();
-        seedbankTable.setFillParent(true);
-        seedbankTable.top().left();
-        seedbankTable.add(seedBankImage).width(400).height(100).row();
-        seedbankTable.add(innerTable).padTop(-100).padLeft(10);
-        // Agregar la tabla principal al stage
+        // Agregar la tabla principal al escenario
+        stage.addActor(mainTable);
+
+  
         
         
         menuTable = new Table();
@@ -167,15 +203,20 @@ public class GameScreen implements Screen {
         menuTable.add(buttonStack).size(200, 60); // Tamaño del botón
         
 
+     // Crear la tabla para las plantas
+        plantsTable = new Table();
+        plantsTable.top().left(); // Alinear arriba a la izquierda
+        plantsTable.setFillParent(true); // No ocupar toda la pantalla
+        plantsTable.padLeft(10).padTop(250); // Ajustar margenes para separación
 
+        // Añadir la tabla al stage
+        stage.addActor(plantsTable);
         
-        stage.addActor(seedbankTable);
         stage.addActor(menuTable);
 
         dragAndDrop = new DragAndDrop();
 
         
-//        addCard("WallNut.png", "WallNut");
 
         // Configurar drop target
         addPlantDropTarget();
@@ -249,7 +290,6 @@ public class GameScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
             	saveGame();
-            	dispose();
             	
             }
             
@@ -303,33 +343,71 @@ public class GameScreen implements Screen {
         	        return true; // Indica que el evento fue manejado
         	    }
         });
+        
+        
+     // Listener para eliminar la planta seleccionada
+        shovelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Lógica para eliminar la planta seleccionada
+                System.out.println("Pala seleccionada: Listo para eliminar una planta.");
+
+                // Configurar modo de eliminación
+                enablePlantRemovalMode();
+            }
+        });
         optionsMenu.toFront();
         
      // Agregar cartas de ejemplo
-        addCard("PeaShooterIcon.png", "PeaShooter");
-        addCard("sunflower.png", "Sunflower");
+        addCard("PeaShooterIcon.png", "PeaShooter",100);
+        addCard("sunflower.png", "Sunflower",50);
+        addCard("WallNutIcon.png", "WallNut", 200); // WallNut con precio de 200
+    
        
     }
 
     
-    private void addCard(String texturePath, String plantType) {
+    private void enablePlantRemovalMode() {
+        isRemovalMode  = true; // Activa el modo de eliminación
+    }
+
+
+
+	private void addCard(String texturePath, String plantType, int price) {
         TextureRegionDrawable cardDrawable = new TextureRegionDrawable(new TextureRegion(new Texture(texturePath)));
         ImageButton cardButton = new ImageButton(cardDrawable);
 
-        // Agregar funcionalidad de arrastrar y soltar para la carta
+        // Crear un Label para el precio
+        Label.LabelStyle priceLabelStyle = new Label.LabelStyle();
+        priceLabelStyle.font = font; // Usa la misma fuente
+        priceLabelStyle.fontColor = Color.WHITE;
+        Label priceLabel = new Label("$" + price, priceLabelStyle);
+        
+
+        // Configurar arrastrar y soltar para la carta
         dragAndDrop.addSource(new DragAndDrop.Source(cardButton) {
             @Override
             public DragAndDrop.Payload dragStart(InputEvent event, float x, float y, int pointer) {
                 DragAndDrop.Payload payload = new DragAndDrop.Payload();
-                payload.setDragActor(new Image(cardDrawable)); // Imagen arrastrada
-                payload.setObject(plantType); // Tipo de planta
+                payload.setDragActor(new Image(cardDrawable));
+                payload.setObject(plantType);
                 return payload;
             }
+        
         });
 
-        // Añadir el botón de la carta al panel
-        innerTable.add(cardButton).size(80, 80).padRight(10);
+        // Crear una tabla para la carta y el precio en una fila
+        Table cardTable = new Table();
+        cardTable.add(cardButton).size(80, 80).padRight(10); // Imagen de la carta
+        cardTable.add(priceLabel).padLeft(10).center(); // Precio al lado derecho
+
+        // Añadir la tabla de la carta a la tabla vertical
+        plantsTable.add(cardTable).padBottom(10).left();
+        plantsTable.row();
     }
+
+
+
 
     private void addPlantDropTarget() {
         // Crear un área de destino
@@ -372,6 +450,17 @@ public class GameScreen implements Screen {
             if (plant != null) {
                 System.out.println("Planta creada correctamente: " + plantType);
                 plant.setPosition(x - plant.getWidth() / 2, y - plant.getHeight() / 2); // Centrar la planta
+             // Añadir ClickListener para eliminar la planta
+                plant.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        if (isRemovalMode) {
+                            System.out.println("Eliminando planta: " + plantType);
+                            plant.remove(); // Eliminar la planta del stage
+                            isRemovalMode = false; // Salir del modo de eliminación
+                        }
+                    }
+                });
                 stage.addActor(plant); // Añadir al escenario
             } else {
                 System.out.println("Error: No se pudo crear la planta.");
@@ -568,54 +657,73 @@ public class GameScreen implements Screen {
 
     
     private void saveGame() {
-        // Ruta fija para guardar el archivo
-        FileHandle saveFile = Gdx.files.local("saves/gameState.json");
+        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        try {
-            // Crear un objeto de datos de guardado
-            SaveData saveData = new SaveData();
+        FileChooser fileChooser = FileChooser.createSaveDialog("Save game", skin, Gdx.files.local("saves/"));
 
-            // Guardar las plantas
-            saveData.plants = new Array<>();
-            for (Actor actor : stage.getActors()) {
-                if (actor instanceof PlantCard) {
-                    PlantCard plant = (PlantCard) actor;
-                    PlantData plantData = new PlantData();
-                    plantData.type = plant.getType();
-                    plantData.x = (int) plant.getX();
-                    plantData.y = (int) plant.getX();
-                    saveData.plants.add(plantData);
+        fileChooser.setFileNameEnabled(true);
+
+        fileChooser.setResultListener(new FileChooser.ResultListener() {
+            @Override
+            public boolean result(boolean success, FileHandle result) {
+                if (success) {
+                    try {
+                    	
+                        String filePath = result.path();
+                        if (!filePath.endsWith(".json")) {
+                            filePath += ".json";
+                        }
+                        FileHandle saveFile = Gdx.files.local(filePath);
+                        SaveData saveData = new SaveData();
+
+                        saveData.plants = new Array<>();
+                        for (Actor actor : stage.getActors()) {
+                            if (actor instanceof PlantCard) {
+                                PlantCard plant = (PlantCard) actor;
+                                PlantData plantData = new PlantData();
+                                plantData.type = plant.getType();
+                                plantData.x = (int) plant.getX();
+                                plantData.y = (int) plant.getY();
+                                saveData.plants.add(plantData);
+                            }
+                        }
+
+                        saveData.zombies = new Array<>();
+                        for (Zombie zombie : zombies) {
+                            ZombieData zombieData = new ZombieData();
+                            zombieData.type = zombie.getClass().getSimpleName();
+                            zombieData.x = zombie.getPosition()[0];
+                            zombieData.y = zombie.getPosition()[1];
+                            zombieData.health = zombie.getHealth();
+                            saveData.zombies.add(zombieData);
+                        }
+
+                        saveData.sun = Integer.parseInt(sunCounterLabel.getText().toString());
+
+                        Json json = new Json();
+                        saveFile.writeString(json.toJson(saveData), false);
+
+                        System.out.println("Juego guardado en: " + result.path());
+                    } catch (Exception e) {
+                        System.out.println("Error al guardar el juego: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("Guardado cancelado por el usuario.");
                 }
+                return true;
             }
+        });
 
-            // Guardar los zombies
-            saveData.zombies = new Array<>();
-            for (Zombie zombie : zombies) {
-                ZombieData zombieData = new ZombieData();
-                zombieData.type = zombie.getClass().getSimpleName();
-                zombieData.x = zombie.getPosition()[0];
-                zombieData.y = zombie.getPosition()[1];
-                zombieData.health = zombie.getHealth();
-                saveData.zombies.add(zombieData);
-            }
+        fileChooser.setOkButtonText("Save");
 
-            // Guardar el contador de sol
-            saveData.sun = Integer.parseInt(sunCounterLabel.getText().toString());
-
-            // Escribir los datos en el archivo
-            Json json = new Json();
-            saveFile.writeString(json.toJson(saveData), false);
-
-            System.out.println("Juego guardado automáticamente en: " + saveFile.path());
-        } catch (Exception e) {
-            System.out.println("Error al guardar el juego: " + e.getMessage());
-        }
+        fileChooser.show(stage);
     }
 
 
 
+
     private void spawnZombie(String zombieType, float x, float y) {
-        // Convertir las coordenadas visuales a índices lógicos
+
         int[] indices = convertCoordinatesToMatrixIndices(x, y);
 
         if (indices == null) {
@@ -623,18 +731,16 @@ public class GameScreen implements Screen {
             return;
         }
 
-        int row = indices[0]; // Fila lógica en el grid
-        int col = GRID_COLS - 1; // Forzamos la columna lógica al borde derecho del grid
+        int row = indices[0]; 
+        int col = GRID_COLS - 1; 
 
-        // Validar si la fila está dentro del rango permitido
         if (row < 0 || row >= GRID_ROWS) {
             System.out.println("Fila fuera del rango del grid: " + row);
             return;
         }
 
-        // Ajustar la posición visual para que esté justo fuera del borde derecho visible
-        float visualX = GRID_X_OFFSET + (col + 1) * TILE_SIZE; // Una columna adicional fuera del grid
-        float visualY = GRID_Y_OFFSET + row * TILE_SIZE; // Alinear con la fila calculada
+        float visualX = GRID_X_OFFSET + (col + 1) * TILE_SIZE;
+        float visualY = GRID_Y_OFFSET + row * TILE_SIZE;
 
         try {
             // Crear el zombie utilizando la fábrica
@@ -655,21 +761,11 @@ public class GameScreen implements Screen {
     }
     
     
-    
-//    private void initializeLawnMowers() {
-//        lawnMowers = new ArrayList<>();
-//        for (int i = 0; i < board.getRow(); i++) { // Supongamos que `board` tiene un método `getRowCount()`
-//            int[] position = {i, 0}; // Coloca la cortadora en la columna 0
-//            LawnMower mower = new LawnMower(position, board);
-//            lawnMowers.add(mower);
-//        }
-//    }
 
 
 
     @Override
     public void show() {
-//    	 //Crear varios zombies de diferentes tipos
     	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 0 * TILE_SIZE);
     	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 1 * TILE_SIZE);
     	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 2 * TILE_SIZE);
@@ -687,13 +783,13 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
     	ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-        // Dibujar el fondo
+
         batch.begin();
         batch.draw(backgroundTexture,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
         renderGrid();
-        checkAllPlantsAndZombies(); // Verifica ataques
-        checkCollisions(); // Detecta colisiones
+        checkAllPlantsAndZombies(); 
+        checkCollisions();
         stage.act(delta);
         stage.draw();
         
@@ -729,9 +825,7 @@ public class GameScreen implements Screen {
     }
    
     public void restoreGameState(SaveData saveData) {
-        // Restaurar las plantas
         for (PlantData plantData : saveData.plants) {
-        	 // Calcular la posición en píxeles del centro de la celda
             float pixelX = GRID_X_OFFSET + plantData.x * TILE_SIZE + TILE_SIZE / 2;
             float pixelY = GRID_Y_OFFSET + plantData.y * TILE_SIZE + TILE_SIZE / 2;
 
@@ -739,10 +833,8 @@ public class GameScreen implements Screen {
             createPlant(plantData.type, pixelX, pixelY);
             }
 
-        // Restaurar los zombies
-        zombies.clear(); // Limpiar lista actual
+        zombies.clear();
 
-        // Restaurar el contador de sol
         sunCounterLabel.setText(String.valueOf(saveData.sun));
     }
 
@@ -751,17 +843,17 @@ public class GameScreen implements Screen {
 	@Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
-        updateGridOffsets(); // Recalcular los offsets al cambiar el tamaño de la ventana
+        updateGridOffsets();
     }
 
     @Override
     public void pause() {
-    	 music.pause(); // Pausar la música del juego
+    	 music.pause(); 
     }
 
     @Override
     public void resume() {
-    	 music.play(); // Reanudar música
+    	 music.play();
     }
 
     @Override
@@ -769,7 +861,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-    	// Liberar la textura de fondo
+    	
         if (backgroundTexture != null) {
             backgroundTexture.dispose();
         }
@@ -779,27 +871,22 @@ public class GameScreen implements Screen {
             buttonMenuTexture.dispose();
         }
 
-        // Liberar la fuente generada
         if (font != null) {
             font.dispose();
         }
 
-        // Liberar el stage
         if (stage != null) {
             stage.dispose();
         }
 
-        // Liberar el batch de renderizado
         if (batch != null) {
             batch.dispose();
         }
 
-        // Liberar el shapeRenderer
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
         }
 
-        // Detener y liberar la música
         if (music != null) {
             music.stop();
             music.dispose();

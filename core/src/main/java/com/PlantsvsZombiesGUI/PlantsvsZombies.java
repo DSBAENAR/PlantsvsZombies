@@ -3,15 +3,13 @@ package com.PlantsvsZombiesGUI;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class PlantsvsZombies extends Game {
     SpriteBatch batch;
     public Music backgroundMusic;
-
     @Override
     public void create() {
         setBatch(new SpriteBatch());

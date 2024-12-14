@@ -21,7 +21,7 @@ public class PlantFactory {
                 if (GameScreen.spendSun(price)) { // Validar si hay suficientes soles
                     DefensePlant wallNutLogic = new WallNut(new int[]{x, y}, null, board);
                     Texture spriteSheet = new Texture("WallNutSprite.png"); // Ruta a tu sprite
-                    return new PlantCard(x, y, spriteSheet, 25, 1, 0.05f, wallNutLogic);
+                    return new PlantCard(x, y, spriteSheet, 17, 1, 0.1f, wallNutLogic);
                 } else {
                     System.out.println("No tienes suficientes soles para plantar un WallNut.");
                 }

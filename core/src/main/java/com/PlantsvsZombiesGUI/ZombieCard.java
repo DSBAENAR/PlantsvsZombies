@@ -82,16 +82,13 @@ public class ZombieCard extends Actor {
             return;
         }
 
-        // Incrementar el temporizador del ataque
         attackTimer += delta;
 
-        // Mover el zombie hacia la izquierda si no está atacando
         if (attackTimer >= attackCooldown) {
             float newX = getX() - 50 * delta; // Velocidad del zombie
             setX(newX);
         }
 
-        // Actualizar la posición lógica del zombie
         int col = (int) ((getX() - GameScreen.GRID_X_OFFSET) / GameScreen.TILE_SIZE);
         position[1] = Math.max(col, 0); // Evita que salga del tablero
 
@@ -100,12 +97,11 @@ public class ZombieCard extends Actor {
             if (actor instanceof PlantCard) {
                 PlantCard plantCard = (PlantCard) actor;
 
-                // Verificar colisión
                 if (collidesWithPlant(plantCard)) {
                     // Detener el movimiento y atacar
                     if (attackTimer >= attackCooldown) {
-                        attackPlant(plantCard); // Atacar la planta
-                        attackTimer = 0f; // Reiniciar el temporizador del ataque
+                        attackPlant(plantCard); 
+                        attackTimer = 0f;
                     }
                     return; // Detener el movimiento mientras ataca
                 }
@@ -114,8 +110,8 @@ public class ZombieCard extends Actor {
 
         // Detener al zombie si llega al borde izquierdo
         if (getX() < GameScreen.GRID_X_OFFSET) {
-            setX(GameScreen.GRID_X_OFFSET); // Mantén al zombie en el borde
-            isAlive = false; // Considerar al zombie "muerto" o detenido
+            setX(GameScreen.GRID_X_OFFSET); 
+            isAlive = false; 
             System.out.println("Zombie alcanzó el borde izquierdo.");
         }
     }
@@ -141,21 +137,18 @@ public class ZombieCard extends Actor {
     }
     
     public Rectangle getBoundingRectangle() {
-        // Ajustar los márgenes del colider si el sprite incluye áreas transparentes
-        float offsetX = getWidth() * 0.1f; // Reducir los lados
-        float offsetY = getHeight() * 0.1f; // Reducir la parte superior e inferior
-        float adjustedWidth = getWidth() * 0.8f; // Ajustar el ancho
-        float adjustedHeight = getHeight() * 0.8f; // Ajustar la altura
+        float offsetX = getWidth() * 0.1f;
+        float offsetY = getHeight() * 0.1f;
+        float adjustedWidth = getWidth() * 0.8f;
+        float adjustedHeight = getHeight() * 0.8f;
         return new Rectangle(getX() + offsetX, getY() + offsetY, adjustedWidth, adjustedHeight);
     }
 
     public void attackPlant(PlantCard plantCard) {
         if (plantCard.getPlantLogic() != null) {
-            // Reducir la vida de la planta
-            plantCard.getPlantLogic().reduceHealth(100); // Cada mordida inflige 100 puntos de daño
+            plantCard.getPlantLogic().reduceHealth(100);
             System.out.println("Zombie atacó a una planta. Salud restante de la planta: " + plantCard.getPlantLogic().getHealth());
 
-            // Si la planta muere, eliminarla
             if (plantCard.getPlantLogic().getHealth() <= 0) {
                 plantCard.remove();
                 System.out.println("Planta destruida por el zombie.");
