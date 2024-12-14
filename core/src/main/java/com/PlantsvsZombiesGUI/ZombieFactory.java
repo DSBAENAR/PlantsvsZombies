@@ -40,6 +40,7 @@ public class ZombieFactory {
             }
             else if (zombieType.equalsIgnoreCase("Conehead")) {
                 zombieSheet = new Texture("ConeheadSprite.png");
+                //iria 1 frame cols
                 frameCols = 47;
                 frameRows = 1;
                 frameDuration = 0.15f;

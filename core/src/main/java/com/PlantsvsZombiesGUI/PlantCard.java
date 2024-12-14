@@ -89,6 +89,9 @@ public class PlantCard extends Actor {
             }
         }
         
+        // aca irian nuevas plantas
+        
+        
      
         if (plantLogic instanceof UtilityPlant) {
             UtilityPlant utilityPlant = (UtilityPlant) plantLogic;
