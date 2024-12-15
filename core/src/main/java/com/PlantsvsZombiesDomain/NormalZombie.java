@@ -10,7 +10,6 @@ public class NormalZombie extends Zombie{
 
     private long attackSpeed = 500;
     private int damage = 100;
-    private Timer timer;
     private Board board;
     /**
      * Constructor of NormalZombie

@@ -42,7 +42,7 @@ public class LawnMower extends Something {
     /**
      * start time
      */
-    protected void zombieCheckTimer() {
+    public void zombieCheckTimer() {
         timerAlive = new Timer();
         timerAlive.scheduleAtFixedRate(new TimerTask() {
 

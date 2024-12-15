@@ -10,7 +10,6 @@ import java.util.TimerTask;
 public abstract class Zombie extends Something implements Attack{
 
     protected int[] initalPosition;
-    protected int column;
     protected int track;
     protected int health;
     protected int price;
@@ -19,7 +18,6 @@ public abstract class Zombie extends Something implements Attack{
     protected Board board;
     protected Player owner;
     protected Timer timerAlive;
-    private int timerTicks = 0;
     protected boolean itsAttacking = false;
 
     /**
@@ -33,7 +31,6 @@ public abstract class Zombie extends Something implements Attack{
      */
     public Zombie(int[] initalPosition, int health, int price, int damage, long attackSpeed, Player owner, Board board) throws PlantsVsZombiesException {
         super(initalPosition, board);
-        this.column = initalPosition[1];
         this.track = initalPosition[0];
         this.health = health;
         this.price = price;
