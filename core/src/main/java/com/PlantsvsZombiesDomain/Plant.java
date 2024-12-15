@@ -7,7 +7,6 @@ public abstract class Plant extends Something{
 
     private int health;
     private int price;
-    protected boolean itsAlive;
     protected Player owner;
 
     /**

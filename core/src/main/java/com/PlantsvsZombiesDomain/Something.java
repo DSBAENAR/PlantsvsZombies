@@ -8,6 +8,7 @@ public abstract class Something{
     private Board board;
     protected int row;
     protected int column;
+    protected boolean itsAlive;
 
     /**
      * Constructor of Something

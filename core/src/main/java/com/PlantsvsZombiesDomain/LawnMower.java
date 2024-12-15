@@ -6,7 +6,6 @@ import java.util.TimerTask;
 
 public class LawnMower extends Something {
 
-    private boolean itsAlive = true;
     private Timer timerAlive;
     private Board board;
     /**
@@ -19,6 +18,7 @@ public class LawnMower extends Something {
         this.board = board;
         row = position[0];
         column = position[1];
+        this.itsAlive = true;
         zombieCheckTimer();
 
     }
