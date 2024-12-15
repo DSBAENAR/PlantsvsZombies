@@ -25,18 +25,32 @@ public class PlantsVsZombies {
      * Constructor
      * @param board board of the game
      * @param time time of the game
-     * @param gameMode mode of the game
+     * @param gameMode numerical representation of the game mode (1 = PvsM, 2 = MvsM, 3 = PvsP)
      * @param player1 one of the players
      * @param player2 the other player
      */
-    public PlantsVsZombies(Board board, int time, String gameMode, Player player1, Player player2){
+    public PlantsVsZombies(Board board, int time, int gameMode, Player player1, Player player2) throws PlantsVsZombiesException {
         this.player1 = player1;
         this.player2 = player2;
         this.board = board;
         this.time = time;
-        this.gameMode = gameMode;
-        player1Inventory = new ArrayList<>();
-        player2Inventory = new ArrayList<>();
+
+        switch (gameMode) {
+            case 1:
+                this.gameMode = GameModes.PvsM.getDisplayName();
+                break;
+            case 2:
+                this.gameMode = GameModes.MvsM.getDisplayName();
+                break;
+            case 3:
+                this.gameMode = GameModes.PvsP.getDisplayName();
+                break;
+            default:
+                throw new PlantsVsZombiesException(PlantsVsZombiesException.NO_VALID_GAMEMODE);
+
+        }
+        player1Inventory = player1.getInventory();
+        player2Inventory = player2.getInventory();
         turn = true;
         startTimer();
     }

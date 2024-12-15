@@ -7,10 +7,10 @@ import java.util.ArrayList;
  */
 public abstract class Player implements GameMoves{
 
-    private String name;
-    private int money;
-    private boolean isPlant;
-    private ArrayList<Something> inventory;
+    protected String name;
+    protected int money;
+    protected boolean isPlant;
+    protected ArrayList<Something> inventory;
 
     /**
      * Constructor of the playrt
@@ -95,29 +95,9 @@ public abstract class Player implements GameMoves{
      * @param something the something
      */
     @Override
-    public void putSomething(int[] position, Something something) throws PlantsVsZombiesException{
-        if (isPlant){
-            if(something instanceof Plant){
-                if(money >= ((Plant) something).getPrice()){
-                    money -= ((Plant) something).getPrice();
-                    ((Plant) something).setOwner(this);
-                    inventory.add(something);
-                }else{
-                    throw new PlantsVsZombiesException(PlantsVsZombiesException.NOT_ENOUGH_MONEY);
-                }
-            }
-        } else {
-            if(something instanceof Zombie){
-                if(money >= ((Zombie) something).getPrice()){
-                    money -= ((Zombie) something).getPrice();
-                    ((Zombie) something).setOwner(this);
-                    inventory.add(something);
-                }else{
-                    throw new PlantsVsZombiesException(PlantsVsZombiesException.NOT_ENOUGH_MONEY);
-                }
-            }
-        }
-    }
+    public abstract void putSomething(int[] position, Something something) throws PlantsVsZombiesException;
+
+
 
     /**
      * To delete something in the inventory (Plants)
@@ -125,13 +105,6 @@ public abstract class Player implements GameMoves{
      * @param something the something
      */
     @Override
-    public void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException{
-        for(Something inventory : this.inventory){
-            if(inventory.equals(something)){
-                this.inventory.remove(inventory);
-                break;
-            }
-        }
-    }
+    public abstract void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException;
 
 }

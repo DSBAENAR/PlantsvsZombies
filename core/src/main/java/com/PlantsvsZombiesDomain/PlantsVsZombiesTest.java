@@ -15,7 +15,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         SunFlower sunFlower1 = new SunFlower(position, player1, board);
@@ -40,7 +40,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         SunFlower sunFlower = new SunFlower(position, player1, board);
@@ -62,7 +62,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         pvsz.putSomething(position, new SunFlower(position, player1, board));
@@ -80,12 +80,12 @@ public class PlantsVsZombiesTest {
     }
 
     @Test
-    void testGenerateMoney10Secs(){
+    void testGenerateMoney10Secs() throws PlantsVsZombiesException {
 
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int initialMoneyP1 = player1.getMoney();
         int initialMoneyP2 = player2.getMoney();
@@ -106,7 +106,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         pvsz.putSomething(position, new SunFlower(position, player1, board));
@@ -133,7 +133,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         pvsz.putSomething(position, new PeaShooter(position, player1, board));
@@ -155,7 +155,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         PeaShooter peaShooter1 = new PeaShooter(position, player1, board);
@@ -184,7 +184,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int [] position = new int[]{0, 9};
         WallNut wallNut = new WallNut(position, player1, board);
@@ -217,7 +217,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 9};
         SunFlower sunFlower = new SunFlower(position, player1, board);
@@ -244,7 +244,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         PeaShooter peaShooter = new PeaShooter(position, player1, board);
@@ -283,7 +283,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         WallNut wallNut = new WallNut(position, player1, board);
@@ -308,7 +308,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         ECIPlant eciPlant = new ECIPlant(position, player1, board);
@@ -333,7 +333,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 9};
         WallNut wallNut = new WallNut(position, player1, board);
@@ -357,7 +357,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
 
         int[] position = new int[]{0, 9};
         PotatoMine potatoMine = new PotatoMine(position, player1, board);
@@ -387,7 +387,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
         int[] position = new int[]{0, 9};
         int[] position2 = new int[]{0, 9};
 
@@ -418,7 +418,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
         int[] position1 = new int[]{1, 8};
         int[] position2 = new int[]{1, 9};
         int[] position3 = new int[]{1, 3};
@@ -459,7 +459,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
         Something[][] matrixBoard = board.getMatrixBoard();
 
         for (int i = 0; i <= 4; i++) {
@@ -476,7 +476,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
         int[] position1 = new int[]{2, 1};
         int[] position3 = new int[]{2, 2};
         int[] position2 = new int[]{1, 9};
@@ -510,7 +510,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, player1, player2);
         int[] position1 = new int[]{2, 1};
         int[] position3 = new int[]{2, 2};
         int[] position2 = new int[]{1, 9};
