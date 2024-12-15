@@ -29,7 +29,6 @@ public class PvPMenu implements Screen {
     private Texture btnPlay;
     private Texture btnLoadGame;
     private Texture btnpvp; //Player vs Player
-    private Texture btnmvm; //Machine vs Machine
     private Stage stage;
     private Texture titleTexture;
 
@@ -44,7 +43,7 @@ public class PvPMenu implements Screen {
         btnPlay = new Texture("button_play.png");
         btnLoadGame = new Texture("button_load.png");
         btnpvp = new Texture("button_pvp.png");
-        btnmvm = new Texture("button_mvm.png");
+        new Texture("button_mvm.png");
         titleTexture = new Texture("TextPvP.png");
         
      // Crear un Stage para gestionar los elementos de UI
@@ -62,7 +61,6 @@ public class PvPMenu implements Screen {
     	TextureRegionDrawable btnplayDrawabable = new TextureRegionDrawable(new TextureRegion(btnPlay));
     	TextureRegionDrawable btnLoadGameDrawabable = new TextureRegionDrawable(new TextureRegion(btnLoadGame));
     	TextureRegionDrawable btnpvpDrawabable = new TextureRegionDrawable(new TextureRegion(btnpvp));
-    	TextureRegionDrawable btnmvmDrawabable = new TextureRegionDrawable(new TextureRegion(btnmvm));
     	
     	
         // Crear un ImageButton con el drawable
@@ -70,7 +68,6 @@ public class PvPMenu implements Screen {
         ImageButton btnplayActor = new ImageButton(btnplayDrawabable);
         ImageButton btnLoadGameActor = new ImageButton(btnLoadGameDrawabable);
         ImageButton btnpvpGameActor = new ImageButton(btnpvpDrawabable);
-        ImageButton btnmvmGameActor = new ImageButton(btnmvmDrawabable);
         
          //Agregar un listener para manejar el clic en el botón
         btnSaveAndExitActor.addListener(new ClickListener() {
@@ -85,7 +82,7 @@ public class PvPMenu implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
             	game.dispose();
-                game.setScreen(new LevelMenu(game)); // Ejemplo de transición a la pantalla del menú principal
+                game.setScreen(new PVPScreen(game)); // Ejemplo de transición a la pantalla del menú principal
             }
         });
         
@@ -123,18 +120,14 @@ public class PvPMenu implements Screen {
         tableOptions.row().pad(10, 0, 10, 0);
         tableOptions.add(btnLoadGameActor).fillX().uniformX();
         tableOptions.row().pad(10, 0, 10, 0);
-        tableOptions.add(btnpvpGameActor).fillX().uniformX();
-        tableOptions.row().pad(10, 0, 10, 0);
-        tableOptions.add(btnmvmGameActor).fillX().uniformX();
-        tableOptions.row().pad(10, 0, 10, 0);
         tableOptions.add(btnSaveAndExitActor).fillX().uniformX();
         
         
         Table titleTable = new Table();
-        titleTable.setFillParent(true); // Asegura que la tabla ocupe toda la pantalla
-        titleTable.top(); // Posiciona el contenido en la parte superior
+        titleTable.setFillParent(true); 
+        titleTable.top(); 
         titleTable.add(new Image(new TextureRegionDrawable(new TextureRegion(titleTexture)))).center().padTop(20);
-        stage.addActor(titleTable); // Agrega la tabla al stage
+        stage.addActor(titleTable);
 
         
        

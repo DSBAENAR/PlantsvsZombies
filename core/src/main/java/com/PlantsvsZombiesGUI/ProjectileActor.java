@@ -21,6 +21,9 @@ public class ProjectileActor extends Actor {
 
     @Override
     public void act(float delta) {
+    	if (GameStateManager.isPaused()) {
+            return; // No hacer nada si el juego está en pausa
+        }
         super.act(delta);
 
         // Mover el proyectil hacia la derecha

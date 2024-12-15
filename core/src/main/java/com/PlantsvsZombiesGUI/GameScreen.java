@@ -4,6 +4,7 @@ package com.PlantsvsZombiesGUI;
 import com.PlantsvsZombiesDomain.Board;
 import com.PlantsvsZombiesDomain.HumanPlayer;
 import com.PlantsvsZombiesDomain.Zombie;
+import com.PlantsvsZombiesGUI.GameStateManager.GameState;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
@@ -61,12 +62,17 @@ public class GameScreen implements Screen {
     private Array<Rectangle> gridCells; // Lista de rectángulos que representan las celdas
     private Rectangle highlightedCell = null;
     private static Label sunCounterLabel;
-    private static int sunCounter = 1050;
     private Array<Zombie> zombies; // Lista lógica de zombies
     private Board board;
 	private Table plantsTable;
 	private boolean isRemovalMode = false;
-    public GameScreen(PlantsvsZombies game) {
+	private boolean isGameOver = false;
+	private Image gameOverImage;
+	private Window gameOverMenu;
+	private Table zombiesTable;
+	
+	
+	public GameScreen(PlantsvsZombies game) {
         this.game = game;
         zombies = new Array<>();
         new Array<>();
@@ -101,6 +107,7 @@ public class GameScreen implements Screen {
         
         createUI();
         createGrid();
+        
     }
     
     
@@ -116,7 +123,14 @@ public class GameScreen implements Screen {
     
 
     private void createUI() {
-        new Image(new Texture("SeedBank.png"));
+    	createGameOverMenu(); // Llamar una vez
+
+    	
+    	Texture gameOverTexture = new Texture("PC Computer - Plants vs Zombies - Game Over Screen.png");
+    	gameOverImage = new Image(gameOverTexture);
+    	gameOverImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Ajustar al tamaño de la pantalla
+    	gameOverImage.setVisible(false); // Ocultar inicialmente
+    	stage.addActor(gameOverImage);
         
         buttonMenuTexture = new Texture("ButtonMenu.png");
         
@@ -133,10 +147,9 @@ public class GameScreen implements Screen {
         Label saveLabel = new Label("Save", labelStyle);
         optionsLabel.setAlignment(Align.center); // Alinear el texto al centro
         saveLabel.setAlignment(Align.center); // Alinear el texto al centro
-        CharSequence suncounter = String.valueOf(sunCounter);
-		sunCounterLabel = new Label(suncounter, labelStyle);
+        sunCounterLabel = new Label(String.valueOf(GameManager.getGameManager().getSunCounter()), labelStyle);
         sunCounterLabel.setAlignment(Align.center); // Alinear texto
-     
+        initializeSunCounter();
         
         
         Texture sunTexture = new Texture("Sun.png");
@@ -203,23 +216,28 @@ public class GameScreen implements Screen {
         menuTable.add(buttonStack).size(200, 60); // Tamaño del botón
         
 
-     // Crear la tabla para las plantas
+    
         plantsTable = new Table();
-        plantsTable.top().left(); // Alinear arriba a la izquierda
+        plantsTable.top().left(); 
+        
         plantsTable.setFillParent(true); // No ocupar toda la pantalla
         plantsTable.padLeft(10).padTop(250); // Ajustar margenes para separación
+        
+        
+       
 
         // Añadir la tabla al stage
         stage.addActor(plantsTable);
-        
         stage.addActor(menuTable);
+        
 
         dragAndDrop = new DragAndDrop();
 
         
 
         // Configurar drop target
-        addPlantDropTarget();
+        addPlantDropTarget();     
+        // Mostrar el menú de Game Over
         
      // Crear un estilo para la ventana
         Window.WindowStyle windowStyle = new Window.WindowStyle();
@@ -252,21 +270,14 @@ public class GameScreen implements Screen {
                 optionsLabel.setColor(Color.WHITE);
             }
 
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("Opciones seleccionadas");
-                pause();
-                // Aquí puedes implementar lo que quieras que haga este botón
-                return true;
-            }
         });
 
         // Botón de "Main Menu"
         mainMenuInGameLabel.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	dispose();
             	game.setScreen(new mainMenu(game)); // Cambiar al menú principal
+            	dispose();
             }
             
             Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
@@ -283,6 +294,8 @@ public class GameScreen implements Screen {
         		mainMenuInGameLabel.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         });
+        
+        
         
         
      // Botón de "Guardar"
@@ -320,7 +333,6 @@ public class GameScreen implements Screen {
      // Añadir un InputListener para manejar el hover
         buttonStack.addListener(new InputListener() {
         	Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
-        	private boolean isMenuVisible = false;
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         	    // Implementación al entrar
@@ -334,14 +346,23 @@ public class GameScreen implements Screen {
         		textLabelMenu.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         	
-        	 @Override
-        	    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-        	        // Alternar visibilidad del menú al hacer clic
-        	        isMenuVisible = !isMenuVisible;
-        	        optionsMenu.setVisible(isMenuVisible);
-        	        optionsMenu.toFront();
-        	        return true; // Indica que el evento fue manejado
+        	@Override
+        	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+        	    if (GameStateManager.isPaused()) {
+        	        // Si está pausado, reanuda el juego
+        	        GameStateManager.setGameState(GameStateManager.GameState.RUNNING);
+        	        music.play(); // Reanudar música
+        	        optionsMenu.setVisible(false); // Ocultar el menú
+        	    } else {
+        	        // Si no está pausado, pausa el juego
+        	        GameStateManager.setGameState(GameStateManager.GameState.PAUSED);
+        	        music.pause(); // Pausar música
+        	        optionsMenu.setVisible(true); // Mostrar el menú
+        	        optionsMenu.toFront(); // Asegurar que el menú esté al frente
         	    }
+        	    return true;
+        	}
+
         });
         
         
@@ -361,15 +382,127 @@ public class GameScreen implements Screen {
      // Agregar cartas de ejemplo
         addCard("PeaShooterIcon.png", "PeaShooter",100);
         addCard("sunflower.png", "Sunflower",50);
-        addCard("WallNutIcon.png", "WallNut", 200); // WallNut con precio de 200
+        addCard("WallNutIcon.png", "WallNut", 200);
     
        
     }
+    
+
+    public void pauseGame() {
+        music.pause(); // Pausa la música
+    }
+
+    public void resumeGame() {
+        music.play(); // Reanuda la música
+    }
+
+
+
+	private void createGameOverMenu() {
+        // Estilo de la ventana
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font; // Usa la misma fuente definida anteriormente
+        windowStyle.background = new TextureRegionDrawable(new TextureRegion(new Texture("menuGame.png"))); // Fondo del menú (usa tu imagen de fondo)
+
+        // Crear la ventana del Game Over
+        gameOverMenu = new Window("", windowStyle);
+        gameOverMenu.setSize(450, 600); // Ajusta el tamaño de la ventana
+        gameOverMenu.setPosition(
+            (Gdx.graphics.getWidth() - gameOverMenu.getWidth()) / 2f, // Centrar horizontalmente
+            (Gdx.graphics.getHeight() - gameOverMenu.getHeight()) / 2f // Centrar verticalmente
+        );
+        gameOverMenu.setVisible(false); // Inicialmente invisible
+
+        // Estilo para los botones
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        buttonStyle.font = font; // Usa la misma fuente
+
+        // Botón para reiniciar el juego
+        TextButton restartButton = new TextButton("Restart", buttonStyle);
+        restartButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                restartGame(); // Implementa esta lógica para reiniciar tu juego
+            }
+        });
+
+        // Botón para volver al menú principal
+        TextButton mainMenuButton = new TextButton("Main Menu", buttonStyle);
+        mainMenuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                goToMainMenu(); // Implementa esta lógica para volver al menú principal
+            }
+        });
+
+        // Añadir botones a la ventana
+        gameOverMenu.add(restartButton).size(200, 50).pad(10); // Ajusta el tamaño y espaciado
+        gameOverMenu.row(); // Nueva fila
+        gameOverMenu.add(mainMenuButton).size(200, 50).pad(10);
+
+        // Añadir la ventana al stage
+        stage.addActor(gameOverMenu);
+    }
+
+       private void showGameOverMenu() {
+        gameOverMenu.setVisible(true);
+        gameOverMenu.toFront();
+    }
+
+    // Método para reiniciar el juego
+    private void restartGame() {
+        game.setScreen(new GameScreen(game));
+    }
+
+    // Método para ir al menú principal
+    private void goToMainMenu() {
+    	dispose();
+        game.setScreen(new mainMenu(game)); // Cambia a la pantalla del menú principal
+    }
+
 
     
     private void enablePlantRemovalMode() {
         isRemovalMode  = true; // Activa el modo de eliminación
     }
+
+    private void checkForGameOver() {
+        if (isGameOver) return;
+
+        for (Actor actor : stage.getActors()) {
+            if (actor instanceof ZombieCard) {
+                ZombieCard zombie = (ZombieCard) actor;
+                if (zombie.getX() <= GameScreen.GRID_X_OFFSET) {
+                    triggerGameOver();
+                    break;
+                }
+            }
+        }
+    }
+
+    private void triggerGameOver() {
+        if (!GameStateManager.isGameOver()) {
+            GameStateManager.setGameState(GameState.GAME_OVER);
+
+            // Detener la música
+            music.stop();
+
+            // Limpiar el escenario y mostrar la imagen de Game Over
+            stage.clear();
+
+            // Mostrar la imagen de Game Over si no está ya a
+            gameOverImage.setVisible(true);
+            stage.addActor(gameOverImage);
+            stage.addActor(gameOverMenu);
+
+            // Mostrar el menú de Game Over
+            showGameOverMenu();
+        }
+    }
+
+
+
+	
 
 
 
@@ -397,12 +530,12 @@ public class GameScreen implements Screen {
         });
 
         // Crear una tabla para la carta y el precio en una fila
-        Table cardTable = new Table();
-        cardTable.add(cardButton).size(80, 80).padRight(10); // Imagen de la carta
-        cardTable.add(priceLabel).padLeft(10).center(); // Precio al lado derecho
+        Table cardPlantTable = new Table();
+        cardPlantTable.add(cardButton).size(80, 80).padRight(10); // Imagen de la carta
+        cardPlantTable.add(priceLabel).padLeft(10).center(); // Precio al lado derecho
 
         // Añadir la tabla de la carta a la tabla vertical
-        plantsTable.add(cardTable).padBottom(10).left();
+        plantsTable.add(cardPlantTable).padBottom(10).left();
         plantsTable.row();
     }
 
@@ -469,6 +602,8 @@ public class GameScreen implements Screen {
             System.out.println("Excepción al crear la planta: " + e.getMessage());
         }
     }
+    
+    
 
 
 
@@ -525,6 +660,7 @@ public class GameScreen implements Screen {
     
     private void renderGrid() {
         Gdx.gl.glEnable(GL20.GL_BLEND);
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         // Dibujar el fondo de la celda resaltada
@@ -640,17 +776,31 @@ public class GameScreen implements Screen {
 
 
     public static void incrementSunCounter(int amount) {
-        sunCounter += amount;
-        sunCounterLabel.setText(String.valueOf(sunCounter)); // Actualizar visualmente
+        GameManager.getGameManager();
+		GameManager.incrementSunCounter(amount);
+        updateSunCounterLabel(); // Actualizar la etiqueta visual
     }
 
+
     public static boolean spendSun(int amount) {
-        if (sunCounter >= amount) {
-            sunCounter -= amount;
-            sunCounterLabel.setText(String.valueOf(sunCounter)); // Actualizar visualmente
-            return true;
+        boolean success = GameManager.getGameManager().spendSun(amount);
+        if (success) {
+            updateSunCounterLabel(); // Actualizar la etiqueta visual
         }
-        return false;
+        return success;
+    }
+
+    
+    private static void updateSunCounterLabel() {
+        sunCounterLabel.setText(String.valueOf(GameManager.getGameManager().getSunCounter()));
+    }
+    
+    private void initializeSunCounter() {
+        GameManager.getGameManager().setOnSunCounterChange(() -> {
+            if (sunCounterLabel != null) {
+                sunCounterLabel.setText(String.valueOf(GameManager.getGameManager().getSunCounter()));
+            }
+        });
     }
 
     
@@ -782,16 +932,30 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-    	ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
-        batch.begin();
-        batch.draw(backgroundTexture,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.end();
-        renderGrid();
-        checkAllPlantsAndZombies(); 
-        checkCollisions();
-        stage.act(delta);
-        stage.draw();
+    	if (!GameStateManager.isGameOver()) {
+	        // Dibujar el fondo y otros elementos
+	        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+	        batch.begin();
+	        batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+	        batch.end();
+	        renderGrid();
+	        checkForGameOver(); 
+	        checkAllPlantsAndZombies();
+	        checkCollisions();
+	        stage.act(delta);
+	        stage.draw();
+	    } else {
+	        triggerGameOver();
+	        stage.draw();
+	    }
+	 
+	 
+	 if (GameStateManager.isPaused()) {
+	        // Dibuja la escena actual sin actualizar lógica ni animaciones
+	        stage.draw();
+	        return;
+	    }
         
      // Dibujar colliders
         shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
@@ -817,6 +981,7 @@ public class GameScreen implements Screen {
                 shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
             }
         }
+        
 
         shapeRenderer.end();
         stage.act(delta);

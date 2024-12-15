@@ -76,7 +76,9 @@ public class ZombieCard extends Actor {
     @Override
     public void act(float delta) {
         super.act(delta);
-
+        if (GameStateManager.isPaused()) {
+            return; // No hacer nada si el juego está en pausa
+        }
         if (!isAlive) {
             remove();
             return;

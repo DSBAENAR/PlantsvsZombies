@@ -9,17 +9,16 @@ public class PlantFactory {
         try {
             if (plantType.equals("PeaShooter")) {
                 int price = 100;
-                if (GameScreen.spendSun(price)) { // Validar si hay suficientes soles
+                if (GameManager.getGameManager().spendSun(price)) {
                     AttackPlant peashooterLogic = new PeaShooter(new int[]{x, y}, new HumanPlayer("Player 1",50,true), board);
                     Texture spriteSheet = new Texture("PeaShooterSprite.png"); // Ruta a tu sprite
-                    // EN 25 iria 1
                     return new PlantCard(x, y, spriteSheet, 25, 1, 0.1f, peashooterLogic);
                 } else {
                     System.out.println("No tienes suficientes soles para plantar un PeaShooter.");
                 }
             } else if (plantType.equals("WallNut")) {
                 int price = 50;
-                if (GameScreen.spendSun(price)) { // Validar si hay suficientes soles
+                if (GameManager.getGameManager().spendSun(price)) {
                     DefensePlant wallNutLogic = new WallNut(new int[]{x, y}, null, board);
                     Texture spriteSheet = new Texture("WallNutSprite.png"); // Ruta a tu sprite
                     return new PlantCard(x, y, spriteSheet, 17, 1, 0.1f, wallNutLogic);
@@ -28,7 +27,7 @@ public class PlantFactory {
                 }
             } else if (plantType.equals("Sunflower")) {
                 int price = 50;
-                if (GameScreen.spendSun(price)) { // Validar si hay suficientes soles
+                if (GameManager.getGameManager().spendSun(price)) {
                     UtilityPlant sunflowerLogic = new SunFlower(new int[]{x, y},  new HumanPlayer("Player 1",50,true), board);
                     Texture spriteSheet = new Texture("SunflowerSprite.png"); // Ruta a tu sprite
                     return new PlantCard(x, y, spriteSheet, 25, 1, 0.05f, sunflowerLogic);

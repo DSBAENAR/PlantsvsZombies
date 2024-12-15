@@ -86,11 +86,11 @@ public class LawnMowerActor extends Actor {
 
 
 
-void activateLawnMower() {
-    if (isMoving) return; // Evitar activaciones múltiples
-    isMoving = true;
-    setItsAlive(false); // Marcar la cortadora como inactiva
-}
+	public void activateLawnMower() {
+	    if (isMoving) return; // Evitar activaciones múltiples
+	    isMoving = true;
+	    setItsAlive(false); // Marcar la cortadora como inactiva
+	}
 
 
 

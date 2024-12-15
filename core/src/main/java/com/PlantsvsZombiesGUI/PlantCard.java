@@ -77,6 +77,10 @@ public class PlantCard extends Actor {
     @Override
     public void act(float delta) {
         super.act(delta);
+        
+        if (GameStateManager.isPaused()) {
+            return;
+        }
 
         // Verificar si la planta lógica es de ataque
         if (plantLogic instanceof AttackPlant) {
@@ -89,18 +93,23 @@ public class PlantCard extends Actor {
             }
         }
         
-        // aca irian nuevas plantas
-        
+
         
      
         if (plantLogic instanceof UtilityPlant) {
             UtilityPlant utilityPlant = (UtilityPlant) plantLogic;
-            utilityPlant.setOnMoneyGeneratedCallback(() -> {
-                Gdx.app.postRunnable(() -> {
-                    GameScreen.incrementSunCounter(utilityPlant.getMoneySupply());
+
+            if (plantLogic.getHealth() > 0) {
+                utilityPlant.setOnMoneyGeneratedCallback(() -> {
+                    Gdx.app.postRunnable(() -> {
+                        GameManager.incrementSunCounter(utilityPlant.getMoneySupply());
+                    });
                 });
-            });
+            } else {
+            	utilityPlant.setOnMoneyGeneratedCallback(null);
+            }
         }
+
 
         // Eliminar la planta si su salud llega a 0
         if (plantLogic.getHealth() <= 0) {
