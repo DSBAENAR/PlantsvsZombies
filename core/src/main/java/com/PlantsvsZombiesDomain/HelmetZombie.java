@@ -8,7 +8,6 @@ import java.util.Timer;
 public abstract class HelmetZombie extends Zombie {
     protected int damage;
     protected long attackSpeed;
-    protected Timer timer;
     protected Board board;
 
     /**

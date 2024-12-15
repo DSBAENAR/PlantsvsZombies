@@ -16,7 +16,6 @@ public abstract class Zombie extends Something implements Attack{
     protected int price;
     protected int damage;
     protected long attackSpeed;
-    protected boolean itsAlive;
     protected Board board;
     protected Player owner;
     protected Timer timerAlive;
