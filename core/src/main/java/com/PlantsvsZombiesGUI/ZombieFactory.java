@@ -1,58 +1,89 @@
 package com.PlantsvsZombiesGUI;
 
+import com.PlantsvsZombiesDomain.*;
 import com.badlogic.gdx.graphics.Texture;
 
 public class ZombieFactory {
+    private static boolean validatePrice = false;
 
-    public static ZombieCard createZombie(String zombieType, int row, int col, float tileSize) {
-        Texture zombieSheet;
-        int frameCols, frameRows;
-        float frameDuration;
+    public static void setValidatePrice(boolean validate) {
+        validatePrice = validate;
+    }
 
+    public static ZombieCard createZombie(String zombieType, int row, int col, Board board) {
         try {
-            // Calcular posiciones visuales
-            float adjustedX = GameScreen.GRID_X_OFFSET + col * tileSize + tileSize / 2;
-            float adjustedY = GameScreen.GRID_Y_OFFSET + row * tileSize + tileSize / 2;
-
-            // Configurar los valores según el tipo de zombie
+            int price = getZombiePrice(zombieType); // Obtén el precio del zombie
+            
+            // Verificar el precio solo si está habilitado
+            if (validatePrice && !GameManager.getGameManager().spendBrain(price)) {
+                System.out.println("No tienes suficientes cerebros para crear un " + zombieType);
+                return null; // No se puede crear el zombie
+            }
+            
+            // Crear el zombie si el jugador tiene suficientes cerebros
             if (zombieType.equalsIgnoreCase("NormalZombie")) {
-                zombieSheet = new Texture("NormalZombiePrepare.png");
-                frameCols = 15;
-                frameRows = 1;
-                frameDuration = 0.1f;
-                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,100);
-
+                NormalZombie normalZombieLogic = new NormalZombie(new int[]{row, col}, new HumanPlayer("Player 1", 50, true), board);
+                Texture spriteSheet = new Texture("NormalZombiePrepare.png");
+                return new ZombieCard(
+                        calculateX(col),
+                        calculateY(row),
+                        spriteSheet,
+                        15, 1, 0.05f,
+                        normalZombieLogic
+                );
             } else if (zombieType.equalsIgnoreCase("Brainstein")) {
-                zombieSheet = new Texture("BrainsteinSprite.png");
-                frameCols = 8;
-                frameRows = 1;
-                frameDuration = 0.05f;
-                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,100);
-
+                BrainsteinZombie brainsteinLogic = new BrainsteinZombie(new int[]{row, col}, new HumanPlayer("Player 1", 50, true), board);
+                Texture spriteSheet = new Texture("BrainsteinSprite.png");
+                return new ZombieCard(
+                        calculateX(col),
+                        calculateY(row),
+                        spriteSheet,
+                        15, 1, 0.05f,
+                        brainsteinLogic
+                );
             } else if (zombieType.equalsIgnoreCase("Buckethead")) {
-                zombieSheet = new Texture("BucketheadSprite.png");
-                frameCols = 47;
-                frameRows = 1;
-                frameDuration = 0.15f;
-                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,800);
-               
-
-            }
-            else if (zombieType.equalsIgnoreCase("Conehead")) {
-                zombieSheet = new Texture("ConeheadSprite.png");
-                //iria 1 frame cols
-                frameCols = 47;
-                frameRows = 1;
-                frameDuration = 0.15f;
-                return new ZombieCard(adjustedX, adjustedY, zombieSheet, frameCols, frameRows, frameDuration,380);
-            }
-            else {
-                throw new IllegalArgumentException("Tipo de zombie desconocido: " + zombieType);
+                Buckethead bucketheadLogic = new Buckethead(new int[]{row, col}, new HumanPlayer("Player 1", 50, true), board);
+                Texture spriteSheet = new Texture("BucketheadSprite.png");
+                return new ZombieCard(
+                        calculateX(col),
+                        calculateY(row),
+                        spriteSheet,
+                        47, 1, 0.05f,
+                        bucketheadLogic
+                );
+            } else if (zombieType.equalsIgnoreCase("Conehead")) {
+                Conehead coneheadLogic = new Conehead(new int[]{row, col}, new HumanPlayer("Player 1", 50, true), board);
+                Texture spriteSheet = new Texture("ConeheadSprite.png");
+                return new ZombieCard(
+                        calculateX(col),
+                        calculateY(row),
+                        spriteSheet,
+                        47, 1, 0.05f,
+                        coneheadLogic
+                );
+            } else {
+                System.out.println("Tipo de zombie desconocido: " + zombieType);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Error al crear el zombie de tipo: " + zombieType);
-            return null; // En caso de error, retorna null
         }
+        return null;
+    }
+
+    // Método para definir el precio de cada tipo de zombie
+    private static int getZombiePrice(String zombieType) {
+        if (zombieType.equalsIgnoreCase("NormalZombie")) return 100;
+        if (zombieType.equalsIgnoreCase("Brainstein")) return 200;
+        if (zombieType.equalsIgnoreCase("Buckethead")) return 300;
+        if (zombieType.equalsIgnoreCase("Conehead")) return 150;
+        return 0; // Por defecto si no se encuentra el tipo
+    }
+
+    private static float calculateX(int col) {
+        return GameScreen.GRID_X_OFFSET + col * GameScreen.TILE_SIZE + GameScreen.TILE_SIZE / 2;
+    }
+
+    private static float calculateY(int row) {
+        return GameScreen.GRID_Y_OFFSET + row * GameScreen.TILE_SIZE + GameScreen.TILE_SIZE / 2;
     }
 }

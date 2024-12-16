@@ -15,7 +15,7 @@ public class PlantsvsZombies extends Game {
         setBatch(new SpriteBatch());
         backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("backgroundsound.mp3"));
         backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(0.5f);
+        backgroundMusic.setVolume(0.1f);
         backgroundMusic.play(); // Inicia la música al comenzar el juego
         this.setScreen(new mainMenu(this));
         CustomCursor.setCustomCursor();

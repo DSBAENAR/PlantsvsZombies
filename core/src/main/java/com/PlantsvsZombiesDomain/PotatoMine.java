@@ -24,7 +24,7 @@ public class PotatoMine extends DefensePlant{
      * @throws PlantsVsZombiesException if the position is not valid
      */
     public PotatoMine(int[] position, Player owner, Board board) throws PlantsVsZombiesException{
-        super(position, 100, 50, owner, board);
+        super(position, 150, 50, owner, board);
         startActivationTimer();
         startDetectionTimer();
     }

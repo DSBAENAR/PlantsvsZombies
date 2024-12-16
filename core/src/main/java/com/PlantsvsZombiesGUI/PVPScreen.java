@@ -30,6 +30,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Align;
@@ -47,12 +48,12 @@ public class PVPScreen implements Screen {
     private Texture backgroundTexture;    
     private Texture buttonMenuTexture;
     private PlantsvsZombies game;
-    private Table innerTable;
+    private Table innerPlantTable;
     private Table menuTable;
     private DragAndDrop dragAndDrop;
-    private final int GRID_ROWS = 5; // Número de filas
+    private final static int GRID_ROWS = 5; // Número de filas
     public final static int GRID_COLS = 9; // Número de columnas
-    public final static float TILE_SIZE = 150; // Tamaño de cada tile
+    public final static float TILE_SIZE = 140; // Tamaño de cada tile
     public static float GRID_X_OFFSET; // Offset dinámico en X
     public static float GRID_Y_OFFSET; // Offset dinámico en Y
     private ShapeRenderer shapeRenderer;
@@ -66,13 +67,26 @@ public class PVPScreen implements Screen {
 	private Table plantsTable;
 	private boolean isRemovalMode = false;
 	private Table zombiesTable;
-    public PVPScreen(PlantsvsZombies game) {
+	private Table innerZombieTable;
+	private static Label brainCounterLabel;
+	private int totalGameTime; // Tiempo total de la partida (en segundos)
+    private int roundTime; // Tiempo de cada ronda (en segundos)
+    private float preparationTime = 120f; // Tiempo de preparación para plantas (2 minutos)
+    private float currentTimer; // Contador del cronómetro en segundos
+    private boolean isPreparationPhase = true; // Estado inicial: fase de preparación
+    private int currentRound = 1; // Ronda actual (1 o 2)
+    private Label timerLabel; // Etiqueta para mostrar el cronómetro
+    private Label roundLabel;
+	private float preparationTimer;
+    public PVPScreen(PlantsvsZombies game, int totalGameTime) {
         this.game = game;
         zombies = new Array<>();
         new Array<>();
         this.board = new Board(GRID_ROWS, GRID_COLS, new HumanPlayer("Player 1",50,true), new HumanPlayer("Player 2",50,true)); // Crear con jugadores
         // Otros inicializadores
-        
+        this.totalGameTime = totalGameTime;
+        this.roundTime = totalGameTime / 2; // Dividir el tiempo total entre dos rondas
+        this.currentTimer = preparationTime;
 
         // Inicializar el viewport
         viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -95,12 +109,14 @@ public class PVPScreen implements Screen {
         
         music = Gdx.audio.newMusic(Gdx.files.internal("inGame.mp3"));
         music.setLooping(true);
-        music.setVolume(0.3f);
+        music.setVolume(0f);
         music.play(); // Inicia la música al comenzar el juego
         shapeRenderer = new ShapeRenderer();
         
         createUI();
         createGrid();
+        
+       
     }
     
     
@@ -117,64 +133,109 @@ public class PVPScreen implements Screen {
 
     private void createUI() {
     	
-        new Image(new Texture("SeedBank.png"));
-        
+    	 
+    	GameManager gameManager = GameManager.getGameManager();
+    	// Configurar listeners para cambios en los contadores
+        gameManager.setOnSunCounterChangeListener(() -> {
+            if (sunCounterLabel != null) {
+                sunCounterLabel.setText(String.valueOf(gameManager.getSunCounter()));
+            }
+        });
+
+        gameManager.setOnBrainCounterChangeListener(() -> {
+            if (brainCounterLabel != null) {
+                brainCounterLabel.setText(String.valueOf(gameManager.getBrainCounter()));
+            }
+        });
         buttonMenuTexture = new Texture("ButtonMenu.png");
         
         // Crear el ImageButton con imagen de fondo
         Image buttonImage = new Image(buttonMenuTexture);
         
         Label.LabelStyle labelStyle = new Label.LabelStyle();//Estilo Base del texto (No hoover)
-        labelStyle.font = font; // Usa la fuente predeterminada
+        labelStyle.font = font; 
         Label textLabelMenu = new Label("Menu", labelStyle);
         textLabelMenu.setAlignment(Align.center);
-     // Crear el Label como botón de opciones
         Label optionsLabel = new Label("Options", labelStyle);
         Label mainMenuInGameLabel = new Label("main menu", labelStyle);
         Label saveLabel = new Label("Save", labelStyle);
-        optionsLabel.setAlignment(Align.center); // Alinear el texto al centro
-        saveLabel.setAlignment(Align.center); // Alinear el texto al centro
+        optionsLabel.setAlignment(Align.center); 
+        saveLabel.setAlignment(Align.center); 
         sunCounterLabel = new Label(String.valueOf(GameManager.getGameManager().getSunCounter()), labelStyle);
-        sunCounterLabel.setAlignment(Align.center); // Alinear texto
-        initializeSunCounter();
+        sunCounterLabel.setAlignment(Align.center); 
+        brainCounterLabel = new Label(String.valueOf(GameManager.getGameManager().getBrainCounter()), labelStyle);
+        brainCounterLabel.setAlignment(Align.center); 
+        //Configurar el estilo de las etiquetas
+
+        // Etiqueta para mostrar el tiempo restante
+        timerLabel = new Label(formatTime(currentTimer), labelStyle);
+        timerLabel.setPosition(Gdx.graphics.getWidth() / 2f - 50, Gdx.graphics.getHeight() - 50);
+
+        // Etiqueta para mostrar la ronda actual
+        roundLabel = new Label("Round 1: Preparation Phase", labelStyle);
+        roundLabel.setPosition(Gdx.graphics.getWidth() / 2f - 100, Gdx.graphics.getHeight() - 100);
+
+        stage.addActor(timerLabel);
+        stage.addActor(roundLabel);
         
         
         Texture sunTexture = new Texture("Sun.png");
         Image sunImage = new Image(new TextureRegionDrawable(new TextureRegion(sunTexture)));
+        Texture brainTexture = new Texture("Brain.png");
+        Image brainImage = new Image(new TextureRegionDrawable(new TextureRegion(brainTexture)));
 
         // Crear una tabla para el sol y el contador de soles
         Table sunTable = new Table();
-        sunTable.add(sunImage).size(60, 60).padRight(10); // Imagen del sol con un poco de espacio a la derecha
-        sunTable.add(sunCounterLabel).align(Align.left); // Contador de soles
+        sunTable.add(sunImage).size(60, 60).padRight(10);
+        sunTable.add(sunCounterLabel).align(Align.left);
+        
+     // Crear una tabla para el sol y el contador de soles
+        Table brainTable = new Table();
+        brainTable.add(brainImage).size(100, 100).padRight(10);
+        brainTable.add(brainCounterLabel).align(Align.left); // Contador de soles
         
         
         // Agregar la pala debajo de las cartas
         Texture shovelTexture = new Texture("Shovel.png");
         ImageButton shovelButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(shovelTexture)));
-        innerTable = new Table();
-        innerTable.top().left(); // Alinear hacia arriba y a la izquierda
-        innerTable.setFillParent(false); // Ajustar dinámicamente al contenido
-        // Agregar la tabla de sol y contador de soles
-        innerTable.add(sunTable)
-            .padBottom(10) // Espaciado debajo
+        innerPlantTable = new Table();
+        innerPlantTable.top().left(); // Alinear hacia arriba y a la izquierda
+        innerPlantTable.setFillParent(false); // Ajustar dinámicamente al contenido
+        innerPlantTable.add(sunTable)
+            .padBottom(10)
             .expandX()
             .align(Align.center)
-            .row(); // Mover a la siguiente fila
+            .row(); 
         
      // Agregar el contador de soles en la parte superior
-        innerTable.add(sunCounterLabel)
+        innerPlantTable.add(sunCounterLabel)
             .padBottom(20) // Espaciado hacia abajo
             .expandX()
             .align(Align.center)
             .row(); // Mover a una nueva fila
-
-        innerTable.row(); // Crear nueva fila para la pala
-        innerTable.add(shovelButton)
+        innerPlantTable.row(); // Crear nueva fila para la pala
+        innerPlantTable.add(shovelButton)
             .size(80, 80)
             .padTop(10) // Espaciado hacia arriba
             .align(Align.left);
         
-    
+        
+        
+        innerZombieTable = new Table();
+        innerZombieTable.top().right(); // Alinear hacia arriba y a la derecha
+        innerZombieTable.setFillParent(false); // Ajustar dinámicamente al contenido
+
+        // Agregar brainTable y brainCounterLabel sin expandir
+        innerZombieTable.add(brainTable)
+            .padBottom(10)
+            .align(Align.right) // Alinea el contenido a la derecha
+            .row();
+
+        innerZombieTable.add(brainCounterLabel)
+            .padBottom(20)
+            .align(Align.right) // Alinea el contador a la derecha
+            .row();
+
         
         
         // Combinar ambos en un Stack
@@ -186,13 +247,20 @@ public class PVPScreen implements Screen {
   
         
         // Crear la tabla principal
-        Table mainTable = new Table();
-        mainTable.setFillParent(true);
-        mainTable.top().left(); // Alinear todo en la esquina superior izquierda
-        mainTable.add(innerTable).padTop(10).padLeft(10); // Posicionar la tabla interna
+        Table mainPlantTable = new Table();
+        mainPlantTable.setFillParent(true);
+        mainPlantTable.top().left(); // Alinear todo en la esquina superior izquierda
+        mainPlantTable.add(innerPlantTable).padTop(10).padLeft(10); // Posicionar la tabla interna
 
-        // Agregar la tabla principal al escenario
-        stage.addActor(mainTable);
+        
+     // Crear la tabla principal de zombies
+        Table mainZombieTable = new Table();
+        mainZombieTable.setFillParent(true);
+        mainZombieTable.top().right(); // Alinear arriba y a la derecha
+        mainZombieTable.add(innerZombieTable).padTop(30).align(Align.topRight); // Evita padLeft
+        // Agregar la tabla principal al stage
+        stage.addActor(mainZombieTable);
+        stage.addActor(mainPlantTable);
 
   
         
@@ -217,8 +285,9 @@ public class PVPScreen implements Screen {
 
         // Añadir la tabla al stage
         stage.addActor(plantsTable);
-        
         stage.addActor(menuTable);
+        stage.addActor(zombiesTable);
+
 
         dragAndDrop = new DragAndDrop();
 
@@ -326,7 +395,6 @@ public class PVPScreen implements Screen {
      // Añadir un InputListener para manejar el hover
         buttonStack.addListener(new InputListener() {
         	Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
-        	private boolean isMenuVisible = false;
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
         	    // Implementación al entrar
@@ -342,12 +410,20 @@ public class PVPScreen implements Screen {
         	
         	 @Override
         	    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-        	        // Alternar visibilidad del menú al hacer clic
-        	        isMenuVisible = !isMenuVisible;
-        	        optionsMenu.setVisible(isMenuVisible);
-        	        optionsMenu.toFront();
-        	        return true; // Indica que el evento fue manejado
-        	    }
+        		 if (GameStateManager.isPaused()) {
+         	        // Si está pausado, reanuda el juego
+         	        GameStateManager.setGameState(GameStateManager.GameState.RUNNING);
+         	        music.play(); // Reanudar música
+         	        optionsMenu.setVisible(false); // Ocultar el menú
+         	    } else {
+         	        // Si no está pausado, pausa el juego
+         	        GameStateManager.setGameState(GameStateManager.GameState.PAUSED);
+         	        music.pause(); // Pausar música
+         	        optionsMenu.setVisible(true); // Mostrar el menú
+         	        optionsMenu.toFront(); // Asegurar que el menú esté al frente
+         	    }
+         	    return true;
+         	}
         });
         
         
@@ -374,7 +450,15 @@ public class PVPScreen implements Screen {
     }
     
     
-    private static class DragPayload {
+    private String formatTime(float time) {
+        int minutes = (int) (time / 60);
+        int seconds = (int) (time % 60);
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
+
+
+	private static class DragPayload {
         String objectType; // "Plant" o "Zombie"
         String type;       // Tipo específico ("Peashooter", "NormalZombie", etc.)
 
@@ -414,17 +498,50 @@ public class PVPScreen implements Screen {
         });
 
         // Crear la tabla para la carta y el precio
-        Table cardPlantTable = new Table();
-        cardPlantTable.add(cardButton).size(80, 80).padRight(10); // Imagen
-        cardPlantTable.add(priceLabel).padLeft(10).center(); // Precio
+        Table cardTable = new Table();
+        cardTable.add(cardButton).size(80, 80).padRight(10); // Imagen
+        cardTable.add(priceLabel).padLeft(10).center(); // Precio
 
-        // Añadir la carta a la tabla de cartas (puede ser de plantas o zombies)
-        plantsTable.add(cardPlantTable).padBottom(10).left();
-        plantsTable.row();
+        // Añadir la carta a la tabla correspondiente
+        if (objectType.equalsIgnoreCase("Plant")) {
+            plantsTable.add(cardTable).padBottom(10).left(); // Alineación a la izquierda
+            plantsTable.row();
+        } else if (objectType.equalsIgnoreCase("Zombie")) {
+            zombiesTable.add(cardTable).padBottom(10).right(); // Alineación a la derecha
+            zombiesTable.row();
+        }
     }
 
 
+    private void updateTimer(float delta) {
+        currentTimer -= delta; // Reducir el cronómetro con el deltaTime
 
+        if (isPreparationPhase) {
+            if (currentTimer <= 0) {
+                // Fin de la fase de preparación, empezar la ronda 1
+                isPreparationPhase = false;
+                currentTimer = roundTime;
+                roundLabel.setText("Round 1: Zombies' Turn");
+            }
+        } else {
+            if (currentTimer <= 0) {
+                if (currentRound == 1) {
+                    // Pausa entre ronda 1 y ronda 2
+                    currentRound = 2;
+                    isPreparationPhase = true;
+                    currentTimer = preparationTime;
+                    roundLabel.setText("Round 2: Preparation Phase");
+                } else {
+                    // Fin de la partida
+                    roundLabel.setText("Game Over!");
+                    currentTimer = 0;
+                }
+            }
+        }
+
+        // Actualizar la etiqueta del tiempo
+        timerLabel.setText(formatTime(currentTimer));
+    }
 
 
 	private void addPlantDropTarget() {
@@ -501,31 +618,33 @@ public class PVPScreen implements Screen {
     }
     
     
-    private void createZombie(String plantType, float x, float y) {
+    private void createZombie(String zombieType, float x, float y) {
         try {
-            ZombieCard zombie = ZombieFactory.createZombie(plantType, (int) x, (int) y, TILE_SIZE);
+            int[] gridPosition = convertCoordinatesToMatrixIndices(x, y);
+            if (gridPosition == null) {
+                System.out.println("Error: Coordenadas fuera del grid.");
+                return;
+            }
+
+            int row = gridPosition[0];
+            int col = gridPosition[1];
+
+            ZombieCard zombie = ZombieFactory.createZombie(zombieType, row, col, board);
             if (zombie != null) {
-                System.out.println("Planta creada correctamente: " + plantType);
-                zombie.setPosition(x - zombie.getWidth() / 2, y - zombie.getHeight() / 2); // Centrar la planta
-             // Añadir ClickListener para eliminar la planta
-                zombie.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        if (isRemovalMode) {
-                            System.out.println("Eliminando planta: " + plantType);
-                            zombie.remove(); // Eliminar la planta del stage
-                            isRemovalMode = false; // Salir del modo de eliminación
-                        }
-                    }
-                });
-                stage.addActor(zombie); // Añadir al escenario
-            } else {
-                System.out.println("Error: No se pudo crear la planta.");
+                float posX = PVPScreen.GRID_X_OFFSET + col * PVPScreen.TILE_SIZE + PVPScreen.TILE_SIZE / 2 ;
+                float posY = PVPScreen.GRID_Y_OFFSET + row * PVPScreen.TILE_SIZE + PVPScreen.TILE_SIZE / 2;
+
+                zombie.setPosition(posX, posY);
+                stage.addActor(zombie);
+                System.out.println("Zombie creado correctamente: Row=" + row + ", Col=" + col);
             }
         } catch (Exception e) {
-            System.out.println("Excepción al crear la planta: " + e.getMessage());
+            System.out.println("Error al crear zombie: " + e.getMessage());
         }
     }
+
+
+
 
 
 
@@ -536,7 +655,7 @@ public class PVPScreen implements Screen {
         float fieldWidth = GRID_COLS * TILE_SIZE;
         float fieldHeight = GRID_ROWS * TILE_SIZE;
 
-        GRID_X_OFFSET = (Gdx.graphics.getWidth() - fieldWidth)-210;
+        GRID_X_OFFSET = (Gdx.graphics.getWidth() - fieldWidth)-300;
         GRID_Y_OFFSET = (Gdx.graphics.getHeight() - fieldHeight)-125;
 
         for (int row = 0; row < GRID_ROWS; row++) {
@@ -552,16 +671,18 @@ public class PVPScreen implements Screen {
     }
     
 
-    private int[] convertCoordinatesToMatrixIndices(float x, float y) {
+ // Método para convertir coordenadas a índices del grid
+    private static int[] convertCoordinatesToMatrixIndices(float x, float y) {
         int col = (int) ((x - GRID_X_OFFSET) / TILE_SIZE);
         int row = (int) ((y - GRID_Y_OFFSET) / TILE_SIZE);
 
-        // Validar los índices
+        System.out.println("Convertir coordenadas: x=" + x + ", y=" + y + " -> Row=" + row + ", Col=" + col);
+
         if (row >= 0 && row < GRID_ROWS && col >= 0 && col < GRID_COLS) {
             return new int[]{row, col};
         } else {
-            System.out.println("Error: Coordenadas fuera del grid. Row: " + row + ", Col: " + col);
-            return null; // Coordenadas no válidas
+            System.out.println("Error: Coordenadas fuera del grid. Row=" + row + ", Col=" + col);
+            return null; // Posición inválida
         }
     }
 
@@ -603,7 +724,12 @@ public class PVPScreen implements Screen {
     }
     
     
-    public void checkAllPlantsAndZombies() {
+    private void checkAllPlantsAndZombies() {
+        // Verifica el estado actual para evitar actualizaciones indebidas
+        if (!GameStateManager.isZombiePhase()) {
+            return;
+        }
+
         Array<ZombieCard> zombies = new Array<>();
         Array<PlantCard> plants = new Array<>();
 
@@ -621,6 +747,7 @@ public class PVPScreen implements Screen {
             plant.checkForZombies(zombies);
         }
     }
+
 
 
     
@@ -709,21 +836,35 @@ public class PVPScreen implements Screen {
         }
         return success;
     }
+    
+    public static void incrementBrainCounter(int amount) {
+        GameManager.getGameManager();
+		GameManager.incrementBrainCounter(amount);
+		updateBrainCounterLabel(); // Actualizar la etiqueta visual
+    }
 
+
+    public static boolean spendBrain(int amount) {
+        boolean success = GameManager.getGameManager().spendBrain(amount);
+        if (success) {
+        	updateBrainCounterLabel(); 
+        }
+        return success;
+    }
     
     private static void updateSunCounterLabel() {
         sunCounterLabel.setText(String.valueOf(GameManager.getGameManager().getSunCounter()));
     }
     
-    private void initializeSunCounter() {
-        GameManager.getGameManager().setOnSunCounterChange(() -> {
-            if (sunCounterLabel != null) {
-                sunCounterLabel.setText(String.valueOf(GameManager.getGameManager().getSunCounter()));
-            }
-        });
+    private static void updateBrainCounterLabel() {
+    	brainCounterLabel.setText(String.valueOf(GameManager.getGameManager().getSunCounter()));
     }
+    
 
     
+    
+
+
 
     
     private void saveGame() {
@@ -814,7 +955,7 @@ public class PVPScreen implements Screen {
 
         try {
             // Crear el zombie utilizando la fábrica
-            ZombieCard zombieCard = ZombieFactory.createZombie(zombieType, row, col, TILE_SIZE);
+            ZombieCard zombieCard = ZombieFactory.createZombie(zombieType, row, col, board);
 
             if (zombieCard != null) {
                 // Añadir el zombie al escenario
@@ -831,38 +972,57 @@ public class PVPScreen implements Screen {
     }
     
     
+    
+    
 
 
 
     @Override
     public void show() {
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 300, GRID_Y_OFFSET + 0 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 1 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 2 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 3 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 4 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 5 * TILE_SIZE);
-    	for (Actor actor : stage.getActors()) {
-    	    System.out.println(actor.getClass().getSimpleName() + " en posición (" + actor.getX() + ", " + actor.getY() + ")");
-    	}
+//    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 500, GRID_Y_OFFSET + 0 * TILE_SIZE);
+//    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 500, GRID_Y_OFFSET + 1 * TILE_SIZE);
+//    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 500, GRID_Y_OFFSET + 2 * TILE_SIZE);
+//    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 500, GRID_Y_OFFSET + 3 * TILE_SIZE);
+////    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 500, GRID_Y_OFFSET + 4 * TILE_SIZE);
+//    	spawnZombie("Brainstein", Gdx.graphics.getWidth() - 500, GRID_Y_OFFSET + 4 * TILE_SIZE);
+//    	for (Actor actor : stage.getActors()) {
+//    	    System.out.println(actor.getClass().getSimpleName() + " en posición (" + actor.getX() + ", " + actor.getY() + ")");
+//    	}
         Gdx.input.setInputProcessor(stage);
+        ZombieFactory.setValidatePrice(true);
     }
 
 
     @Override
     public void render(float delta) {
-    	ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
+        // Actualizar el estado del juego solo si no está en pausa
+        if (!GameStateManager.isPaused()) {
+            updateGameState(delta);
+        }
+
+        // Dibujar el fondo
         batch.begin();
-        batch.draw(backgroundTexture,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
+
         renderGrid();
-        checkAllPlantsAndZombies(); 
-        checkCollisions();
+
+        // Actualizar y verificar solo en las fases correctas
+        if (GameStateManager.isZombiePhase() || GameStateManager.isPlantPhase()) {
+            checkAllPlantsAndZombies();
+            checkCollisions();
+        }
+
+        // Actualizar el stage (esto dibuja los actores y permite interacciones)
         stage.act(delta);
         stage.draw();
-        
-     // Dibujar colliders
+
+        // Actualizar el cronómetro
+        updateTimer(delta);
+
+        // Dibujar colliders para depuración
         shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
@@ -877,24 +1037,79 @@ public class PVPScreen implements Screen {
                 shapeRenderer.setColor(1, 0, 0, 1); // Rojo para zombies
                 Rectangle rect = zombie.getBoundingRectangle();
                 shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-            }
-            
-            else if (actor instanceof LawnMowerActor) {
-            	LawnMowerActor lawn = (LawnMowerActor) actor;
-                shapeRenderer.setColor(1, 1, 0, 1); // Rojo para zombies
+            } else if (actor instanceof LawnMowerActor) {
+                LawnMowerActor lawn = (LawnMowerActor) actor;
+                shapeRenderer.setColor(1, 1, 0, 1); // Amarillo para cortadoras
                 Rectangle rect = lawn.getBoundingRectangle();
                 shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
             }
         }
-        
 
         shapeRenderer.end();
-        stage.act(delta);
-        stage.draw();
-        
     }
+
+    
+    
+
+    private void updateGameState(float delta) {
+        switch (GameStateManager.getCurrentState()) {
+            case PREPARATION_PLANTS:
+                preparationTime -= delta;
+                if (preparationTime <= 0) {
+                    System.out.println("Fase de preparación terminada. Inicia Ronda 1 - Zombies.");
+                    roundTime = totalGameTime / 2; // Reiniciar el tiempo de la primera ronda
+                    GameStateManager.setGameState(GameStateManager.GameState.ROUND_1_ZOMBIES);
+                }
+                break;
+
+            case ROUND_1_ZOMBIES:
+                roundTime -= delta;
+                if (roundTime <= 0) {
+                    transitionToRound2();
+                }
+                break;
+
+            case ROUND_2_PLANTS:
+                preparationTime -= delta;
+                if (preparationTime <= 0) {
+                    System.out.println("Fase de preparación terminada. Inicia Ronda 2 - Zombies.");
+                    roundTime = totalGameTime / 2; // Reiniciar el tiempo de la segunda ronda
+                    GameStateManager.setGameState(GameStateManager.GameState.ROUND_2_ZOMBIES);
+                }
+                break;
+
+            case ROUND_2_ZOMBIES:
+                roundTime -= delta;
+                if (roundTime <= 0) {
+                    System.out.println("¡Juego terminado!");
+                    GameStateManager.setGameState(GameStateManager.GameState.GAME_OVER);
+                }
+                break;
+
+            case PAUSED:
+                break;
+
+            case GAME_OVER:
+                // Aquí puedes implementar lógica para finalizar el juego
+                System.out.println("GAME OVER: Todas las rondas finalizadas.");
+                break;
+
+            default:
+                break;
+        }
+    }
+
    
-    public void restoreGameState(SaveData saveData) {
+    private void transitionToRound2() {
+        currentRound = 2;
+        preparationTime = 120f; // Reiniciar el tiempo de preparación
+        GameStateManager.setGameState(GameStateManager.GameState.PREPARATION_PLANTS); // Configurar para la preparación
+        System.out.println("Ronda 1 finalizada. Tiempo de preparación para Ronda 2.");
+    }
+
+
+
+	public void restoreGameState(SaveData saveData) {
         for (PlantData plantData : saveData.plants) {
             float pixelX = GRID_X_OFFSET + plantData.x * TILE_SIZE + TILE_SIZE / 2;
             float pixelY = GRID_Y_OFFSET + plantData.y * TILE_SIZE + TILE_SIZE / 2;

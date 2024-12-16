@@ -31,6 +31,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.utils.Align;
@@ -51,7 +52,7 @@ public class GameScreen implements Screen {
     private Table innerTable;
     private Table menuTable;
     private DragAndDrop dragAndDrop;
-    private final int GRID_ROWS = 5; // Número de filas
+    public final static int GRID_ROWS = 5; // Número de filas
     public final static int GRID_COLS = 9; // Número de columnas
     public final static float TILE_SIZE = 150; // Tamaño de cada tile
     public static float GRID_X_OFFSET; // Offset dinámico en X
@@ -69,7 +70,6 @@ public class GameScreen implements Screen {
 	private boolean isGameOver = false;
 	private Image gameOverImage;
 	private Window gameOverMenu;
-	private Table zombiesTable;
 	
 	
 	public GameScreen(PlantsvsZombies game) {
@@ -86,6 +86,9 @@ public class GameScreen implements Screen {
         batch = new SpriteBatch();
         stage  = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
+        GameManager.getGameManager();
+		GameManager.setSunCounter(5000);
+
 
         // Inicializar recursos
         backgroundTexture = new Texture("lawn.png");
@@ -123,7 +126,7 @@ public class GameScreen implements Screen {
     
 
     private void createUI() {
-    	createGameOverMenu(); // Llamar una vez
+    	createGameOverMenu();
 
     	
     	Texture gameOverTexture = new Texture("PC Computer - Plants vs Zombies - Game Over Screen.png");
@@ -383,6 +386,9 @@ public class GameScreen implements Screen {
         addCard("PeaShooterIcon.png", "PeaShooter",100);
         addCard("sunflower.png", "Sunflower",50);
         addCard("WallNutIcon.png", "WallNut", 200);
+        addCard("PotatoIcon.png", "PotatoMine", 25);
+        addCard("EciPlant.png", "ECIPlant", 75);
+
     
        
     }
@@ -630,7 +636,7 @@ public class GameScreen implements Screen {
     }
     
 
-    private int[] convertCoordinatesToMatrixIndices(float x, float y) {
+    public int[] convertCoordinatesToMatrixIndices(float x, float y) {
         int col = (int) ((x - GRID_X_OFFSET) / TILE_SIZE);
         int row = (int) ((y - GRID_Y_OFFSET) / TILE_SIZE);
 
@@ -700,6 +706,10 @@ public class GameScreen implements Screen {
         for (PlantCard plant : plants) {
             plant.checkForZombies(zombies);
         }
+     // Verifica cada zombie contra todas las plantas
+        for (ZombieCard zombie : zombies) {
+            zombie.checkForPlants(plants);
+        }
     }
 
 
@@ -743,7 +753,6 @@ public class GameScreen implements Screen {
                     // Eliminar zombie si está muerto
                     if (!zombie.isAlive()) {
                         zombie.remove();
-                        System.out.println("Zombie eliminado.");
                     }
                     break; // Un proyectil solo afecta a un zombie
                 }
@@ -778,14 +787,14 @@ public class GameScreen implements Screen {
     public static void incrementSunCounter(int amount) {
         GameManager.getGameManager();
 		GameManager.incrementSunCounter(amount);
-        updateSunCounterLabel(); // Actualizar la etiqueta visual
+        updateSunCounterLabel();
     }
 
 
     public static boolean spendSun(int amount) {
         boolean success = GameManager.getGameManager().spendSun(amount);
         if (success) {
-            updateSunCounterLabel(); // Actualizar la etiqueta visual
+            updateSunCounterLabel();
         }
         return success;
     }
@@ -796,7 +805,7 @@ public class GameScreen implements Screen {
     }
     
     private void initializeSunCounter() {
-        GameManager.getGameManager().setOnSunCounterChange(() -> {
+        GameManager.getGameManager().setOnSunCounterChangeListener(() -> {
             if (sunCounterLabel != null) {
                 sunCounterLabel.setText(String.valueOf(GameManager.getGameManager().getSunCounter()));
             }
@@ -894,7 +903,7 @@ public class GameScreen implements Screen {
 
         try {
             // Crear el zombie utilizando la fábrica
-            ZombieCard zombieCard = ZombieFactory.createZombie(zombieType, row, col, TILE_SIZE);
+            ZombieCard zombieCard = ZombieFactory.createZombie(zombieType, row, col, board);
 
             if (zombieCard != null) {
                 // Añadir el zombie al escenario
@@ -911,17 +920,52 @@ public class GameScreen implements Screen {
     }
     
     
+    private void spawnZombieWithDelay(String zombieType, int row, float delaySeconds) {
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                if (row < 0 || row >= GRID_ROWS) {
+                    System.out.println("Fila fuera del rango del grid: " + row);
+                    return;
+                }
+
+                int col = GRID_COLS - 1; // Última columna válida
+                float visualX = GRID_X_OFFSET + (GRID_COLS + 1) * TILE_SIZE; // +1 o +2 los coloca fuera del grid
+                float visualY = GRID_Y_OFFSET + row * TILE_SIZE; // Fila específica
+
+                try {
+                    // Crear el zombie
+                    ZombieCard zombieCard = ZombieFactory.createZombie(zombieType, row, col, board);
+
+                    if (zombieCard != null) {
+                        zombieCard.setPosition(visualX, visualY);
+                        stage.addActor(zombieCard);
+
+                        System.out.println("Zombie creado con delay: " + zombieType + " en fila " + row);
+                    } else {
+                        System.out.println("Error: No se pudo crear el zombie.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Excepción al generar el zombie: " + e.getMessage());
+                }
+            }
+        }, delaySeconds);
+    }
+
+
+
+    
 
 
 
     @Override
     public void show() {
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 0 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 1 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 2 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 3 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 4 * TILE_SIZE);
-    	spawnZombie("NormalZombie", Gdx.graphics.getWidth() - 100, GRID_Y_OFFSET + 5 * TILE_SIZE);
+    	 spawnZombieWithDelay("NormalZombie",1,10f); // Aparece después de 1 segundo
+    	 spawnZombieWithDelay("NormalZombie",2,10f); // Aparece después de 1 segundo
+    	 spawnZombieWithDelay("NormalZombie",3,10f); // Aparece después de 1 segundo
+    	 spawnZombieWithDelay("NormalZombie",4,10f); // Aparece después de 1 segundo
+    	 spawnZombieWithDelay("NormalZombie",0,10f); // Aparece después de 1 segundo
+
     	for (Actor actor : stage.getActors()) {
     	    System.out.println(actor.getClass().getSimpleName() + " en posición (" + actor.getX() + ", " + actor.getY() + ")");
     	}
@@ -957,35 +1001,7 @@ public class GameScreen implements Screen {
 	        return;
 	    }
         
-     // Dibujar colliders
-        shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        for (Actor actor : stage.getActors()) {
-            if (actor instanceof PlantCard) {
-                PlantCard plant = (PlantCard) actor;
-                shapeRenderer.setColor(0, 0, 1, 1); // Azul para plantas
-                Rectangle rect = plant.getBoundingRectangle();
-                shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-            } else if (actor instanceof ZombieCard) {
-                ZombieCard zombie = (ZombieCard) actor;
-                shapeRenderer.setColor(1, 0, 0, 1); // Rojo para zombies
-                Rectangle rect = zombie.getBoundingRectangle();
-                shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-            }
-            
-            else if (actor instanceof LawnMowerActor) {
-            	LawnMowerActor lawn = (LawnMowerActor) actor;
-                shapeRenderer.setColor(1, 1, 0, 1); // Rojo para zombies
-                Rectangle rect = lawn.getBoundingRectangle();
-                shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-            }
-        }
-        
-
-        shapeRenderer.end();
-        stage.act(delta);
-        stage.draw();
         
     }
    

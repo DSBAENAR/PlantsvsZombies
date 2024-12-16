@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.PlantsvsZombiesGUI.GameScreen;
+
 /**
  * Class Zombie that extends Something class, this class is for the zombies
  */
@@ -68,6 +70,14 @@ public abstract class Zombie extends Something implements Attack{
     public int getHealth() {
         return health;
     }
+    
+    /**
+     * get the damage
+     * @return health
+     */
+    public int getDamage() {
+        return damage;
+    }
 
     /**
      * set the health
@@ -111,12 +121,52 @@ public abstract class Zombie extends Something implements Attack{
      * @param position initial position of the zombie
      * @throws PlantsVsZombiesException if the column is not 9
      */
-    protected static int[] validatePosition(int[] position) throws PlantsVsZombiesException {
-        if (position[1] != 9) {
-            throw new PlantsVsZombiesException(PlantsVsZombiesException.ARGUMENTS_NOT_VALID);
+    protected static int[] validatePosition(float x, float y) throws PlantsVsZombiesException {
+        // Convierte las coordenadas de píxeles en índices del grid lógico
+        int[] position = convertCoordinatesToMatrixIndices(x, y);
+
+        if (position == null) {
+            throw new PlantsVsZombiesException("Las coordenadas están fuera del rango del grid: x=" + x + ", y=" + y);
         }
-        return position;
+
+        return validatePosition(position); // Valida la posición lógica resultante
     }
+    
+    protected static int[] validatePosition(int[] position) throws PlantsVsZombiesException {
+        if (position == null || position.length != 2) {
+            throw new PlantsVsZombiesException("La posición proporcionada no es válida: " + (position == null ? "null" : "tamaño incorrecto"));
+        }
+
+        int row = position[0];
+        int col = position[1];
+
+        // Validar que las coordenadas estén dentro del rango del grid
+        if (row < 0 || row >= GameScreen.GRID_ROWS || col < 0 || col >= GameScreen.GRID_COLS) {
+            throw new PlantsVsZombiesException("La posición está fuera del rango del grid: row=" + row + ", col=" + col);
+        }
+
+        // Validar que el zombie esté en la última columna
+        if (col != GameScreen.GRID_COLS - 1) {
+            throw new PlantsVsZombiesException("El zombie debe comenzar en la última columna del grid: row=" + row + ", col=" + col);
+        }
+
+        return position; // Si todo es válido, retorna la posición lógica
+    }
+
+    
+    private static int[] convertCoordinatesToMatrixIndices(float x, float y) {
+        int col = (int) ((x - GameScreen.GRID_X_OFFSET) / GameScreen.TILE_SIZE);
+        int row = (int) ((y - GameScreen.GRID_Y_OFFSET) / GameScreen.TILE_SIZE);
+
+        // Validar que las coordenadas estén dentro del rango
+        if (row >= 0 && row < GameScreen.GRID_ROWS && col >= 0 && col < GameScreen.GRID_COLS) {
+            return new int[]{row, col};
+        } else {
+            System.out.println("Error: Coordenadas fuera del grid. Row: " + row + ", Col: " + col);
+            return null;
+        }
+    }
+
 
     /**
      * start time
@@ -160,7 +210,7 @@ public abstract class Zombie extends Something implements Attack{
         }
     }
 
-    protected void moveZombie() {
+    public void moveZombie() {
         if (this.column == 0) {
             stopTimer();
         } else {

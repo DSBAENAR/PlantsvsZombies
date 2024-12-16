@@ -26,6 +26,9 @@ public class LawnMowerActor extends Actor {
     @Override
     public void act(float delta) {
         super.act(delta);
+        if (GameStateManager.isPaused()) {
+            return; // No hacer nada si el juego está en pausa
+        }
 
      // Mover la cortadora si está activa
         if (isMoving) {

@@ -10,6 +10,7 @@ public abstract class UtilityZombie extends Zombie{
 
     protected int moneySupply;
     protected Timer timer;
+	private Runnable onMoneyGeneratedCallback;
 
     /**
      * Constructor of UtilityZombie
@@ -25,6 +26,10 @@ public abstract class UtilityZombie extends Zombie{
         super(position, health, price, 0,0, owner, board);
         this.moneySupply = MoneySupply;
         startGeneratingMoney();
+    }
+    
+    public void setOnMoneyGeneratedCallback(Runnable callback) {
+        this.onMoneyGeneratedCallback = callback;
     }
 
     /**
@@ -42,6 +47,9 @@ public abstract class UtilityZombie extends Zombie{
         if (owner != null) {
             int initialMoney = owner.getMoney();
             owner.setMoney(initialMoney + moneySupply);
+            if (onMoneyGeneratedCallback != null) {
+                onMoneyGeneratedCallback.run();
+            }
 
         } else {
             System.out.println("The owner of the plant is null. Excepcion para crear");}
