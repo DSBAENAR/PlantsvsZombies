@@ -36,8 +36,7 @@ public class mainMenu implements Screen {
     private Stage stage;
     private Stage loadStage; // Nuevo campo para el Stage del selector de archivos
     private boolean isLoadStageActive = false; // Indica si el selector está activo
-
-    Skin skin;
+    private Skin skin;
 
     public mainMenu(final PlantsvsZombies game) {
         this.game = game;
@@ -49,9 +48,7 @@ public class mainMenu implements Screen {
         btnLoadGame = new Texture("button_load.png");
         btnpvp = new Texture("button_pvp.png");
         btnmvm = new Texture("button_mvm.png");
-//        skin = new Skin(Gdx.files.internal("uiskin.json"));
-        
-     // Crear un Stage para gestionar los elementos de UI
+
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Gdx.input.setInputProcessor(stage);
         createUI();
@@ -74,28 +71,24 @@ public class mainMenu implements Screen {
         ImageButton btnpvpGameActor = new ImageButton(btnpvpDrawabable);
         ImageButton btnmvmGameActor = new ImageButton(btnmvmDrawabable);
         
-         //Agregar un listener para manejar el clic en el botón
         btnSaveAndExitActor.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	Gdx.app.exit(); // Ejemplo de transición a la pantalla del menú principal
+            	Gdx.app.exit();
             }
         });
         
-        //Agregar un listener para manejar el clic en el botón
         btnplayActor.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
             	game.dispose();
-                game.setScreen(new LevelMenu(game)); // Ejemplo de transición a la pantalla del menú principal
-            }
+                game.setScreen(new LevelMenu(game));            }
         });
         
-      //Agregar un listener para manejar el clic en el botón
         btnLoadGameActor.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	loadGame(); // Ejemplo de transición a la pantalla del menú principal
+            	loadGame();
             }
           
 				
@@ -103,7 +96,6 @@ public class mainMenu implements Screen {
         });
         
         
-        //Agregar un listener para manejar el clic en el botón
         btnpvpGameActor.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -132,7 +124,6 @@ public class mainMenu implements Screen {
         tableOptions.add(btnSaveAndExitActor).fillX().uniformX();
         
        
-        // Agregar la tabla al stage
         stage.addActor(tableOptions);
        
     }
@@ -141,8 +132,7 @@ public class mainMenu implements Screen {
 
     
     private void loadGame() {
-        // Inicializa el Skin para el diálogo
-        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         // Crea el FileChooser para seleccionar archivos guardados
         FileChooser fileChooser = FileChooser.createPickDialog("Select a file to load", skin, Gdx.files.local("saves/"));
@@ -155,7 +145,6 @@ public class mainMenu implements Screen {
             }
         });
 
-        // Configura el listener de resultado
         fileChooser.setResultListener(new FileChooser.ResultListener() {
             @Override
             public boolean result(boolean success, FileHandle result) {
@@ -168,8 +157,6 @@ public class mainMenu implements Screen {
                 return true;
             }
         });
-
-        // Muestra el diálogo en el stage actual
         fileChooser.show(stage);
     }
 
@@ -184,26 +171,39 @@ public class mainMenu implements Screen {
             Json json = new Json();
             SaveData saveData = json.fromJson(SaveData.class, file);
 
-            // Cargar las plantas
-            for (PlantData plant : saveData.plants) {
-                System.out.println("Planta: " + plant.type + " en (" + plant.x + ", " + plant.y + ")");
-                // Aquí puedes añadir lógica para recrear las plantas en tu juego
-            }
+            System.out.println("Estado del juego cargado: " + file.path());
 
-            // Cargar los zombis
-            for (ZombieData zombie : saveData.zombies) {
-                System.out.println("Zombi: " + zombie.type + " en (" + zombie.x + ", " + zombie.y + ") con vida: " + zombie.health);
-                // Aquí puedes añadir lógica para recrear los zombis en tu juego
-            }
-
-            // Actualizar el sol
-            System.out.println("Cantidad de sol: " + saveData.sun);
-            // Aplica el estado del sol al juego actual
+            // Aplicar los datos cargados al juego
+            applyGameState(saveData);
 
         } catch (Exception e) {
             System.out.println("Error al cargar el archivo: " + e.getMessage());
         }
     }
+
+    
+    
+    
+    private void applyGameState(SaveData saveData) {
+        GameScreen gameScreen = new GameScreen(game);
+        game.setScreen(gameScreen);
+
+        for (PlantData plantData : saveData.plants) {
+            System.out.println("Creando planta: " + plantData.type + " en posición (" + plantData.x + ", " + plantData.y + ")");
+            gameScreen.createPlant(plantData.type, plantData.x, plantData.y); // Método en GameScreen
+        }
+
+        for (ZombieData zombieData : saveData.zombies) {
+            System.out.println("Creando zombi: " + zombieData.type + " en posición (" + zombieData.x + ", " + zombieData.y + ")");
+            gameScreen.createZombie(zombieData.type, zombieData.x, zombieData.y); // Método en GameScreen
+        }
+
+        GameManager.getGameManager().setSunCounter(saveData.sun);
+        GameStateManager.setGameState(GameStateManager.GameState.RUNNING);
+
+        System.out.println("Soles cargados: " + saveData.sun);
+    }
+
 
 
 
@@ -211,15 +211,12 @@ public class mainMenu implements Screen {
     
     @Override
     public void render(float delta) {
-        // Limpiar pantalla
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
 
-        // Dibujar el fondo y el botón de "Salir"
         game.getBatch().begin();
         game.getBatch().draw(background, 0, 0,Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         game.getBatch().end();
         
-     // Renderizar el Stage principal o el selector de archivos
         if (isLoadStageActive && loadStage != null) {
             loadStage.act(delta);
             loadStage.draw();

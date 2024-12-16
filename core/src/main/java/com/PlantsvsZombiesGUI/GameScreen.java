@@ -52,18 +52,18 @@ public class GameScreen implements Screen {
     private Table innerTable;
     private Table menuTable;
     private DragAndDrop dragAndDrop;
-    public final static int GRID_ROWS = 5; // Número de filas
-    public final static int GRID_COLS = 9; // Número de columnas
+    public final static int GRID_ROWS = 5; 
+    public final static int GRID_COLS = 9; 
     public final static float TILE_SIZE = 150; // Tamaño de cada tile
     public static float GRID_X_OFFSET; // Offset dinámico en X
     public static float GRID_Y_OFFSET; // Offset dinámico en Y
     private ShapeRenderer shapeRenderer;
     private Music music;
     private Window optionsMenu;
-    private Array<Rectangle> gridCells; // Lista de rectángulos que representan las celdas
+    private Array<Rectangle> gridCells;
     private Rectangle highlightedCell = null;
     private static Label sunCounterLabel;
-    private Array<Zombie> zombies; // Lista lógica de zombies
+    private Array<Zombie> zombies;
     private Board board;
 	private Table plantsTable;
 	private boolean isRemovalMode = false;
@@ -77,35 +77,29 @@ public class GameScreen implements Screen {
         zombies = new Array<>();
         new Array<>();
         this.board = new Board(GRID_ROWS, GRID_COLS, new HumanPlayer("Player 1",50,true), new HumanPlayer("Player 2",50,true)); // Crear con jugadores
-        // Otros inicializadores
         
-
-        // Inicializar el viewport
         viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        // Inicializar otros recursos
         batch = new SpriteBatch();
         stage  = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
         GameManager.getGameManager();
 		GameManager.setSunCounter(5000);
 
-
-        // Inicializar recursos
         backgroundTexture = new Texture("lawn.png");
         
-     // Generar la fuente desde un archivo TTF
+     // Generar la fuente 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ZOMBIE.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 32; // Tamaño de la fuente
-        parameter.color = Color.WHITE; // Color del texto
-        parameter.borderWidth = 1; // Borde opcional
+        parameter.size = 32; 
+        parameter.color = Color.WHITE; 
+        parameter.borderWidth = 1; 
         parameter.borderColor = Color.BLACK;
         font = generator.generateFont(parameter);
         
         music = Gdx.audio.newMusic(Gdx.files.internal("inGame.mp3"));
         music.setLooping(true);
         music.setVolume(0.3f);
-        music.play(); // Inicia la música al comenzar el juego
+        music.play();
         shapeRenderer = new ShapeRenderer();
         
         createUI();
@@ -115,8 +109,7 @@ public class GameScreen implements Screen {
     
     
     
- // Calcular los offsets para centrar el campo de juego
-    private void updateGridOffsets() {
+     private void updateGridOffsets() {
         float fieldWidth = GRID_COLS * TILE_SIZE;
         float fieldHeight = GRID_ROWS * TILE_SIZE;
 
@@ -137,14 +130,13 @@ public class GameScreen implements Screen {
         
         buttonMenuTexture = new Texture("ButtonMenu.png");
         
-        // Crear el ImageButton con imagen de fondo
         Image buttonImage = new Image(buttonMenuTexture);
         
         Label.LabelStyle labelStyle = new Label.LabelStyle();//Estilo Base del texto (No hoover)
-        labelStyle.font = font; // Usa la fuente predeterminada
+        labelStyle.font = font; 
         Label textLabelMenu = new Label("Menu", labelStyle);
         textLabelMenu.setAlignment(Align.center);
-     // Crear el Label como botón de opciones
+     
         Label optionsLabel = new Label("Options", labelStyle);
         Label mainMenuInGameLabel = new Label("main menu", labelStyle);
         Label saveLabel = new Label("Save", labelStyle);
@@ -168,26 +160,26 @@ public class GameScreen implements Screen {
         Texture shovelTexture = new Texture("Shovel.png");
         ImageButton shovelButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(shovelTexture)));
         innerTable = new Table();
-        innerTable.top().left(); // Alinear hacia arriba y a la izquierda
+        innerTable.top().left(); 
         innerTable.setFillParent(false); // Ajustar dinámicamente al contenido
-        // Agregar la tabla de sol y contador de soles
-        innerTable.add(sunTable)
-            .padBottom(10) // Espaciado debajo
-            .expandX()
-            .align(Align.center)
-            .row(); // Mover a la siguiente fila
-        
-     // Agregar el contador de soles en la parte superior
-        innerTable.add(sunCounterLabel)
-            .padBottom(20) // Espaciado hacia abajo
-            .expandX()
-            .align(Align.center)
-            .row(); // Mover a una nueva fila
 
-        innerTable.row(); // Crear nueva fila para la pala
+        innerTable.add(sunTable)
+            .padBottom(10) 
+            .expandX()
+            .align(Align.center)
+            .row(); 
+        
+
+        innerTable.add(sunCounterLabel)
+            .padBottom(20) 
+            .expandX()
+            .align(Align.center)
+            .row(); 
+
+        innerTable.row(); 
         innerTable.add(shovelButton)
             .size(80, 80)
-            .padTop(10) // Espaciado hacia arriba
+            .padTop(10) 
             .align(Align.left);
         
     
@@ -204,10 +196,9 @@ public class GameScreen implements Screen {
         // Crear la tabla principal
         Table mainTable = new Table();
         mainTable.setFillParent(true);
-        mainTable.top().left(); // Alinear todo en la esquina superior izquierda
-        mainTable.add(innerTable).padTop(10).padLeft(10); // Posicionar la tabla interna
+        mainTable.top().left(); 
+        mainTable.add(innerTable).padTop(10).padLeft(10); 
 
-        // Agregar la tabla principal al escenario
         stage.addActor(mainTable);
 
   
@@ -216,46 +207,39 @@ public class GameScreen implements Screen {
         menuTable = new Table();
         menuTable.top().right();
         menuTable.setFillParent(true);
-        menuTable.add(buttonStack).size(200, 60); // Tamaño del botón
+        menuTable.add(buttonStack).size(200, 60); 
         
 
     
         plantsTable = new Table();
         plantsTable.top().left(); 
         
-        plantsTable.setFillParent(true); // No ocupar toda la pantalla
-        plantsTable.padLeft(10).padTop(250); // Ajustar margenes para separación
-        
+        plantsTable.setFillParent(true); 
+        plantsTable.padLeft(10).padTop(250); 
         
        
 
-        // Añadir la tabla al stage
         stage.addActor(plantsTable);
         stage.addActor(menuTable);
         
 
         dragAndDrop = new DragAndDrop();
 
-        
-
-        // Configurar drop target
         addPlantDropTarget();     
-        // Mostrar el menú de Game Over
+
         
-     // Crear un estilo para la ventana
-        Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.titleFont = font; // Usa la misma fuente que ya definiste
-        windowStyle.background = new TextureRegionDrawable(new TextureRegion(new Texture("menuGame.png"))); // Fondo del menú
+             Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = font; 
+        windowStyle.background = new TextureRegionDrawable(new TextureRegion(new Texture("menuGame.png"))); 
 
-        // Crear la ventana para el menú de opciones
         optionsMenu = new Window("", windowStyle);
-        optionsMenu.setSize(450, 600); // Tamaño del menú
-        optionsMenu.setPosition(Gdx.graphics.getWidth() / 2f - 150, Gdx.graphics.getHeight() / 2f - 200); // Centrar el menú
-        optionsMenu.setVisible(false); // Ocultarlo inicialmente
+        optionsMenu.setSize(450, 600);
+        optionsMenu.setPosition(Gdx.graphics.getWidth() / 2f - 150, Gdx.graphics.getHeight() / 2f - 200);
+        optionsMenu.setVisible(false);
 
-        // Añadir botones al menú de opciones
+        
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font; // Usa la misma fuente para los botones
+        buttonStyle.font = font;
        
 
         optionsLabel.addListener(new InputListener() {
@@ -263,45 +247,42 @@ public class GameScreen implements Screen {
 
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-                // Cambiar color al pasar el cursor
                 optionsLabel.setColor(hoverColor);
             }
 
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-                // Restaurar el color al salir del cursor
                 optionsLabel.setColor(Color.WHITE);
             }
 
         });
 
-        // Botón de "Main Menu"
+
         mainMenuInGameLabel.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	game.setScreen(new mainMenu(game)); // Cambiar al menú principal
+            	game.setScreen(new mainMenu(game));
             	dispose();
             }
             
             Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-        	    // Implementación al entrar
-        		mainMenuInGameLabel.setColor(color); // Cambiar color del texto al pasar el cursor
+        	   
+        		mainMenuInGameLabel.setColor(color); 
              
         	}
 
         	@Override
         	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-        	    // Implementación al salir
-        		mainMenuInGameLabel.setColor(Color.WHITE); // Restaurar el color original al salir
+        	    
+        		mainMenuInGameLabel.setColor(Color.WHITE); 
         	}
         });
         
         
         
         
-     // Botón de "Guardar"
         saveLabel.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -312,56 +293,48 @@ public class GameScreen implements Screen {
             Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-        	    // Implementación al entrar
+
         		saveLabel.setColor(color); // Cambiar color del texto al pasar el cursor
              
         	}
 
         	@Override
         	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-        	    // Implementación al salir
         		saveLabel.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         });
         
-        // Añadir botones a la ventana
         optionsMenu.add(optionsLabel).pad(10).row();
         optionsMenu.add(mainMenuInGameLabel).pad(10).row();
         optionsMenu.add(saveLabel).pad(10).row();
 
-        // Añadir el menú de opciones al escenario
         stage.addActor(optionsMenu);
         
      
-     // Añadir un InputListener para manejar el hover
         buttonStack.addListener(new InputListener() {
         	Color color = new Color(1 / 255f, 233 / 255f, 1 / 255f, 1);
         	@Override
         	public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
-        	    // Implementación al entrar
         		textLabelMenu.setColor(color); // Cambiar color del texto al pasar el cursor
              
         	}
 
         	@Override
         	public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
-        	    // Implementación al salir
         		textLabelMenu.setColor(Color.WHITE); // Restaurar el color original al salir
         	}
         	
         	@Override
         	public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
         	    if (GameStateManager.isPaused()) {
-        	        // Si está pausado, reanuda el juego
         	        GameStateManager.setGameState(GameStateManager.GameState.RUNNING);
-        	        music.play(); // Reanudar música
-        	        optionsMenu.setVisible(false); // Ocultar el menú
+        	        music.play();
+        	        optionsMenu.setVisible(false);
         	    } else {
-        	        // Si no está pausado, pausa el juego
         	        GameStateManager.setGameState(GameStateManager.GameState.PAUSED);
-        	        music.pause(); // Pausar música
-        	        optionsMenu.setVisible(true); // Mostrar el menú
-        	        optionsMenu.toFront(); // Asegurar que el menú esté al frente
+        	        music.pause();
+        	        optionsMenu.setVisible(true);
+        	        optionsMenu.toFront(); 
         	    }
         	    return true;
         	}
@@ -369,20 +342,16 @@ public class GameScreen implements Screen {
         });
         
         
-     // Listener para eliminar la planta seleccionada
         shovelButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Lógica para eliminar la planta seleccionada
                 System.out.println("Pala seleccionada: Listo para eliminar una planta.");
 
-                // Configurar modo de eliminación
                 enablePlantRemovalMode();
             }
         });
         optionsMenu.toFront();
         
-     // Agregar cartas de ejemplo
         addCard("PeaShooterIcon.png", "PeaShooter",100);
         addCard("sunflower.png", "Sunflower",50);
         addCard("WallNutIcon.png", "WallNut", 200);
@@ -394,41 +363,33 @@ public class GameScreen implements Screen {
     }
     
 
-    public void pauseGame() {
-        music.pause(); // Pausa la música
-    }
-
-    public void resumeGame() {
-        music.play(); // Reanuda la música
-    }
+   
 
 
 
 	private void createGameOverMenu() {
         // Estilo de la ventana
         Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.titleFont = font; // Usa la misma fuente definida anteriormente
+        windowStyle.titleFont = font; 
         windowStyle.background = new TextureRegionDrawable(new TextureRegion(new Texture("menuGame.png"))); // Fondo del menú (usa tu imagen de fondo)
 
-        // Crear la ventana del Game Over
         gameOverMenu = new Window("", windowStyle);
-        gameOverMenu.setSize(450, 600); // Ajusta el tamaño de la ventana
+        gameOverMenu.setSize(450, 600); 
         gameOverMenu.setPosition(
-            (Gdx.graphics.getWidth() - gameOverMenu.getWidth()) / 2f, // Centrar horizontalmente
-            (Gdx.graphics.getHeight() - gameOverMenu.getHeight()) / 2f // Centrar verticalmente
+            (Gdx.graphics.getWidth() - gameOverMenu.getWidth()) / 2f, 
+            (Gdx.graphics.getHeight() - gameOverMenu.getHeight()) / 2f 
         );
-        gameOverMenu.setVisible(false); // Inicialmente invisible
+        gameOverMenu.setVisible(false); 
 
-        // Estilo para los botones
+
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font; // Usa la misma fuente
+        buttonStyle.font = font;
 
-        // Botón para reiniciar el juego
         TextButton restartButton = new TextButton("Restart", buttonStyle);
         restartButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                restartGame(); // Implementa esta lógica para reiniciar tu juego
+                restartGame();
             }
         });
 
@@ -458,6 +419,11 @@ public class GameScreen implements Screen {
     // Método para reiniciar el juego
     private void restartGame() {
         game.setScreen(new GameScreen(game));
+      spawnZombieWithDelay("NormalZombie",1,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("NormalZombie",2,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("NormalZombie",3,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("NormalZombie",4,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("NormalZombie",0,10f); // Aparece después de 1 segundo
     }
 
     // Método para ir al menú principal
@@ -583,7 +549,7 @@ public class GameScreen implements Screen {
             });
     }
 
-    private void createPlant(String plantType, float x, float y) {
+    void createPlant(String plantType, float x, float y) {
         try {
             PlantCard plant = PlantFactory.createPlant(plantType, (int) x, (int) y, board);
             if (plant != null) {
@@ -610,7 +576,30 @@ public class GameScreen implements Screen {
     }
     
     
+    void createZombie(String zombieType, float x, float y) {
+        try {
+            int[] gridPosition = convertCoordinatesToMatrixIndices(x, y);
+            if (gridPosition == null) {
+                System.out.println("Error: Coordenadas fuera del grid.");
+                return;
+            }
 
+            int row = gridPosition[0];
+            int col = gridPosition[1];
+
+            ZombieCard zombie = ZombieFactory.createZombie(zombieType, row, col, board);
+            if (zombie != null) {
+                float posX = PVPScreen.GRID_X_OFFSET + col * PVPScreen.TILE_SIZE + PVPScreen.TILE_SIZE / 2 ;
+                float posY = PVPScreen.GRID_Y_OFFSET + row * PVPScreen.TILE_SIZE + PVPScreen.TILE_SIZE / 2;
+
+                zombie.setPosition(posX, posY);
+                stage.addActor(zombie);
+                System.out.println("Zombie creado correctamente: Row=" + row + ", Col=" + col);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al crear zombie: " + e.getMessage());
+        }
+    }
 
 
 
@@ -881,45 +870,6 @@ public class GameScreen implements Screen {
 
 
 
-    private void spawnZombie(String zombieType, float x, float y) {
-
-        int[] indices = convertCoordinatesToMatrixIndices(x, y);
-
-        if (indices == null) {
-            System.out.println("Coordenadas fuera del grid. No se pudo crear el zombie.");
-            return;
-        }
-
-        int row = indices[0]; 
-        int col = GRID_COLS - 1; 
-
-        if (row < 0 || row >= GRID_ROWS) {
-            System.out.println("Fila fuera del rango del grid: " + row);
-            return;
-        }
-
-        float visualX = GRID_X_OFFSET + (col + 1) * TILE_SIZE;
-        float visualY = GRID_Y_OFFSET + row * TILE_SIZE;
-
-        try {
-            // Crear el zombie utilizando la fábrica
-            ZombieCard zombieCard = ZombieFactory.createZombie(zombieType, row, col, board);
-
-            if (zombieCard != null) {
-                // Añadir el zombie al escenario
-                zombieCard.setPosition(visualX, visualY);
-                stage.addActor(zombieCard);
-
-                System.out.println("Zombie creado: " + zombieType + " en fila " + row + " y fuera del borde derecho.");
-            } else {
-                System.out.println("Error: No se pudo crear el zombie.");
-            }
-        } catch (Exception e) {
-            System.out.println("Excepción al generar el zombie: " + e.getMessage());
-        }
-    }
-    
-    
     private void spawnZombieWithDelay(String zombieType, int row, float delaySeconds) {
         Timer.schedule(new Timer.Task() {
             @Override
@@ -960,11 +910,14 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-    	 spawnZombieWithDelay("NormalZombie",1,10f); // Aparece después de 1 segundo
-    	 spawnZombieWithDelay("NormalZombie",2,10f); // Aparece después de 1 segundo
-    	 spawnZombieWithDelay("NormalZombie",3,10f); // Aparece después de 1 segundo
-    	 spawnZombieWithDelay("NormalZombie",4,10f); // Aparece después de 1 segundo
-    	 spawnZombieWithDelay("NormalZombie",0,10f); // Aparece después de 1 segundo
+     spawnZombieWithDelay("NormalZombie",1,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("NormalZombie",2,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("NormalZombie",3,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("NormalZombie",4,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("NormalZombie",0,10f); // Aparece después de 1 segundo
+   	 spawnZombieWithDelay("Buckethead",1,3f); // Aparece después de 1 segundo
+  	 spawnZombieWithDelay("Conehead",2,3f); // Aparece después de 1 segundo
+
 
     	for (Actor actor : stage.getActors()) {
     	    System.out.println(actor.getClass().getSimpleName() + " en posición (" + actor.getX() + ", " + actor.getY() + ")");
@@ -1001,23 +954,12 @@ public class GameScreen implements Screen {
 	        return;
 	    }
         
+     
 
         
     }
    
-    public void restoreGameState(SaveData saveData) {
-        for (PlantData plantData : saveData.plants) {
-            float pixelX = GRID_X_OFFSET + plantData.x * TILE_SIZE + TILE_SIZE / 2;
-            float pixelY = GRID_Y_OFFSET + plantData.y * TILE_SIZE + TILE_SIZE / 2;
-
-            System.out.println("Restaurando planta: " + plantData.type + " en posición (" + pixelX + ", " + pixelY + ")");
-            createPlant(plantData.type, pixelX, pixelY);
-            }
-
-        zombies.clear();
-
-        sunCounterLabel.setText(String.valueOf(saveData.sun));
-    }
+    
 
 
 
@@ -1073,4 +1015,52 @@ public class GameScreen implements Screen {
             music.dispose();
         }
     }
+
+
+
+    public void restoreGameState(SaveData saveData) {
+        // Restaurar plantas
+    	
+        for (PlantData plantData : saveData.plants) {
+            float pixelX = GRID_X_OFFSET + plantData.x * TILE_SIZE + TILE_SIZE / 2;
+            float pixelY = GRID_Y_OFFSET + plantData.y * TILE_SIZE + TILE_SIZE / 2;
+
+            System.out.println("Restaurando planta: " + plantData.type + " en posición (" + pixelX + ", " + pixelY + ")");
+            createPlant(plantData.type, pixelX, pixelY);
+        }
+
+
+        GRID_X_OFFSET = (Gdx.graphics.getWidth() - GRID_COLS * TILE_SIZE) / 2;
+        GRID_Y_OFFSET = (Gdx.graphics.getHeight() - GRID_ROWS * TILE_SIZE) / 2;
+
+        for (ZombieData zombieData : saveData.zombies) {
+            int row = zombieData.y; // fila
+            int col = zombieData.x; // columna
+
+            float posX = GRID_X_OFFSET + col * TILE_SIZE; // Esquina izquierda de la celda
+            float posY = GRID_Y_OFFSET + row * TILE_SIZE; // Esquina inferior de la celda
+
+            // Ajusta el centro del zombie (si es necesario)
+            posX += TILE_SIZE / 4; // Desplazar ligeramente si está desfasado
+            posY += TILE_SIZE / 4;
+
+
+            System.out.println("Restaurando zombie: " + zombieData.type + " en posición (" + posX + ", " + posY + ")");
+            
+            // Crear la instancia del zombie usando ZombieFactory
+            ZombieCard zombie = ZombieFactory.createZombie(zombieData.type, row, col, board);
+            if (zombie != null) {
+                zombie.setPosition(posX, posY);
+                stage.addActor(zombie); // Añadir el zombie al escenario
+            } else {
+                System.out.println("Error: No se pudo crear el zombie: " + zombieData.type);
+            }
+        }
+
+        // Restaurar soles
+        GameManager.getGameManager().setSunCounter(saveData.sun);
+        sunCounterLabel.setText(String.valueOf(saveData.sun));
+    }
+
+
 }
