@@ -45,7 +45,7 @@ public class MachinePlayer extends Player {
 
     }
 
-    public void randomStrategy() throws PlantsVsZombiesException {
+    private void randomStrategy() throws PlantsVsZombiesException {
         Random random = new Random();
         Something[][] matrixBoard = board.getMatrixBoard();
         int boardRows = matrixBoard.length;
@@ -158,7 +158,7 @@ public class MachinePlayer extends Player {
      * Original Strategy
      * @throws PlantsVsZombiesException
      */
-    public void originalStrategy() throws PlantsVsZombiesException {
+    private void originalStrategy() throws PlantsVsZombiesException {
 
         if (isPlant) {
             Something[][] matrixBoard = board.getMatrixBoard();
@@ -192,7 +192,7 @@ public class MachinePlayer extends Player {
         }
     }
 
-    public void startZombieReleaseTimer() {
+    private void startZombieReleaseTimer() {
         if (zombieTimer != null) {
             zombieTimer.cancel();
         }
@@ -208,7 +208,7 @@ public class MachinePlayer extends Player {
     /**
      * Releases the zombies from the tracks
      */
-    public void releaseZombiesFromTracks() {
+    private void releaseZombiesFromTracks() {
         if (!track0Set.isEmpty()) {
             Zombie zombie = track0Set.removeFirst();
             zombie.setOwner(this);
@@ -259,7 +259,7 @@ public class MachinePlayer extends Player {
     /**
      * Fills the tracks with zombies
      */
-    public void fillTracksWithZombies(Board board, Player player) throws PlantsVsZombiesException {
+    private void fillTracksWithZombies(Board board, Player player) throws PlantsVsZombiesException {
         int[] initialPosition;
 
         for (int i = 0; i < 5; i++) {
