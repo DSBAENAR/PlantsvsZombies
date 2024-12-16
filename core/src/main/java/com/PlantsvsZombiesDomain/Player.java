@@ -22,6 +22,7 @@ public abstract class Player implements GameMoves{
      * @param money    money of the player
      * @param isPlant  if the player is a plant
      */
+
     public Player(String name, int money, boolean isPlant) {
         this.name = name;
         this.money = money;
