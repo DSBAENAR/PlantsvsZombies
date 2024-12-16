@@ -11,6 +11,7 @@ public class PlantsVsZombiesException extends Exception {
     public final static String NOT_ENOUGH_MONEY = "You don't have enough money";
     public final static String ARGUMENTS_NOT_VALID = "The arguments are not valid";
     public final static String NO_VALID_GAMEMODE = "No valid game mode";
+    public final static String NO_VALID_STRATEGY = "No valid strategy for this mode";
 
     /**
      * Constructor of the PlantsVsZombiesException

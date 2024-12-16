@@ -11,18 +11,71 @@ public abstract class Player implements GameMoves{
     protected int money;
     protected boolean isPlant;
     protected ArrayList<Something> inventory;
+    protected Board board;
+    protected int gameMode;
+    protected int strategy;
 
     /**
      * Constructor of the playrt
-     * @param name name of the player
-     * @param money money of the player
-     * @param isPlant if the player is a plant
+     *
+     * @param name     name of the player
+     * @param money    money of the player
+     * @param isPlant  if the player is a plant
      */
     public Player(String name, int money, boolean isPlant) {
         this.name = name;
         this.money = money;
         this.isPlant = isPlant;
         this.inventory = new ArrayList<>();
+    }
+
+    /**
+     * Set the board for the player
+     * @param board the board to assign
+     */
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    /**
+     * Get the board assigned to the player
+     * @return the board
+     */
+    public Board getBoard() {
+        return board;
+    }
+
+    /**
+     * Set the strategy of the player
+     * @param strategy the strategy to assign
+     */
+    public void setStrategy(int strategy) {
+        this.strategy = strategy;
+    }
+
+    /**
+     * Get the strategy of the player
+     * @return the strategy
+     */
+    public int getStrategy() {
+        return strategy;
+    }
+
+
+    /**
+     * get the game mode
+     * @return gameMode
+     */
+    public int getGameMode() {
+        return gameMode;
+    }
+
+    /**
+     * set the game mode
+     * @param gameMode game mode
+     */
+    public void setGameMode(int gameMode) {
+        this.gameMode = gameMode;
     }
 
     /**
@@ -106,5 +159,6 @@ public abstract class Player implements GameMoves{
      */
     @Override
     public abstract void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException;
+
 
 }

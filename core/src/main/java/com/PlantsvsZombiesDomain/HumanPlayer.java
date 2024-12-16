@@ -1,7 +1,5 @@
 package com.PlantsvsZombiesDomain;
 
-import java.util.ArrayList;
-
 /**
  * Class HumanPlayer that extends Player class, this class is for the human players
  */
@@ -61,7 +59,4 @@ public class HumanPlayer extends Player {
             }
         }
     }
-
-
-
 }

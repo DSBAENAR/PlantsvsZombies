@@ -25,7 +25,6 @@ public abstract class HelmetZombie extends Zombie {
         super(validatePosition(initalPosition), health, price, damage, attackSpeed, owner, board);
         this.damage = damage;
         this.attackSpeed = attackSpeed;
-        this.board = board;
     }
     public long getAttackSpeed() {
         return attackSpeed;

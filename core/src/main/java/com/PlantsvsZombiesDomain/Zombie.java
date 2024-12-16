@@ -15,7 +15,6 @@ public abstract class Zombie extends Something implements Attack{
     protected int price;
     protected int damage;
     protected long attackSpeed;
-    protected Board board;
     protected Player owner;
     protected Timer timerAlive;
     protected boolean itsAttacking = false;
@@ -36,7 +35,6 @@ public abstract class Zombie extends Something implements Attack{
         this.price = price;
         this.damage = damage;
         this.attackSpeed = attackSpeed;
-        this.board = board;
         this.itsAlive = true;
         this.owner = owner;
         startTimer();

@@ -20,6 +20,5 @@ public class NormalZombie extends Zombie{
      */
     public NormalZombie(int[] initalPosition, Player owner, Board board) throws PlantsVsZombiesException {
         super(validatePosition(initalPosition), 100, 100, 100, 500, owner, board);
-        this.board = board;
     }
 }
