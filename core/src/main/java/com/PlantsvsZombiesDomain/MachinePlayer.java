@@ -22,7 +22,7 @@ public class MachinePlayer extends Player {
      * Constructor of HumanPlayer
      *
      * @param name    of the player
-     * @param money   its the initial money of the player
+     * @param money   it's the initial money of the player
      * @param isPlant if the player is a plant (True) or a zombie (False)
      */
     public MachinePlayer(String name, int money, boolean isPlant) throws PlantsVsZombiesException {
@@ -48,8 +48,6 @@ public class MachinePlayer extends Player {
     public void randomStrategy() throws PlantsVsZombiesException {
         Random random = new Random();
         Something[][] matrixBoard = board.getMatrixBoard();
-        int boardRows = matrixBoard.length;
-        int boardColumns = matrixBoard[0].length;
         int randomColumn = random.nextInt(10);
         int randomRow = random.nextInt(5);
         int randomNumber = random.nextInt(5);
@@ -156,7 +154,6 @@ public class MachinePlayer extends Player {
 
     /**
      * Original Strategy
-     * @throws PlantsVsZombiesException
      */
     public void originalStrategy() throws PlantsVsZombiesException {
 
