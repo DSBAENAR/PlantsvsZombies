@@ -1,10 +1,14 @@
 package com.PlantsvsZombiesDomain;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * PlantsVsZoombies Exception class
  */
 public class PlantsVsZombiesException extends Exception {
 
+    private static final Logger LOGGER = Logger.getLogger(PlantsVsZombiesException.class.getName());
     public final static String SOMETHING_ALREADY_IN_POSITION = "There is already something in this position";
     public final static String NO_SOMETHING_IN_POSITION = "There is no something in this position";
     public final static String DONT_MATCH_OBJECTS = "The object at the position does not match the specified object.";
@@ -19,6 +23,7 @@ public class PlantsVsZombiesException extends Exception {
      */
     public PlantsVsZombiesException(String message) {
         super(message);
+        LOGGER.log(Level.SEVERE, "PlantsVsZombiesException: {0}", message);
     }
 
 }
