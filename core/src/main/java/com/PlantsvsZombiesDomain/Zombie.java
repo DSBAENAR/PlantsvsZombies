@@ -12,16 +12,13 @@ import com.PlantsvsZombiesGUI.GameScreen;
 public abstract class Zombie extends Something implements Attack{
 
     protected int[] initalPosition;
-    protected int column;
     protected int track;
     protected int health;
     protected int price;
     protected int damage;
     protected long attackSpeed;
-    protected Board board;
     protected Player owner;
     protected Timer timerAlive;
-    private int timerTicks = 0;
     protected boolean itsAttacking = false;
 
     /**
@@ -35,13 +32,11 @@ public abstract class Zombie extends Something implements Attack{
      */
     public Zombie(int[] initalPosition, int health, int price, int damage, long attackSpeed, Player owner, Board board) throws PlantsVsZombiesException {
         super(initalPosition, board);
-        this.column = initalPosition[1];
         this.track = initalPosition[0];
         this.health = health;
         this.price = price;
         this.damage = damage;
         this.attackSpeed = attackSpeed;
-        this.board = board;
         this.itsAlive = true;
         this.owner = owner;
         startTimer();

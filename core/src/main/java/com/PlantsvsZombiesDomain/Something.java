@@ -5,7 +5,7 @@ package com.PlantsvsZombiesDomain;
  */
 public abstract class Something{
     protected int[] position;
-    private Board board;
+    protected Board board;
     protected int row;
     protected int column;
     protected boolean itsAlive;

@@ -10,7 +10,6 @@ public abstract class AttackZombie extends Zombie {
 
     protected int damage;
     protected long attackSpeed;
-    protected Board board;
     protected Timer timer;
     protected int row;
     /**
@@ -28,7 +27,6 @@ public abstract class AttackZombie extends Zombie {
         super(initalPosition, health, price, damage, attackSpeed, owner, board);
         this.damage = damage;
         this.attackSpeed = attackSpeed;
-        this.board = board;
         this.row = initalPosition[0];
     }
 

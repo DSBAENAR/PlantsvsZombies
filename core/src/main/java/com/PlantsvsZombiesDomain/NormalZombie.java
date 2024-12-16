@@ -10,7 +10,6 @@ public class NormalZombie extends Zombie{
 
     private long attackSpeed = 500;
     private int damage = 100;
-    private Timer timer;
     private Board board;
     /**
      * Constructor of NormalZombie
@@ -21,6 +20,5 @@ public class NormalZombie extends Zombie{
      */
     public NormalZombie(int[] initalPosition, Player owner, Board board) throws PlantsVsZombiesException {
         super(validatePosition(initalPosition), 100, 100, 100, 500, owner, board);
-        this.board = board;
     }
 }

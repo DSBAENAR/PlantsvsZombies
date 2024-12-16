@@ -7,22 +7,75 @@ import java.util.ArrayList;
  */
 public abstract class Player implements GameMoves{
 
-    private String name;
-    private int money;
-    private boolean isPlant;
-    private ArrayList<Something> inventory;
+    protected String name;
+    protected int money;
+    protected boolean isPlant;
+    protected ArrayList<Something> inventory;
+    protected Board board;
+    protected int gameMode;
+    protected int strategy;
 
     /**
      * Constructor of the playrt
-     * @param name name of the player
-     * @param money money of the player
-     * @param isPlant if the player is a plant
+     *
+     * @param name     name of the player
+     * @param money    money of the player
+     * @param isPlant  if the player is a plant
      */
     public Player(String name, int money, boolean isPlant) {
         this.name = name;
         this.money = money;
         this.isPlant = isPlant;
         this.inventory = new ArrayList<>();
+    }
+
+    /**
+     * Set the board for the player
+     * @param board the board to assign
+     */
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    /**
+     * Get the board assigned to the player
+     * @return the board
+     */
+    public Board getBoard() {
+        return board;
+    }
+
+    /**
+     * Set the strategy of the player
+     * @param strategy the strategy to assign
+     */
+    public void setStrategy(int strategy) {
+        this.strategy = strategy;
+    }
+
+    /**
+     * Get the strategy of the player
+     * @return the strategy
+     */
+    public int getStrategy() {
+        return strategy;
+    }
+
+
+    /**
+     * get the game mode
+     * @return gameMode
+     */
+    public int getGameMode() {
+        return gameMode;
+    }
+
+    /**
+     * set the game mode
+     * @param gameMode game mode
+     */
+    public void setGameMode(int gameMode) {
+        this.gameMode = gameMode;
     }
 
     /**
@@ -95,29 +148,9 @@ public abstract class Player implements GameMoves{
      * @param something the something
      */
     @Override
-    public void putSomething(int[] position, Something something) throws PlantsVsZombiesException{
-        if (isPlant){
-            if(something instanceof Plant){
-                if(money >= ((Plant) something).getPrice()){
-                    money -= ((Plant) something).getPrice();
-                    ((Plant) something).setOwner(this);
-                    inventory.add(something);
-                }else{
-                    throw new PlantsVsZombiesException(PlantsVsZombiesException.NOT_ENOUGH_MONEY);
-                }
-            }
-        } else {
-            if(something instanceof Zombie){
-                if(money >= ((Zombie) something).getPrice()){
-                    money -= ((Zombie) something).getPrice();
-                    ((Zombie) something).setOwner(this);
-                    inventory.add(something);
-                }else{
-                    throw new PlantsVsZombiesException(PlantsVsZombiesException.NOT_ENOUGH_MONEY);
-                }
-            }
-        }
-    }
+    public abstract void putSomething(int[] position, Something something) throws PlantsVsZombiesException;
+
+
 
     /**
      * To delete something in the inventory (Plants)
@@ -125,13 +158,7 @@ public abstract class Player implements GameMoves{
      * @param something the something
      */
     @Override
-    public void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException{
-        for(Something inventory : this.inventory){
-            if(inventory.equals(something)){
-                this.inventory.remove(inventory);
-                break;
-            }
-        }
-    }
+    public abstract void deleteSomething(int[] position, Something something) throws PlantsVsZombiesException;
+
 
 }

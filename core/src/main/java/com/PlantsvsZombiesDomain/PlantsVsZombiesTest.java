@@ -2,6 +2,8 @@ package com.PlantsvsZombiesDomain;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -15,21 +17,21 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1,1 , player1, player2);
 
         int[] position = new int[]{0, 1};
         SunFlower sunFlower1 = new SunFlower(position, player1, board);
         pvsz.putSomething(position, sunFlower1);
         assertEquals(sunFlower1, pvsz.getBoard().getMatrixBoard()[0][1]);
-        assertEquals(sunFlower1, pvsz.getPlayer1().getInventory().get(0));
+        assertEquals(sunFlower1, pvsz.getPlayer1().getInventory().getFirst());
 
         assertFalse(pvsz.getTurn());
 
         int[] position2 = new int[]{0, 9};
         NormalZombie normalZombie1 = new NormalZombie(position2, player2, board);
         pvsz.putSomething(position2, normalZombie1);
-        assertEquals(normalZombie1, pvsz.getBoard().getTrack(0).get(0));
-        assertEquals(normalZombie1, pvsz.getPlayer2().getInventory().get(0));
+        assertEquals(normalZombie1, pvsz.getBoard().getTrack(0).getFirst());
+        assertEquals(normalZombie1, pvsz.getPlayer2().getInventory().getFirst());
         assertTrue(pvsz.getTurn());
     }
 
@@ -40,7 +42,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         SunFlower sunFlower = new SunFlower(position, player1, board);
@@ -62,8 +64,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
         int[] position = new int[]{0, 1};
         pvsz.putSomething(position, new SunFlower(position, player1, board));
         int[] position2 = new int[]{0, 9};
@@ -74,19 +75,17 @@ public class PlantsVsZombiesTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
         int moneyAfterGeneration = player2.getMoney();
         assertEquals(moneyAfterPurchase + 25 + 100, moneyAfterGeneration);
     }
 
     @Test
-    void testGenerateMoney10Secs(){
+    void testGenerateMoney10Secs() throws PlantsVsZombiesException {
 
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
         int initialMoneyP1 = player1.getMoney();
         int initialMoneyP2 = player2.getMoney();
         try {
@@ -106,8 +105,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
         int[] position = new int[]{0, 1};
         pvsz.putSomething(position, new SunFlower(position, player1, board));
         int[] position2 = new int[]{0, 9};
@@ -117,13 +115,13 @@ public class PlantsVsZombiesTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertEquals(8, pvsz.getBoard().getTrack(0).get(0).getZombiePosition()[1]);
+        assertEquals(8, pvsz.getBoard().getTrack(0).getFirst().getZombiePosition()[1]);
         try {
             Thread.sleep(3100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertEquals(7, pvsz.getBoard().getTrack(0).get(0).getZombiePosition()[1]);
+        assertEquals(7, pvsz.getBoard().getTrack(0).getFirst().getZombiePosition()[1]);
     }
 
 
@@ -133,19 +131,18 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
         int[] position = new int[]{0, 1};
         pvsz.putSomething(position, new PeaShooter(position, player1, board));
         int[] position2 = new int[]{0, 9};
         pvsz.putSomething(position2, new NormalZombie(position2, player2, board));
-        int zombieInitialHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
+        int zombieInitialHealth = pvsz.getBoard().getTrack(0).getFirst().getHealth();
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        int zombieCurrentHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
+        int zombieCurrentHealth = pvsz.getBoard().getTrack(0).getFirst().getHealth();
         assertEquals(zombieInitialHealth - 20, zombieCurrentHealth);
     }
 
@@ -155,8 +152,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
         int[] position = new int[]{0, 1};
         PeaShooter peaShooter1 = new PeaShooter(position, player1, board);
         pvsz.putSomething(position, peaShooter1);
@@ -167,13 +163,14 @@ public class PlantsVsZombiesTest {
         pvsz.putSomething(positionAnotherPeaShooter, peaShooter2);
         int[] positionAnotherZombie = new int[]{1, 9};
         pvsz.putSomething(positionAnotherZombie, new NormalZombie(positionAnotherZombie, player2, board));
-        int zombieInitialHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
+        int zombieInitialHealth = pvsz.getBoard().getTrack(0).getFirst().getHealth();
+
         try {
             Thread.sleep(2300);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        int zombieCurrentHealth = pvsz.getBoard().getTrack(0).get(0).getHealth();
+        int zombieCurrentHealth = pvsz.getBoard().getTrack(0).getFirst().getHealth();
         assertEquals(zombieInitialHealth - 40, zombieCurrentHealth);
     }
 
@@ -184,8 +181,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
         int [] position = new int[]{0, 9};
         WallNut wallNut = new WallNut(position, player1, board);
         pvsz.putSomething(position, wallNut);
@@ -217,15 +213,14 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
-
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
         int[] position = new int[]{0, 9};
         SunFlower sunFlower = new SunFlower(position, player1, board);
         pvsz.putSomething(position, sunFlower);
         int[] position2 = new int[]{0, 9};
         NormalZombie normalZombie = new NormalZombie(position2, player2, board);
         pvsz.putSomething(position2, normalZombie);
-        assertEquals(true, sunFlower.getItsAlive());
+        assertTrue(sunFlower.getItsAlive());
         assertEquals(sunFlower, pvsz.getBoard().getMatrixBoard()[0][9]);
         assertTrue(player1.getInventory().contains(sunFlower));
         try {
@@ -244,7 +239,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         PeaShooter peaShooter = new PeaShooter(position, player1, board);
@@ -254,7 +249,7 @@ public class PlantsVsZombiesTest {
         pvsz.putSomething(position2, normalZombie);
 
         assertTrue(normalZombie.getItsAlive());
-        assertEquals(normalZombie, pvsz.getBoard().getTrack(0).get(0));
+        assertEquals(normalZombie, pvsz.getBoard().getTrack(0).getFirst());
         assertTrue(player2.getInventory().contains(normalZombie));
 
         NormalZombie normalZombie2 = new NormalZombie(position2, player2, board);
@@ -283,13 +278,14 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         WallNut wallNut = new WallNut(position, player1, board);
         pvsz.putSomething(position, wallNut);
         int[] position2 = new int[]{0, 9};
         ECIZombie eciZombie = new ECIZombie(position2, player2, board);
+        assertEquals(50, eciZombie.getDamage());
         pvsz.putSomething(position2, eciZombie);
         int plantInitialHealth = ((Plant) pvsz.getBoard().getMatrixBoard()[0][1]).getHealth();
         try {
@@ -308,7 +304,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
 
         int[] position = new int[]{0, 1};
         ECIPlant eciPlant = new ECIPlant(position, player1, board);
@@ -333,7 +329,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
 
         int[] position = new int[]{0, 9};
         WallNut wallNut = new WallNut(position, player1, board);
@@ -341,13 +337,13 @@ public class PlantsVsZombiesTest {
         int[] position2 = new int[]{0, 9};
         Conehead conehead = new Conehead(position2, player2, board);
         pvsz.putSomething(position2, conehead);
-        int zombieInitialPosition = pvsz.getBoard().getTrack(0).get(0).getPosition()[0];
+        int zombieInitialPosition = pvsz.getBoard().getTrack(0).getFirst().getPosition()[0];
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        assertEquals(zombieInitialPosition , pvsz.getBoard().getTrack(0).get(0).getPosition()[0]);
+        assertEquals(zombieInitialPosition , pvsz.getBoard().getTrack(0).getFirst().getPosition()[0]);
     }
 
 
@@ -357,7 +353,7 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
 
         int[] position = new int[]{0, 9};
         PotatoMine potatoMine = new PotatoMine(position, player1, board);
@@ -387,7 +383,8 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
+
         int[] position = new int[]{0, 9};
         int[] position2 = new int[]{0, 9};
 
@@ -418,7 +415,8 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
+
         int[] position1 = new int[]{1, 8};
         int[] position2 = new int[]{1, 9};
         int[] position3 = new int[]{1, 3};
@@ -459,7 +457,8 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
+
         Something[][] matrixBoard = board.getMatrixBoard();
 
         for (int i = 0; i <= 4; i++) {
@@ -476,7 +475,8 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
+
         int[] position1 = new int[]{2, 1};
         int[] position3 = new int[]{2, 2};
         int[] position2 = new int[]{1, 9};
@@ -510,9 +510,9 @@ public class PlantsVsZombiesTest {
         Player player1 = new HumanPlayer("Barbosa", 1000, true);
         Player player2 = new HumanPlayer("Baena", 1000, false);
         Board board = new Board(5, 10, player1, player2);
-        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, "Normal", player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
+
         int[] position1 = new int[]{2, 1};
-        int[] position3 = new int[]{2, 2};
         int[] position2 = new int[]{1, 9};
 
         SunFlower sunFlower = new SunFlower(position1, player1, board);
@@ -525,6 +525,70 @@ public class PlantsVsZombiesTest {
 
         assertFalse(sunFlower.getItsAlive());
         assertNull(pvsz.getBoard().getMatrixBoard()[2][1]);
+    }
+
+
+    @Test
+    void testOriginalStrategyForPlants() throws PlantsVsZombiesException {
+        MachinePlayer player1 = new MachinePlayer("TestPlayer", 1500, true);
+        Player player2 = new HumanPlayer("Baena", 1000, false);
+        Board board = new Board(5, 10, player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
+        player1.originalStrategy();
+        Something[][] boardMatrix = player1.getBoard().getMatrixBoard();
+        boolean plantPlaced = false;
+        if (boardMatrix[0][1] instanceof SunFlower) {
+            plantPlaced = true;
+        }
+        assertTrue(plantPlaced);
+        player1.originalStrategy();
+        player1.originalStrategy();
+        player1.originalStrategy();
+        player1.originalStrategy();
+        player1.originalStrategy();
+        if (boardMatrix[0][2] instanceof PeaShooter) {
+            plantPlaced = true;
+        }
+    }
+
+    @Test
+    void testOriginalStrategyForZombies() throws PlantsVsZombiesException {
+        MachinePlayer player2 = new MachinePlayer("TestPlayer", 1500, false);
+        Player player1 = new HumanPlayer("Baena", 1000, true);
+        Board board = new Board(5, 10, player1, player2);
+        PlantsVsZombies pvsz = new PlantsVsZombies(board, 10, 1, 1, player1, player2);
+        int[] position = new int[]{0, 1};
+        SunFlower sunFlower1 = new SunFlower(position, player1, board);
+        pvsz.putSomething(position, sunFlower1);
+
+        int[] position2 = new int[]{0, 9};
+        player2.putSomething(position, new Conehead(position2, player2, board));
+        try {
+            Thread.sleep(1100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ArrayList<Zombie> track0 = pvsz.getBoard().getTrack(0);
+        ArrayList<Zombie> track1 = pvsz.getBoard().getTrack(1);
+        ArrayList<Zombie> track2 = pvsz.getBoard().getTrack(2);
+        ArrayList<Zombie> track3 = pvsz.getBoard().getTrack(3);
+        ArrayList<Zombie> track4 = pvsz.getBoard().getTrack(4);
+
+        if (!(track0.getFirst() instanceof NormalZombie)) {
+            fail();
+        }
+        if (!(track1.getFirst() instanceof Conehead)) {
+            fail();
+        }
+        if (!(track2.getFirst() instanceof NormalZombie)) {
+            fail();
+        }
+        if (!(track3.getFirst() instanceof NormalZombie)) {
+            fail();
+        }
+        if (!(track4.getFirst() instanceof Buckethead)) {
+            fail();
+        }
     }
 
 }
