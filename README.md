@@ -1,6 +1,5 @@
 # PlantsvsZombies
-
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+This project is an implementation of the popular game "Plants vs. Zombies" using the **libGDX** framework. It was generated with [gdx-liftoff](https://github.com/tommyettinger/gdx-liftoff) and is structured to support multiple platforms, with a primary focus on the desktop platform using LWJGL3.
 
 This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
 
